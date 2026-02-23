@@ -128,7 +128,7 @@ export default function TesterDashboard() {
   return (
     <DashboardLayout
       user={user}
-      dashboardLabel="Tester Dashboard"
+      dashboardLabel="Tester"
       headerTitle={`Welcome, ${user.name}!`}
       headerSubtitle="Here's an overview of your testing activities"
       onLogout={handleLogout}

@@ -35,7 +35,7 @@ export default function DeveloperDashboard() {
   return (
     <DashboardLayout
       user={user}
-      dashboardLabel="Developer Dashboard"
+      dashboardLabel="Developer"
       headerTitle={`Welcome, ${user.name}!`}
       headerSubtitle="Manage assigned bugs and fixes"
       onLogout={handleLogout}

@@ -20,7 +20,6 @@ export default function DashboardLayout({
   const showProjectSelector = projectsLoading || projects.length > 1;
   
   const navLinks = [
-    { to: '/dashboard', label: 'Dashboard' },
     { to: '/reports', label: 'Reports' },
     { to: '/chat', label: 'Chat' },
   ];
