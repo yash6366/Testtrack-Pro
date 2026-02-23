@@ -311,7 +311,7 @@ export async function createTestCase(projectId, data) {
 }
 ```
 
-### For Bug Fixes (v0.6.2 Enhancement)
+### For Bug Fixes (V1 Enhancement)
 
 Include:
 - What was broken

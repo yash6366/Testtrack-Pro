@@ -70,7 +70,7 @@ TestTrack Pro is a comprehensive software testing management platform that helps
 
 🎉 **Congratulations!** You've completed your first test execution!
 
-## New in v0.6.2: Bug Fix Documentation
+## New in V1: Bug Fix Documentation
 
 ### Documenting Bug Fixes (For Developers)
 
@@ -84,7 +84,7 @@ TestTrack Pro is a comprehensive software testing management platform that helps
 4. Click **Save**
 5. Tester verifies the fix matches the bug report
 
-### New Analytics Dashboard (v0.6.2)
+### New Analytics Dashboard (V1)
 
 Access advanced metrics from the **Analytics** menu:
 - **Flaky Tests**: Identify tests with inconsistent results
@@ -96,7 +96,7 @@ Access advanced metrics from the **Analytics** menu:
 
 When you log in, you'll see the **Dashboard** with:
 
-### Key Metrics (Enhanced in v0.6.2)
+### Key Metrics (Enhanced in V1)
 - **Total Test Cases**: Number of test cases in your projects
 - **Active Executions**: Currently running tests
 - **Open Bugs**: Bugs awaiting resolution
@@ -136,8 +136,8 @@ TestTrack Pro has four user roles:
 ### 👨‍💻 Developer (Bug Management & Fix Documentation)
 - ✅ View test cases and executions
 - ✅ Manage assigned bugs (update status)
-- ✅ Document bug fixes with root cause analysis **(NEW in v0.6.2)**
-- ✅ View developer analytics dashboard **(NEW in v0.6.2)**
+- ✅ Document bug fixes with root cause analysis **(NEW in V1)**
+- ✅ View developer analytics dashboard **(NEW in V1)**
 - ✅ Link bugs to git commits and code reviews
 - ❌ Cannot create test cases or execute tests (security constraint)
 - ❌ Cannot verify test results
@@ -185,7 +185,7 @@ When a test fails:
 4. Assign to a developer (optional)
 5. Click **Create Bug**
 
-### Documenting a Bug Fix (Developer Workflow) — NEW in v0.6.2
+### Documenting a Bug Fix (Developer Workflow) — NEW in V1
 
 Developers can now document how they fixed bugs with detailed root cause analysis and git traceability:
 
@@ -204,7 +204,7 @@ Developers can now document how they fixed bugs with detailed root cause analysi
 
 **Note**: Only testers and admins can verify that the fix works. Once verified, the bug is closed.
 
-### Viewing Developer Analytics — NEW in v0.6.2
+### Viewing Developer Analytics — NEW in V1
 
 Developers have access to a personal analytics dashboard:
 
@@ -248,8 +248,8 @@ Attach files to executions or bugs:
 - **📋 Test Cases**: Manage test cases
 - **🧪 Test Executions**: Execute and view test runs
 - **📦 Test Suites**: Organize test cases
-- **🐛 Bugs**: Bug tracking and fix documentation **(v0.6.2: Developers can document fixes)**
-- **📊 Analytics**: Reports and insights **(v0.6.2: New flaky tests, execution trends, developer analytics)**
+- **🐛 Bugs**: Bug tracking and fix documentation **(V1: Developers can document fixes)**
+- **📊 Analytics**: Reports and insights **(V1: New flaky tests, execution trends, developer analytics)**
 - **💬 Chat**: Team communication
 - **🔔 Notifications**: Activity updates
 - **⚙️ Settings**: Account settings
@@ -291,7 +291,7 @@ Connect related test cases, bugs, and executions for better traceability
 ### 4. Regular Reviews
 Schedule regular test case reviews to keep them up-to-date
 
-### 5. Leverage Analytics — Enhanced in v0.6.2
+### 5. Leverage Analytics — Enhanced in V1
 Review analytics weekly to identify:
 - **Flaky tests**: Tests with inconsistent results (pass sometimes, fail others)
 - **High-risk areas**: Modules or features with frequent failures

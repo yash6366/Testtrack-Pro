@@ -582,7 +582,7 @@ All API errors follow a consistent JSON structure:
 **Cause**: File contains malicious content  
 **Solution**: Upload different file
 
-### Fix Documentation Errors (FIX_*) — NEW in v0.6.2
+### Fix Documentation Errors (FIX_*) — NEW in V1
 
 #### FIX_001 - Invalid Root Cause Category
 ```json

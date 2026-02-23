@@ -144,7 +144,7 @@ TestTrack Pro is a comprehensive software testing management platform built with
 - Status workflow: NEW → ASSIGNED → IN_PROGRESS → FIXED → VERIFIED_FIXED → CLOSED
 - Severity (CRITICAL, MAJOR, MINOR, TRIVIAL), Priority (P0-P4)
 - Environment, affected version, reproducibility
-- **New in v0.6.2**: Fix documentation fields:
+- **New in V1**: Fix documentation fields:
   - `fixStrategy`: How the bug was fixed
   - `rootCauseAnalysis`: Analysis of root cause
   - `rootCauseCategory`: DESIGN_DEFECT, IMPLEMENTATION_ERROR, etc.
@@ -235,7 +235,7 @@ TestTrack Pro is a comprehensive software testing management platform built with
 - `commitParserService.js`: Auto-linking commits to bugs via regex patterns
 - `auditService.js`: Comprehensive audit logging for compliance
 
-## Database Schema (v0.6.2)
+## Database Schema (V1)
 
 ### Core Models
 
@@ -273,7 +273,7 @@ TestTrack Pro is a comprehensive software testing management platform built with
 - Status workflow (Open → In Progress → Resolved → Verified)
 - Attachment storage (evidence files)
 
-**BugFixDocumentation** *(NEW in v0.6.2)*
+**BugFixDocumentation** *(NEW in V1)*
 - Root cause classification (Design Defect, Implementation Error, Configuration Issue, etc.)
 - Detailed fix description
 - Git commit/PR linking
@@ -281,7 +281,7 @@ TestTrack Pro is a comprehensive software testing management platform built with
 - Developer attribution
 - Verification status
 
-**DeveloperAnalytics** *(NEW in v0.6.2)*
+**DeveloperAnalytics** *(NEW in V1)*
 - Bugs fixed per developer
 - Average fix time calculations
 - Root cause distribution analysis

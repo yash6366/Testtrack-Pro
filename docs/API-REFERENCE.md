@@ -559,7 +559,7 @@ Request:
 
 Response: `200 OK`
 
-### Document Bug Fix (NEW in v0.6.2)
+### Document Bug Fix (NEW in V1)
 
 **PATCH** `/api/projects/:projectId/bugs/:bugId/fix-documentation`
 
@@ -780,7 +780,7 @@ Response:
 }
 ```
 
-### Get Developer Analytics (NEW in v0.6.2)
+### Get Developer Analytics (NEW in V1)
 
 **GET** `/api/projects/:projectId/analytics/developers`
 

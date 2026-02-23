@@ -205,15 +205,15 @@ See [docs/API-REFERENCE.md](../../docs/API-REFERENCE.md) for complete endpoint d
 - `POST /api/bugs` - Create bug
 - `PUT /api/bugs/:id` - Update bug
 - `PATCH /api/bugs/:id/status` - Update bug status
-- `PATCH /api/bugs/:id/fix-documentation` - Document bug fix (v0.6.2)
+- `PATCH /api/bugs/:id/fix-documentation` - Document bug fix (V1)
 
 #### Analytics
 - `GET /api/analytics/overview` - Dashboard metrics
 - `GET /api/analytics/test-execution-trends` - Execution trends (8-week view)
 - `GET /api/analytics/bug-trends` - Bug trends and velocity
-- `GET /api/analytics/flaky-tests` - Identify flaky tests (v0.6.2)
-- `GET /api/analytics/execution-speed` - Performance analysis (v0.6.2)
-- `GET /api/analytics/developers` - Developer productivity metrics (v0.6.2)
+- `GET /api/analytics/flaky-tests` - Identify flaky tests (V1)
+- `GET /api/analytics/execution-speed` - Performance analysis (V1)
+- `GET /api/analytics/developers` - Developer productivity metrics (V1)
 
 ## Code Structure
 

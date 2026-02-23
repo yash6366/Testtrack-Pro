@@ -14,10 +14,10 @@ Think of it as a mini version of tools like **TestRail + Jira** with modern tech
 - **📋 Test Case Management**: Create, organize, and review test cases with version control
 - **🚀 Test Execution**: Execute test runs with real-time status tracking and live updates
 - **🐛 Defect Tracking**: Report, assign, and track bugs with full lifecycle management
-- **� Bug Fix Documentation** *(NEW v0.6.2)*: Developers document fixes with root cause analysis and git traceability
+- **� Bug Fix Documentation** *(NEW V1)*: Developers document fixes with root cause analysis and git traceability
 - **📊 Analytics Dashboard**: Monitor QA health with comprehensive metrics and trends
-  - **Flaky Test Detection** *(NEW v0.6.2)*: Identify unreliable tests with inconsistent results
-  - **Developer Analytics** *(NEW v0.6.2)*: Track developer fix patterns and productivity metrics
+  - **Flaky Test Detection** *(NEW V1)*: Identify unreliable tests with inconsistent results
+  - **Developer Analytics** *(NEW V1)*: Track developer fix patterns and productivity metrics
   - **Execution Trends**: 8-week pass rate and performance analysis
   - **Bug Velocity**: Monitor bug resolution rates and trends
 - **💬 Real-time Communication**: Collaborate via comments and live notifications
@@ -27,9 +27,9 @@ Think of it as a mini version of tools like **TestRail + Jira** with modern tech
 - **⚡ High Performance**: Sub-second API responses, Smart caching with Redis
 - **🔄 Real-time Updates**: Socket.IO for live test execution and notifications
 
-## 🎉 What's New in v0.6.2
+## 🎉 What's New in V1
 
-TestTrack Pro v0.6.2 introduces major enhancements for developer productivity and deeper quality insights:
+TestTrack Pro V1 introduces major enhancements for developer productivity and deeper quality insights:
 
 ### Bug Fix Documentation
 - **Document Your Fixes**: Developers can now document how they fixed bugs with detailed metadata

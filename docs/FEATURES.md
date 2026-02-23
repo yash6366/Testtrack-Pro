@@ -1,6 +1,6 @@
 # TestTrack Pro - Features Guide
 
-Comprehensive guide to all features and capabilities of TestTrack Pro v0.6.2
+Comprehensive guide to all features and capabilities of TestTrack Pro V1
 
 ## Table of Contents
 
@@ -225,7 +225,7 @@ REOPENED ←──────────────────────�
 - Fix rate trends
 - Reopen rate
 
-### Bug Fix Documentation (NEW in v0.6.2)
+### Bug Fix Documentation (NEW in V1)
 
 **Developers can now comprehensively document bug fixes:**
 
@@ -314,7 +314,7 @@ Logical groupings of related test cases:
 - Trend analysis (improving/declining)
 - Average pass rate over period
 
-#### Flaky Test Detection (NEW in v0.6.2)
+#### Flaky Test Detection (NEW in V1)
 - Identifies tests with inconsistent pass/fail results
 - Calculates flake rate based on last N runs
 - Sorted by flake rate (highest first)
@@ -361,7 +361,7 @@ Action: Review test for environmental dependencies
 - Bug velocity (created vs. resolved)
 - Current velocity trend
 
-### Developer Analytics (NEW in v0.6.2)
+### Developer Analytics (NEW in V1)
 
 **Comprehensive Developer Performance Tracking:**
 
@@ -397,7 +397,7 @@ Action: Review test for environmental dependencies
 - **Efficiency**: Average execution time
 - **Contribution**: Activity heatmap
 - **Fix Rate**: Bugs fixed by developer
-- **Developer Performance**: Developer productivity dashboard (v0.6.2)
+- **Developer Performance**: Developer productivity dashboard (V1)
 
 ### Custom Reports
 
@@ -496,7 +496,7 @@ Action: Review test for environmental dependencies
 - ✅ View bugs assigned to them
 - ✅ View bug details and reproduction steps
 - ✅ Update bug status (IN_PROGRESS, FIXED, REOPENED)
-- ✅ Document fix details (NEW in v0.6.2)
+- ✅ Document fix details (NEW in V1)
 - ✅ Request re-testing after marking FIXED
 - ✅ Add comments and discuss with testers
 - ❌ Cannot execute test cases

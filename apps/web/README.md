@@ -185,13 +185,13 @@ The app will be available at: http://localhost:5173
 - Dashboard with key metrics
 - Test execution trends (8-week view)
 - Bug severity analysis
-- Flaky test detection (v0.6.2)
-- Developer productivity analytics (v0.6.2)
-- Bug velocity tracking (v0.6.2)
+- Flaky test detection (V1)
+- Developer productivity analytics (V1)
+- Bug velocity tracking (V1)
 - Team productivity charts
 - Export reports
 
-### 🔧 Bug Fix Documentation (v0.6.2)
+### 🔧 Bug Fix Documentation (V1)
 
 - Document fixes with root cause analysis
 - Link fixes to git commits and PRs

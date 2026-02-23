@@ -1,6 +1,6 @@
 # OAuth Integration Guide
 
-This guide covers setting up OAuth 2.0 authentication with Google and GitHub providers in TestTrack Pro v0.6.2+.
+This guide covers setting up OAuth 2.0 authentication with Google and GitHub providers in TestTrack Pro V1+.
 
 The OAuth integration allows users to sign up and log in using their Google or GitHub accounts. The system:
 
@@ -10,7 +10,7 @@ The OAuth integration allows users to sign up and log in using their Google or G
 - Maintains email verification status
 - Stores OAuth provider metadata in the database
 
-**Note:** OAuth setup is independent of the new v0.6.2 features (bug fix documentation, developer analytics, flaky test detection). These features work with both OAuth and traditional email/password authentication.
+**Note:** OAuth setup is independent of the new V1 features (bug fix documentation, developer analytics, flaky test detection). These features work with both OAuth and traditional email/password authentication.
 
 ## Setup Google OAuth
 

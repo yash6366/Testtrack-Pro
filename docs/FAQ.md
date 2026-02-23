@@ -258,7 +258,7 @@ Yes:
 
 ---
 
-## Bug Fix Documentation — NEW in v0.6.2
+## Bug Fix Documentation — NEW in V1
 
 ### What is bug fix documentation?
 
@@ -347,7 +347,7 @@ Yes! You can view:
 - Execution trends (pass/fail over time)
 - Bug distribution (by severity)
 - Test coverage (by module)
-- **NEW in v0.6.2**: Bug trends and developer analytics
+- **NEW in V1**: Bug trends and developer analytics
 
 ### Can I create custom reports?
 
@@ -385,7 +385,7 @@ Yes:
 
 ---
 
-## Flaky Tests — NEW in v0.6.2
+## Flaky Tests — NEW in V1
 
 ### What are flaky tests?
 

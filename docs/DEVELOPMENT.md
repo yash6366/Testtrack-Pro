@@ -111,7 +111,7 @@ GITHUB_OAUTH_CLIENT_ID="your-github-client-id"
 GITHUB_OAUTH_CLIENT_SECRET="your-github-secret"
 GITHUB_WEBHOOK_SECRET="your-webhook-secret"
 
-# ===== v0.6.2 FEATURES =====
+# ===== V1 FEATURES =====
 # Bug Fix Documentation: Enabled by default
 # Developer Analytics: Enabled by default
 # Flaky Test Detection: Enabled for test executions
@@ -356,9 +356,9 @@ export function CustomFieldForm({ projectId, onSuccess }) {
 }
 ```
 
-### Developer Workflow for Bug Fix Documentation (v0.6.2)
+### Developer Workflow for Bug Fix Documentation (V1)
 
-Bug fix documentation is a new feature in v0.6.2 that allows developers to document how bugs were fixed, including root cause analysis, git traceability, and fix metadata.
+Bug fix documentation is a new feature in V1 that allows developers to document how bugs were fixed, including root cause analysis, git traceability, and fix metadata.
 
 #### Understanding the Developer Role
 
@@ -680,9 +680,9 @@ pnpm lint
 pnpm format
 ```
 
-### Analytics Features (v0.6.2)
+### Analytics Features (V1)
 
-TestTrack Pro v0.6.2 introduces comprehensive analytics capabilities for monitoring test execution and bug trends.
+TestTrack Pro V1 introduces comprehensive analytics capabilities for monitoring test execution and bug trends.
 
 #### Accessing Analytics Endpoints
 
