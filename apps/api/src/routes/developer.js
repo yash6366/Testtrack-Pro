@@ -318,62 +318,16 @@ export async function developerRoutes(fastify) {
   );
 
   /**
-   * Reject bug (Won't Fix / Duplicate / Cannot Reproduce)
+   * Reject bug (legacy workflow not supported)
    */
   fastify.patch(
     '/api/developer/bugs/:bugId/reject',
     { preHandler: [requirePermission('bug:status:change')] },
     async (request, reply) => {
       try {
-        const { bugId } = request.params;
-        const { projectId } = request.query;
-        const { reason, rejectionReason } = request.body;
-        const userId = request.user.id;
-
-        if (!projectId) {
-          return reply.code(400).send({ error: 'projectId query parameter is required' });
-        }
-
-        if (!rejectionReason) {
-          return reply.code(400).send({
-            error: 'rejectionReason is required (WONTFIX, DUPLICATE, CANNOT_REPRODUCE, WORKS_AS_DESIGNED)',
-          });
-        }
-
-        const validReasons = [
-          'WONTFIX',
-          'DUPLICATE',
-          'CANNOT_REPRODUCE',
-          'WORKS_AS_DESIGNED',
-        ];
-
-        if (!validReasons.includes(rejectionReason)) {
-          return reply.code(400).send({ error: 'Invalid rejection reason' });
-        }
-
-        const bug = await changeBugStatus(
-          Number(bugId),
-          rejectionReason,
-          userId,
-          'DEVELOPER',
-          getClientContext(request),
-          projectId,
-          request.permissionContext,
-        );
-
-        // Add rejection comment
-        if (reason) {
-          await addBugComment(
-            Number(bugId),
-            `Rejected as ${rejectionReason}: ${reason}`,
-            userId,
-            false,
-            projectId,
-            request.permissionContext,
-          );
-        }
-
-        reply.send(bug);
+        return reply.code(400).send({
+          error: 'Bug rejection reasons are not supported in the current workflow.',
+        });
       } catch (error) {
         console.error('Error rejecting bug:', error);
         reply.code(500).send({ error: error.message });

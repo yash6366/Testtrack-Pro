@@ -479,7 +479,7 @@ export async function calculateMilestoneProgress(milestoneId, milestoneData = nu
   // Calculate defect resolution percentage
   if (milestone.defects.length > 0) {
     const resolvedDefects = milestone.defects.filter(d =>
-      ['VERIFIED_FIXED', 'CLOSED', 'WORKS_AS_DESIGNED'].includes(d.status)
+      ['VERIFIED', 'CLOSED'].includes(d.status)
     ).length;
     defectProgress = (resolvedDefects / milestone.defects.length) * 100;
   }
@@ -511,7 +511,7 @@ export async function calculateMilestoneProgress(milestoneId, milestoneData = nu
       ).length,
       totalDefects: milestone.defects.length,
       resolvedDefects: milestone.defects.filter(d =>
-        ['VERIFIED_FIXED', 'CLOSED', 'WORKS_AS_DESIGNED'].includes(d.status)
+        ['VERIFIED', 'CLOSED'].includes(d.status)
       ).length,
     },
   };

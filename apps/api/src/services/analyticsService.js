@@ -221,17 +221,11 @@ export async function getBugTrendAnalysis(projectId, weeks = 8) {
       prisma.bug.count({
         where: {
           projectId,
-          status: 'VERIFIED_FIXED',
+          status: 'VERIFIED',
           createdAt: { gte: weekStart, lt: weekEnd },
         },
       }),
-      prisma.bug.count({
-        where: {
-          projectId,
-          status: 'REOPENED',
-          createdAt: { gte: weekStart, lt: weekEnd },
-        },
-      }),
+      Promise.resolve(0),
       prisma.bug.count({
         where: {
           projectId,
@@ -270,45 +264,18 @@ export async function getReopenedBugsAnalysis(projectId, weeks = 4) {
       where: {
         projectId,
         createdAt: { gte: startDate },
-        status: { in: ['VERIFIED_FIXED', 'REOPENED'] },
+        status: { in: ['VERIFIED', 'CLOSED'] },
       },
     }),
 
-    prisma.bug.count({
-      where: {
-        projectId,
-        status: 'REOPENED',
-        createdAt: { gte: startDate },
-      },
-    }),
+    Promise.resolve(0),
 
-    prisma.bug.groupBy({
-      by: ['assigneeId'],
-      where: {
-        projectId,
-        createdAt: { gte: startDate },
-        status: 'REOPENED',
-      },
-      _count: { id: true },
-    }),
+    Promise.resolve([]),
   ]);
 
   const reopenRate = totalBugs > 0 ? ((reopenedBugs / totalBugs) * 100).toFixed(2) : 0;
 
   const assignmentDetails = [];
-  for (const assignment of assignments) {
-    if (assignment.assigneeId) {
-      const user = await prisma.user.findUnique({
-        where: { id: assignment.assigneeId },
-        select: { name: true },
-      });
-      assignmentDetails.push({
-        assigneeId: assignment.assigneeId,
-        assigneeName: user?.name,
-        reopenedCount: assignment._count.id,
-      });
-    }
-  }
 
   return {
     projectId,
@@ -327,7 +294,7 @@ export async function getBugAgeReport(projectId) {
   const openBugs = await prisma.bug.findMany({
     where: {
       projectId,
-      status: { notIn: ['CLOSED', 'VERIFIED_FIXED'] },
+      status: { notIn: ['CLOSED', 'VERIFIED'] },
     },
     select: {
       id: true,
@@ -555,21 +522,15 @@ export async function getDeveloperFixQuality(userId, weeks = 8) {
     prisma.bug.count({
       where: {
         assigneeId: userId,
-        status: { in: ['VERIFIED_FIXED', 'CLOSED'] },
+        status: { in: ['VERIFIED', 'CLOSED'] },
         createdAt: { gte: startDate },
       },
     }),
-    prisma.bug.count({
-      where: {
-        assigneeId: userId,
-        status: 'REOPENED',
-        createdAt: { gte: startDate },
-      },
-    }),
+    Promise.resolve(0),
   ]);
 
   const resolutionRate = assigned > 0 ? ((resolved / assigned) * 100).toFixed(1) : 0;
-  const reopenRate = resolved > 0 ? ((reopened / resolved) * 100).toFixed(1) : 0;
+  const reopenRate = 0;
   const firstTimeFixRate = resolved > 0 ? (((resolved - reopened) / resolved) * 100).toFixed(1) : 0;
   const qualityScore = Math.max(0, 100 - (Number(reopenRate) * 2));
 
@@ -597,7 +558,7 @@ export async function getDeveloperResolutionTime(userId, weeks = 8) {
     where: {
       assigneeId: userId,
       createdAt: { gte: startDate },
-      status: { in: ['VERIFIED_FIXED', 'CLOSED'] },
+      status: { in: ['VERIFIED', 'CLOSED'] },
     },
     select: {
       createdAt: true,

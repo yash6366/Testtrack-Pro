@@ -26,6 +26,71 @@ import {
 } from './searchIndexService.js';
 
 const prisma = getPrismaClient();
+const COMMENT_EDIT_WINDOW_MINUTES = 5;
+
+function extractMentionedUsernames(body) {
+  if (!body) {
+    return [];
+  }
+
+  const mentionRegex = /@([\w.-]+)/g;
+  const matches = body.matchAll(mentionRegex);
+  const usernames = Array.from(matches, (match) => match[1]);
+  return [...new Set(usernames)];
+}
+
+async function resolveMentionedUsers(usernames, projectId) {
+  if (!usernames.length) {
+    return { users: [], unknown: [] };
+  }
+
+  const where = {
+    name: { in: usernames },
+    isActive: true,
+  };
+
+  if (projectId) {
+    where.OR = [
+      { projectAllocations: { some: { projectId: Number(projectId), isActive: true } } },
+      { role: 'ADMIN' },
+    ];
+  }
+
+  const users = await prisma.user.findMany({
+    where,
+    select: { id: true, name: true, email: true },
+  });
+
+  const found = new Set(users.map((user) => user.name));
+  const unknown = usernames.filter((name) => !found.has(name));
+  return { users, unknown };
+}
+
+async function notifyMentions({ users, comment, bug, authorId }) {
+  for (const user of users) {
+    if (user.id === authorId) {
+      continue;
+    }
+
+    const shouldInApp = await shouldSendNotification(user.id, 'IN_APP', 'USER_MENTIONED');
+    const inQuietHours = await isWithinQuietHours(user.id);
+
+    if (shouldInApp && !inQuietHours) {
+      await createNotification(user.id, {
+        title: `Mentioned in bug ${bug.bugNumber}`,
+        message: comment.comment.slice(0, 140),
+        type: 'USER_MENTIONED',
+        sourceType: 'BUG',
+        sourceId: bug.id,
+        relatedUserId: authorId,
+        actionUrl: `/bugs/${bug.id}`,
+        actionType: 'REVIEW',
+        metadata: { bugId: bug.id, commentId: comment.id },
+      });
+    }
+
+  }
+}
 
 /**
  * Generate unique bug number with atomic increment to prevent collisions
@@ -556,7 +621,7 @@ export async function assignBug(bugId, assigneeId, userId, projectId, permission
  * @returns {Promise<Object>} Created comment
  * @throws {Error} If permissionContext is invalid or missing when projectId is set
  */
-export async function addBugComment(bugId, body, userId, isInternal = false, projectId = null, permissionContext = null) {
+export async function addBugComment(bugId, body, userId, isInternal = false, projectId = null, permissionContext = null, parentCommentId = null) {
   if (!body || body.trim().length === 0) {
     throw new Error('Comment body is required');
   }
@@ -572,12 +637,63 @@ export async function addBugComment(bugId, body, userId, isInternal = false, pro
   if (projectId !== null) {
     const bug = await prisma.bug.findFirst({
       where: { id: bugId, projectId: Number(projectId) },
-      select: { id: true },
+      select: { id: true, bugNumber: true },
     });
 
     if (!bug) {
       throw new Error('Bug not found');
     }
+
+    if (parentCommentId) {
+      const parent = await prisma.bugComment.findFirst({
+        where: { id: Number(parentCommentId), bugId: bugId },
+        select: { id: true },
+      });
+
+      if (!parent) {
+        throw new Error('Parent comment not found');
+      }
+    }
+
+    const mentionedUsernames = extractMentionedUsernames(body);
+    const { users: mentionedUsers, unknown } = await resolveMentionedUsers(
+      mentionedUsernames,
+      projectId
+    );
+
+    if (unknown.length > 0) {
+      throw new Error(`Unknown or unauthorized mentions: ${unknown.join(', ')}`);
+    }
+
+    const comment = await prisma.bugComment.create({
+      data: {
+        bugId: bugId,
+        comment: body.trim(),
+        userId: userId,
+        parentCommentId: parentCommentId ? Number(parentCommentId) : null,
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    if (mentionedUsers.length > 0) {
+      await notifyMentions({
+        users: mentionedUsers,
+        comment,
+        bug,
+        authorId: userId,
+      });
+    }
+
+    // Audit log
+    await logAuditAction(userId, 'BUG_COMMENTED', {
+      resourceType: 'BUG',
+      resourceId: bugId,
+      description: `Added comment to bug`,
+    });
+
+    return comment;
   }
 
   const comment = await prisma.bugComment.create({
@@ -585,6 +701,7 @@ export async function addBugComment(bugId, body, userId, isInternal = false, pro
       bugId: bugId,
       comment: body.trim(),
       userId: userId,
+      parentCommentId: parentCommentId ? Number(parentCommentId) : null,
     },
     include: {
       user: { select: { id: true, name: true, email: true } },
@@ -599,6 +716,81 @@ export async function addBugComment(bugId, body, userId, isInternal = false, pro
   });
 
   return comment;
+}
+
+/**
+ * Update a bug comment within the edit window
+ * @param {number} bugId - Bug ID
+ * @param {number} commentId - Comment ID
+ * @param {string} body - Updated comment text
+ * @param {number} userId - Comment author ID
+ * @param {number} projectId - Project ID
+ * @param {Object} permissionContext - Permission context from authorization layer
+ * @returns {Promise<Object>} Updated comment
+ */
+export async function updateBugComment(bugId, commentId, body, userId, projectId, permissionContext = null) {
+  if (!body || body.trim().length === 0) {
+    throw new Error('Comment body is required');
+  }
+
+  if (!permissionContext) {
+    throw new Error('Missing permission context: direct service invocation not allowed');
+  }
+  assertPermissionContext(permissionContext, 'bug:comment', { projectId });
+
+  const comment = await prisma.bugComment.findUnique({
+    where: { id: Number(commentId) },
+    include: {
+      bug: { select: { id: true, projectId: true, bugNumber: true } },
+      user: { select: { id: true, name: true, email: true } },
+    },
+  });
+
+  if (!comment || comment.bugId !== Number(bugId) || comment.bug.projectId !== Number(projectId)) {
+    throw new Error('Comment not found');
+  }
+
+  if (comment.userId !== userId) {
+    throw new Error('You can only edit your own comments');
+  }
+
+  const now = new Date();
+  const windowMs = COMMENT_EDIT_WINDOW_MINUTES * 60 * 1000;
+  if (now.getTime() - comment.createdAt.getTime() > windowMs) {
+    throw new Error('Comment edit window has expired');
+  }
+
+  const mentionedUsernames = extractMentionedUsernames(body);
+  const { users: mentionedUsers, unknown } = await resolveMentionedUsers(
+    mentionedUsernames,
+    projectId
+  );
+
+  if (unknown.length > 0) {
+    throw new Error(`Unknown or unauthorized mentions: ${unknown.join(', ')}`);
+  }
+
+  const updated = await prisma.bugComment.update({
+    where: { id: comment.id },
+    data: {
+      comment: body.trim(),
+      editedAt: now,
+    },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+    },
+  });
+
+  if (mentionedUsers.length > 0) {
+    await notifyMentions({
+      users: mentionedUsers,
+      comment: updated,
+      bug: comment.bug,
+      authorId: userId,
+    });
+  }
+
+  return updated;
 }
 
 /**
@@ -780,7 +972,6 @@ export async function requestBugRetest(bugId, requesterId, testerId, notes = nul
     await prisma.bug.update({
       where: { id: bugId },
       data: {
-        status: 'AWAITING_VERIFICATION',
         verifiedBy: assignedTesterId,
       },
     });
@@ -967,6 +1158,7 @@ export default {
   changeBugStatus,
   assignBug,
   addBugComment,
+  updateBugComment,
   getBugDetails,
   getProjectBugs,
   requestBugRetest,

@@ -386,8 +386,8 @@ export async function generateDefectAnalysis(projectId) {
   });
 
   const resolvedCount =
-    (statusMap.VERIFIED_FIXED || 0) + (statusMap.CLOSED || 0);
-  const reopenedCount = statusMap.REOPENED || 0;
+    (statusMap.VERIFIED || 0) + (statusMap.CLOSED || 0);
+  const reopenedCount = 0;
   const openCount = Math.max(totalDefects - resolvedCount, 0);
   const resolvedRate = totalDefects > 0 ? ((resolvedCount / totalDefects) * 100).toFixed(2) : 0;
 

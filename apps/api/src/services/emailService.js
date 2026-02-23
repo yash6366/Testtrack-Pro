@@ -439,14 +439,11 @@ function getSeverityColor(severity) {
 function getStatusColor(status) {
   const colors = {
     NEW: '#6366f1',
-    ASSIGNED: '#f59e0b',
+    OPEN: '#f59e0b',
     IN_PROGRESS: '#3b82f6',
     FIXED: '#8b5cf6',
-    VERIFIED_FIXED: '#10b981',
-    REOPENED: '#ef4444',
+    VERIFIED: '#10b981',
     CLOSED: '#6b7280',
-    CANNOT_REPRODUCE: '#64748b',
-    DUPLICATE: '#94a3b8',
   };
   return colors[status] || '#6b7280';
 }

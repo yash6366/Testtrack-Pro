@@ -115,7 +115,7 @@ export const bugObject = {
     description: { type: 'string' },
     priority: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] },
     severity: { type: 'string', enum: ['TRIVIAL', 'MINOR', 'MAJOR', 'CRITICAL', 'BLOCKER'] },
-    status: { type: 'string', enum: ['OPEN', 'IN_PROGRESS', 'FIXED', 'VERIFIED_FIXED', 'REOPENED', 'CLOSED', 'DUPLICATE', 'WONT_FIX'] },
+    status: { type: 'string', enum: ['NEW', 'OPEN', 'IN_PROGRESS', 'FIXED', 'VERIFIED', 'CLOSED'] },
     environment: { type: 'string', enum: ['DEVELOPMENT', 'STAGING', 'UAT', 'PRODUCTION'] },
     assigneeId: { type: ['number', 'null'] },
     reporterId: { type: 'number' },

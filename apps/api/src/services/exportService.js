@@ -228,16 +228,10 @@ export async function generateDeveloperPerformanceCSV(userId, weeks = 8) {
         where: {
           assigneeId: userId,
           createdAt: { gte: startDate },
-          status: { in: ['VERIFIED_FIXED', 'CLOSED'] },
+          status: { in: ['VERIFIED', 'CLOSED'] },
         },
       }),
-      prisma.bug.count({
-        where: {
-          assigneeId: userId,
-          createdAt: { gte: startDate },
-          status: 'REOPENED',
-        },
-      }),
+      Promise.resolve(0),
     ]);
 
     if (!user) {

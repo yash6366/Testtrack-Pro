@@ -63,7 +63,7 @@ export async function getDeveloperAssignedBugs(userId, filters = {}) {
 
 /**
  * Update bug fix documentation
- * @param {number} bugId - Bug ID
+  const updated = bug;
  * @param {Object} fixData - Fix details
  * @param {number} userId - Developer ID
  * @returns {Promise<Object>} Updated bug
@@ -198,11 +198,11 @@ export async function getDeveloperMetrics(userId, options = {}) {
     // Total assigned bugs
     prisma.bug.count({ where }),
 
-    // Resolved bugs (VERIFIED_FIXED or CLOSED)
+    // Resolved bugs (VERIFIED or CLOSED)
     prisma.bug.count({
       where: {
         ...where,
-        status: { in: ['VERIFIED_FIXED', 'CLOSED'] },
+        status: { in: ['VERIFIED', 'CLOSED'] },
       },
     }),
 
@@ -210,23 +210,18 @@ export async function getDeveloperMetrics(userId, options = {}) {
     prisma.bug.count({
       where: {
         ...where,
-        status: 'AWAITING_VERIFICATION',
+        status: 'FIXED',
       },
     }),
 
-    // Reopened bugs (failed verification)
-    prisma.bug.count({
-      where: {
-        ...where,
-        status: 'REOPENED',
-      },
-    }),
+    // Reopened bugs (not tracked in spec workflow)
+    Promise.resolve(0),
 
     // Get actual resolution times for resolved bugs
     prisma.bug.findMany({
       where: {
         ...where,
-        status: { in: ['VERIFIED_FIXED', 'CLOSED'] },
+        status: { in: ['VERIFIED', 'CLOSED'] },
         closedAt: { not: null },
       },
       select: {
@@ -258,8 +253,7 @@ export async function getDeveloperMetrics(userId, options = {}) {
       ? (resolutionTimesInHours.reduce((a, b) => a + b, 0) / resolutionTimesInHours.length).toFixed(2)
       : 0;
 
-  const reopenRate =
-    totalAssigned > 0 ? ((reopened / totalAssigned) * 100).toFixed(2) : 0;
+  const reopenRate = 0;
 
   const resolutionRate =
     totalAssigned > 0 ? ((resolved / totalAssigned) * 100).toFixed(2) : 0;
@@ -426,13 +420,7 @@ export async function requestBugRetest(bugId, data, userId) {
     throw new Error('Can only request retest for FIXED bugs');
   }
 
-  // Update bug status to AWAITING_VERIFICATION
-  const updated = await prisma.bug.update({
-    where: { id: bugId },
-    data: {
-      status: 'AWAITING_VERIFICATION',
-    },
-  });
+  const updated = bug;
 
   // Create retest request
   const retestRequest = await prisma.bugRetestRequest.create({
@@ -450,7 +438,7 @@ export async function requestBugRetest(bugId, data, userId) {
   //     bugId: bugId,
   //     fieldName: 'status',
   //     oldValue: 'FIXED',
-  //     newValue: 'AWAITING_VERIFICATION',
+  //     newValue: 'FIXED',
   //     changedBy: userId,
   //     changeReason: 'Developer requested retest after fix',
   //   },
@@ -463,7 +451,7 @@ export async function requestBugRetest(bugId, data, userId) {
     resourceName: bug.bugNumber,
     projectId: bug.projectId,
     description: `Developer requested retest for bug ${bug.bugNumber}`,
-    newValues: JSON.stringify({ status: 'AWAITING_VERIFICATION' }),
+    newValues: JSON.stringify({ status: 'FIXED' }),
   });
 
   return {
@@ -484,8 +472,8 @@ export async function getDeveloperOverview(userId) {
     totalAssigned,
     inProgress,
     fixed,
-    awaitingVerification,
-    reopened,
+    open,
+    verified,
     recent,
   ] = await Promise.all([
     prisma.bug.count({ where }),
@@ -499,11 +487,11 @@ export async function getDeveloperOverview(userId) {
     }),
 
     prisma.bug.count({
-      where: { ...where, status: 'AWAITING_VERIFICATION' },
+      where: { ...where, status: 'OPEN' },
     }),
 
     prisma.bug.count({
-      where: { ...where, status: 'REOPENED' },
+      where: { ...where, status: 'VERIFIED' },
     }),
 
     prisma.bug.findMany({
@@ -526,8 +514,8 @@ export async function getDeveloperOverview(userId) {
     summary: {
       inProgress,
       fixed,
-      awaitingVerification,
-      reopened,
+      open,
+      verified,
     },
     recentBugs: recent,
   };
@@ -612,7 +600,7 @@ export async function generateDeveloperReport(userId, options = {}) {
   const recentlyResolved = await prisma.bug.findMany({
     where: {
       ...where,
-      status: { in: ['VERIFIED_FIXED', 'CLOSED'] },
+      status: { in: ['VERIFIED', 'CLOSED'] },
       closedAt: { not: null },
     },
     select: {

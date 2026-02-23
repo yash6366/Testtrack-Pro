@@ -12,6 +12,7 @@ import {
   changeBugStatus,
   assignBug,
   addBugComment,
+  updateBugComment,
   getBugDetails,
   getProjectBugs,
   requestBugRetest,
@@ -165,18 +166,11 @@ const changeBugStatusSchema = {
         type: 'string',
         enum: [
           'NEW',
-          'ASSIGNED',
+          'OPEN',
           'IN_PROGRESS',
           'FIXED',
-          'AWAITING_VERIFICATION',
-          'VERIFIED_FIXED',
-          'REOPENED',
-          'CANNOT_REPRODUCE',
-          'DUPLICATE',
-          'WORKS_AS_DESIGNED',
           'CLOSED',
-          'DEFERRED',
-          'WONTFIX',
+          'VERIFIED',
         ],
       },
     },
@@ -250,8 +244,8 @@ const verifyBugFixSchema = {
 
 const reopenBugSchema = {
   tags: ['bugs'],
-  summary: 'Reopen a bug',
-  description: 'Mark a bug as reopened (Tester only)',
+  summary: 'Move bug back to OPEN',
+  description: 'Move a bug back to OPEN status (Tester only)',
   params: {
     type: 'object',
     properties: {
@@ -267,7 +261,7 @@ const reopenBugSchema = {
   },
   response: {
     200: {
-      description: 'Bug reopened successfully',
+      description: 'Bug moved to OPEN successfully',
       ...bugObject,
     },
     ...errorResponse,
@@ -292,11 +286,41 @@ const addBugCommentSchema = {
     properties: {
       body: { type: 'string', description: 'Comment text' },
       isInternal: { type: 'boolean', description: 'Is this an internal note?', default: false },
+      parentCommentId: { type: 'number', description: 'Parent comment ID for threading' },
     },
   },
   response: {
     201: {
       description: 'Comment added successfully',
+      type: 'object',
+    },
+    ...errorResponse,
+  },
+  security: bearerAuth,
+};
+
+const updateBugCommentSchema = {
+  tags: ['bugs'],
+  summary: 'Update bug comment',
+  description: 'Edit a bug comment within the allowed window',
+  params: {
+    type: 'object',
+    properties: {
+      projectId: { type: 'string', description: 'Project ID' },
+      bugId: { type: 'string', description: 'Bug ID' },
+      commentId: { type: 'string', description: 'Comment ID' },
+    },
+  },
+  body: {
+    type: 'object',
+    required: ['body'],
+    properties: {
+      body: { type: 'string', description: 'Updated comment text' },
+    },
+  },
+  response: {
+    200: {
+      description: 'Comment updated successfully',
       type: 'object',
     },
     ...errorResponse,
@@ -527,7 +551,7 @@ export async function bugRoutes(fastify) {
           return reply.code(400).send({ error: 'verified (boolean) is required' });
         }
 
-        const newStatus = verified ? 'VERIFIED_FIXED' : 'REOPENED';
+        const newStatus = verified ? 'VERIFIED' : 'OPEN';
         const updated = await changeBugStatus(
           Number(bugId),
           newStatus,
@@ -565,7 +589,7 @@ export async function bugRoutes(fastify) {
 
         const updated = await changeBugStatus(
           Number(bugId),
-          'REOPENED',
+          'OPEN',
           userId,
           'TESTER',
           getClientContext(request),
@@ -575,7 +599,7 @@ export async function bugRoutes(fastify) {
 
         // Add reopen comment
         if (reason) {
-          await addBugComment(Number(bugId), `Bug reopened: ${reason}`, userId, false, projectId, request.permissionContext);
+          await addBugComment(Number(bugId), `Bug moved to OPEN: ${reason}`, userId, false, projectId, request.permissionContext);
         }
 
         reply.send(updated);
@@ -599,7 +623,7 @@ export async function bugRoutes(fastify) {
     async (request, reply) => {
       try {
         const { bugId, projectId } = request.params;
-        const { body, isInternal } = request.body;
+        const { body, isInternal, parentCommentId } = request.body;
         const userId = request.user.id;
 
         const comment = await addBugComment(
@@ -609,11 +633,41 @@ export async function bugRoutes(fastify) {
           isInternal || false,
           projectId,
           request.permissionContext,
+          parentCommentId,
         );
 
         reply.code(201).send(comment);
       } catch (error) {
         console.error('Error adding comment:', error);
+        reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Update a bug comment
+   */
+  fastify.patch(
+    '/api/projects/:projectId/bugs/:bugId/comments/:commentId',
+    { schema: updateBugCommentSchema, preHandler: [requirePermission('bug:comment')] },
+    async (request, reply) => {
+      try {
+        const { bugId, projectId, commentId } = request.params;
+        const { body } = request.body;
+        const userId = request.user.id;
+
+        const comment = await updateBugComment(
+          Number(bugId),
+          Number(commentId),
+          body,
+          userId,
+          Number(projectId),
+          request.permissionContext,
+        );
+
+        reply.send(comment);
+      } catch (error) {
+        console.error('Error updating comment:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -848,7 +902,7 @@ export async function bugRoutes(fastify) {
       try {
         const { bugId } = request.params;
         const { projectId } = request.query;
-        const { body, isInternal } = request.body;
+        const { body, isInternal, parentCommentId } = request.body;
         const userId = request.user.id;
 
         if (!projectId) {
@@ -862,11 +916,46 @@ export async function bugRoutes(fastify) {
           isInternal || false,
           projectId,
           request.permissionContext,
+          parentCommentId,
         );
 
         reply.code(201).send(comment);
       } catch (error) {
         console.error('Error adding comment:', error);
+        reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Update a bug comment (convenience route)
+   */
+  fastify.patch(
+    '/api/bugs/:bugId/comments/:commentId',
+    { preHandler: [requirePermission('bug:comment')] },
+    async (request, reply) => {
+      try {
+        const { bugId, commentId } = request.params;
+        const { projectId } = request.query;
+        const { body } = request.body;
+        const userId = request.user.id;
+
+        if (!projectId) {
+          return reply.code(400).send({ error: 'projectId query parameter is required' });
+        }
+
+        const comment = await updateBugComment(
+          Number(bugId),
+          Number(commentId),
+          body,
+          userId,
+          Number(projectId),
+          request.permissionContext,
+        );
+
+        reply.send(comment);
+      } catch (error) {
+        console.error('Error updating comment:', error);
         reply.code(500).send({ error: error.message });
       }
     },
