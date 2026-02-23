@@ -58,6 +58,7 @@ const loginSchema = {
     properties: {
       email: { type: 'string', format: 'email' },
       password: { type: 'string' },
+      rememberMe: { type: 'boolean', description: 'Extend refresh token lifetime' },
     },
   },
   response: {

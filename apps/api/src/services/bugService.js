@@ -203,7 +203,7 @@ export async function createBugFromExecution(data, userId, permissionContext = n
       executionId: validatedExecutionId,
       testCaseId: finalTestCaseId,
       assigneeId: validatedAssigneeId,
-      status: validatedAssigneeId ? 'ASSIGNED' : 'NEW',
+      status: validatedAssigneeId ? 'OPEN' : 'NEW',
     },
     include: {
       project: { select: { id: true, name: true } },
@@ -365,10 +365,12 @@ export async function changeBugStatus(bugId, newStatus, userId, role, auditConte
 
   // Workflow validation
   const validStatuses = [
-    'NEW', 'ASSIGNED', 'IN_PROGRESS', 'FIXED',
-    'AWAITING_VERIFICATION', 'VERIFIED_FIXED', 'REOPENED',
-    'CANNOT_REPRODUCE', 'DUPLICATE', 'WORKS_AS_DESIGNED',
-    'CLOSED', 'DEFERRED', 'WONTFIX'
+    'NEW',
+    'OPEN',
+    'IN_PROGRESS',
+    'FIXED',
+    'VERIFIED',
+    'CLOSED',
   ];
 
   if (!validStatuses.includes(newStatus)) {
@@ -377,19 +379,12 @@ export async function changeBugStatus(bugId, newStatus, userId, role, auditConte
 
   // Strict workflow transition validation
   const validTransitions = {
-    'NEW': ['ASSIGNED', 'IN_PROGRESS', 'CANNOT_REPRODUCE', 'DUPLICATE', 'WORKS_AS_DESIGNED', 'DEFERRED', 'WONTFIX'],
-    'ASSIGNED': ['IN_PROGRESS', 'CANNOT_REPRODUCE', 'DUPLICATE', 'WORKS_AS_DESIGNED', 'DEFERRED', 'WONTFIX'],
-    'IN_PROGRESS': ['FIXED', 'CANNOT_REPRODUCE', 'DUPLICATE', 'WORKS_AS_DESIGNED', 'DEFERRED', 'WONTFIX'],
-    'FIXED': ['AWAITING_VERIFICATION', 'REOPENED'],
-    'AWAITING_VERIFICATION': ['VERIFIED_FIXED', 'REOPENED'],
-    'VERIFIED_FIXED': ['CLOSED', 'REOPENED'],
-    'REOPENED': ['ASSIGNED', 'IN_PROGRESS'],
-    'CANNOT_REPRODUCE': ['CLOSED', 'REOPENED'],
-    'DUPLICATE': ['CLOSED'],
-    'WORKS_AS_DESIGNED': ['CLOSED', 'REOPENED'],
-    'DEFERRED': ['ASSIGNED', 'CLOSED'],
-    'WONTFIX': ['CLOSED', 'REOPENED'],
-    'CLOSED': [], // Terminal state, no transitions allowed
+    NEW: ['OPEN'],
+    OPEN: ['IN_PROGRESS'],
+    IN_PROGRESS: ['FIXED'],
+    FIXED: ['VERIFIED', 'OPEN'],
+    VERIFIED: ['CLOSED'],
+    CLOSED: [],
   };
 
   const allowedTransitions = validTransitions[bug.status] || [];
@@ -404,22 +399,14 @@ export async function changeBugStatus(bugId, newStatus, userId, role, auditConte
     throw new Error('Only developers can mark bugs as FIXED');
   }
 
-  if (newStatus === 'VERIFIED_FIXED' && role !== 'TESTER') {
+  if (newStatus === 'VERIFIED' && role !== 'TESTER') {
     throw new Error('Only testers can verify bug fixes');
-  }
-
-  if (newStatus === 'REOPENED' && role !== 'TESTER') {
-    throw new Error('Only testers can reopen bugs');
   }
 
   // Developer-specific workflow constraints
   const developerAllowedStatuses = [
     'IN_PROGRESS',
     'FIXED',
-    'WONTFIX',
-    'DUPLICATE',
-    'CANNOT_REPRODUCE',
-    'WORKS_AS_DESIGNED',
   ];
 
   if (
@@ -530,7 +517,7 @@ export async function assignBug(bugId, assigneeId, userId, projectId, permission
     where: { id: bugId },
     data: {
       assigneeId: Number(assigneeId),
-      status: 'ASSIGNED',
+      status: 'OPEN',
     },
     include: {
       assignee: { select: { id: true, name: true, email: true } },

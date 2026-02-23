@@ -30,6 +30,7 @@ export const SignupSchema = z.object({
 export const LoginSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(1, 'Password is required'),
+  rememberMe: z.boolean().optional(),
 });
 
 export const AuthResponseSchema = z.object({

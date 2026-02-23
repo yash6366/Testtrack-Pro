@@ -133,7 +133,7 @@ export const PERMISSIONS = {
     description: 'Create test cases',
     roles: {
       [ROLES.ADMIN]: true,
-      [ROLES.DEVELOPER]: true,
+      [ROLES.DEVELOPER]: false,
       [ROLES.TESTER]: true, // CHANGE: Testers CAN create test cases
     },
   },

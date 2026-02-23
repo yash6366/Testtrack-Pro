@@ -10,6 +10,35 @@ import { assertPermissionContext } from '../lib/policy.js';
 
 const prisma = getPrismaClient();
 
+async function generateTestCaseId(projectId) {
+  return await prisma.$transaction(
+    async (tx) => {
+      const project = await tx.project.findUnique({
+        where: { id: projectId },
+        select: { key: true },
+      });
+
+      if (!project) {
+        throw new Error('Project not found');
+      }
+
+      const counter = await tx.testCaseCounter.upsert({
+        where: { projectId },
+        create: { projectId, nextNumber: 1 },
+        update: { nextNumber: { increment: 1 } },
+      });
+
+      const number = counter.nextNumber.toString().padStart(3, '0');
+      return `${project.key}-TC-${number}`;
+    },
+    {
+      isolationLevel: 'Serializable',
+      maxWait: 5000,
+      timeout: 10000,
+    }
+  );
+}
+
 /**
  * Create a new test case with steps
  * @param {Object} data - Test case data
@@ -30,6 +59,7 @@ export async function createTestCase(data, userId, auditContext = {}, permission
     name,
     description,
     preconditions,
+    postconditions,
     testData,
     environment,
     type = 'FUNCTIONAL',
@@ -49,6 +79,10 @@ export async function createTestCase(data, userId, auditContext = {}, permission
     throw new Error('ProjectId and name are required');
   }
 
+  if (name.length > 200) {
+    throw new Error('Test case name must be 200 characters or fewer');
+  }
+
   // Check if test case with same name exists in project
   const existing = await prisma.testCase.findFirst({
     where: {
@@ -63,12 +97,16 @@ export async function createTestCase(data, userId, auditContext = {}, permission
   }
 
   // Create test case with steps
+  const testCaseId = await generateTestCaseId(Number(projectId));
+
   const testCase = await prisma.testCase.create({
     data: {
       projectId: Number(projectId),
+      testCaseId,
       name,
       description: description || null,
       preconditions: preconditions || null,
+      postconditions: postconditions || null,
       testData: testData || null,
       environment: environment || null,
       type,
@@ -87,6 +125,7 @@ export async function createTestCase(data, userId, auditContext = {}, permission
           stepNumber: index + 1,
           action: step.action,
           expectedResult: step.expectedResult,
+          testData: step.testData || null,
           notes: step.notes || null,
         })),
       },
@@ -162,6 +201,7 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
     name,
     description,
     preconditions,
+    postconditions,
     testData,
     environment,
     type,
@@ -178,6 +218,15 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
     automationStatus,
   } = updates;
 
+  const trimmedChangeNote = typeof changeNote === 'string' ? changeNote.trim() : '';
+  if (!trimmedChangeNote) {
+    throw new Error('Change summary is required');
+  }
+
+  if (name && name.length > 200) {
+    throw new Error('Test case name must be 200 characters or fewer');
+  }
+
   // Capture current state for version snapshot (before update)
   const versionSnapshot = {
     testCaseId: existing.id,
@@ -190,15 +239,17 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
     status: existing.status,
     automationStatus: existing.automationStatus,
     preconditions: existing.preconditions,
-    postconditions: null, // Not yet in TestCase schema
+    postconditions: existing.postconditions,
+    testData: existing.testData,
     expectedResult: null, // Not on test case level
     tags: existing.tags,
     steps: existing.steps.map(step => ({
       action: step.action,
       expectedResult: step.expectedResult,
+      testData: step.testData,
       notes: step.notes,
     })),
-    changeNote: changeNote || null,
+    changeNote: trimmedChangeNote,
     changedBy: userId,
     changedAt: new Date(),
   };
@@ -211,6 +262,7 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
         ...(name && { name }),
         ...(description !== undefined && { description }),
         ...(preconditions !== undefined && { preconditions }),
+        ...(postconditions !== undefined && { postconditions }),
         ...(testData !== undefined && { testData }),
         ...(environment !== undefined && { environment }),
         ...(type && { type }),
@@ -253,6 +305,7 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
     const normalizedSteps = steps.map((step) => ({
       action: step.action,
       expectedResult: step.expectedResult,
+      testData: step.testData || null,
       notes: step.notes || null,
     }));
 
@@ -267,6 +320,7 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
               stepNumber: index + 1,
               action: step.action,
               expectedResult: step.expectedResult,
+              testData: step.testData,
               notes: step.notes,
             },
           })
@@ -279,6 +333,7 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
               stepNumber: index + 1,
               action: step.action,
               expectedResult: step.expectedResult,
+              testData: step.testData,
               notes: step.notes,
             },
           })
@@ -590,6 +645,7 @@ export async function getProjectTestCases(projectId, filters = {}) {
             stepNumber: true,
             action: true,
             expectedResult: true,
+            testData: true,
           },
           orderBy: { stepNumber: 'asc' },
         },

@@ -22,6 +22,7 @@ const LOCKOUT_DURATION_MINUTES = 15;
 const PASSWORD_HISTORY_COUNT = 5;
 const PASSWORD_RESET_TOKEN_EXPIRY_HOURS = 1;
 const REFRESH_TOKEN_TTL_DAYS = 7;
+const REFRESH_TOKEN_REMEMBER_TTL_DAYS = 30;
 
 function normalizeRole(role) {
   return typeof role === 'string' ? role.trim().toUpperCase() : role;
@@ -39,8 +40,19 @@ function hashRefreshToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
 
-function getRefreshTokenExpiry() {
-  return new Date(Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000);
+function getRefreshTokenExpiry(rememberMe = false) {
+  const ttlDays = rememberMe ? REFRESH_TOKEN_REMEMBER_TTL_DAYS : REFRESH_TOKEN_TTL_DAYS;
+  return new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
+}
+
+function isRememberedSession(session) {
+  if (!session?.expiresAt || !session?.createdAt) {
+    return false;
+  }
+
+  const ttlMs = session.expiresAt.getTime() - session.createdAt.getTime();
+  const baseTtlMs = REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000;
+  return ttlMs > baseTtlMs + 60 * 60 * 1000;
 }
 
 /**
@@ -121,9 +133,9 @@ export async function signup(fastify, { name, email, password, role = 'DEVELOPER
  * @returns {Promise<Object>} Object containing access token, refresh token, and user data
  * @throws {Error} If credentials are invalid, account is locked, or email not verified
  */
-export async function login(fastify, { email, password }, context = {}) {
+export async function login(fastify, { email, password, rememberMe }, context = {}) {
   // Validate input
-  const validated = LoginSchema.parse({ email, password });
+  const validated = LoginSchema.parse({ email, password, rememberMe });
 
   // Find user
   let user = await prisma.user.findUnique({
@@ -245,7 +257,7 @@ export async function login(fastify, { email, password }, context = {}) {
       ipAddress: context.ipAddress || null,
       userAgent: context.userAgent || null,
       deviceLabel: context.deviceLabel || null,
-      expiresAt: getRefreshTokenExpiry(),
+      expiresAt: getRefreshTokenExpiry(Boolean(validated.rememberMe)),
     },
   });
 
@@ -391,7 +403,7 @@ export async function refreshSession(fastify, refreshToken, context = {}) {
       ipAddress: context.ipAddress || session.ipAddress,
       userAgent: context.userAgent || session.userAgent,
       deviceLabel: context.deviceLabel || session.deviceLabel,
-      expiresAt: getRefreshTokenExpiry(),
+      expiresAt: getRefreshTokenExpiry(isRememberedSession(session)),
     },
   });
 

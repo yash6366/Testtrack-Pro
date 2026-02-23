@@ -378,6 +378,14 @@ model TestCaseTemplate {
   @@index([projectId])
 }
 
+model TestCaseCounter {
+  id         Int @id @default(autoincrement())
+  projectId  Int @unique
+  nextNumber Int @default(1)
+
+  @@index([projectId])
+}
+
 // ============================================
 // TEST SUITE MODELS
 // ============================================
