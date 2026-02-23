@@ -1,10 +1,13 @@
 import { Server } from "socket.io";
-import { Redis } from "@upstash/redis";
+import { createAdapter } from "@socket.io/redis-adapter";
+import { Redis as UpstashRedis } from "@upstash/redis";
+import Redis from "ioredis";
 import { getPrismaClient } from "./prisma.js";
 import { verifyTokenAndLoadUser } from "./rbac.js";
 import { createNotification, getNotificationPreferences, isWithinQuietHours } from "../services/notificationService.js";
 
 let redisClient = null;
+let redisAdapter = null; // For Socket.IO scaling
 let logger = console; // Default logger, will be overridden
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_NOTIFICATION_LENGTH = 500;
@@ -13,36 +16,78 @@ const ALLOWED_PUBLIC_PREFIXES = ['bug-', 'execution-'];
 const onlineUserIds = new Set();
 
 /**
- * Initialize Redis client for caching and pub/sub
- * Note: Upstash REST API does not support Socket.IO Redis adapter (requires Redis protocol for pub/sub)
- * For horizontal scaling, use standard Redis with @socket.io/redis-adapter
- * @returns {boolean} Success status
+ * Initialize Redis clients for caching and Socket.IO pub/sub
+ * 
+ * Two Redis configurations are supported:
+ * 1. Standard Redis (ioredis) - For Socket.IO adapter (multi-server scaling)
+ * 2. Upstash REST - For general caching (single instance)
+ * 
+ * For horizontal scaling with multiple servers:
+ * - Configure REDIS_URL for Socket.IO adapter
+ * - This enables pub/sub across server instances
+ * 
+ * For single server with caching:
+ * - Configure UPSTASH_REDIS_REST_URL and token
+ * - Socket.IO will use in-memory adapter
+ * 
+ * @returns {Object} Status of Redis initialization
  */
 export function initializeRedis() {
-  try {
-    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-      redisClient = new Redis({
+  const status = {
+    upstashRedis: false,
+    socketIOAdapter: false,
+  };
+
+  // Initialize standard Redis for Socket.IO adapter (if configured)
+  if (process.env.REDIS_URL) {
+    try {
+      const pubClient = new Redis(process.env.REDIS_URL);
+      const subClient = pubClient.duplicate();
+      
+      redisAdapter = createAdapter(pubClient, subClient);
+      status.socketIOAdapter = true;
+      logger.info('Redis adapter initialized for Socket.IO (multi-server support enabled)');
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to initialize Redis adapter for Socket.IO');
+    }
+  }
+
+  // Initialize Upstash REST Redis for general caching (if configured)
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    try {
+      redisClient = new UpstashRedis({
         url: process.env.UPSTASH_REDIS_REST_URL,
         token: process.env.UPSTASH_REDIS_REST_TOKEN,
       });
-      logger.info('Redis client initialized (Upstash REST)');
-      return true;
-    } else {
-      logger.warn('Redis env vars not found - using in-memory adapter (single instance only)');
-      return false;
+      status.upstashRedis = true;
+      logger.info('Upstash Redis client initialized for caching');
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to initialize Upstash Redis client');
     }
-  } catch (error) {
-    logger.warn({ err: error }, 'Redis initialization failed - using in-memory adapter');
-    return false;
   }
+
+  // Log final status
+  if (!status.socketIOAdapter && !status.upstashRedis) {
+    logger.warn('No Redis configured - using in-memory adapter (single instance only)');
+  }
+
+  return status;
 }
 
 /**
- * Get the Redis client instance
- * @returns {object|null} Redis client or null if not initialized
+ * Get the Redis client instance (Upstash REST for caching)
+ * @returns {object|null} Upstash Redis client or null if not initialized
  */
 export function getRedisClient() {
   return redisClient;
+}
+
+/**
+ * Get the Redis adapter for Socket.IO
+ * @returns {function|null} Redis adapter function or null if not initialized
+ */
+export function getRedisAdapter() {
+  return redisAdapter;
 }
 
 /**
@@ -65,22 +110,36 @@ export function setupSocket(fastifyServer) {
       origin: [
         process.env.FRONTEND_URL,
         "http://localhost:5173",
-        "http://localhost:5174"
-      ].filter(Boolean),
+      ],
       credentials: true,
     },
     transports: ["websocket", "polling"],
   });
 
   /**
-   * SCALING NOTE: Socket.IO uses in-memory adapter by default (single instance only)
-   * For multi-server deployments:
-   * 1. Use standard Redis (not Upstash REST) with @socket.io/redis-adapter
-   * 2. Or use Socket.IO sticky sessions with a load balancer
-   * See: https://socket.io/docs/v4/using-multiple-nodes/
+   * HORIZONTAL SCALING SUPPORT
+   * 
+   * If Redis adapter is initialized, Socket.IO will use it for pub/sub
+   * across multiple server instances. This enables:
+   * - Broadcasting across all servers
+   * - Room management across instances
+   * - User presence synchronization
+   * 
+   * Configuration:
+   * - Set REDIS_URL environment variable
+   * - Deploy multiple instances behind load balancer
+   * - No sticky sessions required with Redis adapter
+   * 
+   * For single server deployments:
+   * - Leave REDIS_URL unset
+   * - Uses default in-memory adapter
+   * - All features work normally on single instance
    */
-  if (redisClient) {
-    logger.info('Socket.IO using in-memory adapter (Upstash REST does not support pub/sub)');
+  if (redisAdapter) {
+    io.adapter(redisAdapter);
+    logger.info('Socket.IO using Redis adapter - multi-server support enabled');
+  } else {
+    logger.info('Socket.IO using in-memory adapter - single instance mode');
   }
 
   // Socket connection handler

@@ -6,6 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Edit2, Save, ChevronDown, Plus } from 'lucide-react';
 import Button from './common/Button';
+import TestCaseAssignmentModal from './TestCaseAssignmentModal';
+import DefectAssignmentModal from './DefectAssignmentModal';
 
 export default function MilestoneDetailsModal({
   milestone,
@@ -16,6 +18,8 @@ export default function MilestoneDetailsModal({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
+  const [showTestCaseModal, setShowTestCaseModal] = useState(false);
+  const [showDefectModal, setShowDefectModal] = useState(false);
   const [formData, setFormData] = useState({
     name: milestone.name,
     description: milestone.description,
@@ -395,9 +399,7 @@ export default function MilestoneDetailsModal({
             <div className="space-y-4">
               <div className="flex justify-end">
                 <Button
-                  onClick={() => {
-                    // TODO: Implement test case assignment modal
-                  }}
+                  onClick={() => setShowTestCaseModal(true)}
                   variant="primary"
                   className="flex items-center gap-2"
                 >
@@ -444,9 +446,7 @@ export default function MilestoneDetailsModal({
                 <Button
                   onClick={() => {
                     // TODO: Implement defect assignment modal
-                  }}
-                  variant="primary"
-                  className="flex items-center gap-2"
+                  }}setShowDefectModal(true)lassName="flex items-center gap-2"
                 >
                   <Plus size={18} />
                   Add Defects
@@ -488,5 +488,34 @@ export default function MilestoneDetailsModal({
         </div>
       </div>
     </div>
+
+        {/* Assignment Modals */}
+        {showTestCaseModal && (
+          <TestCaseAssignmentModal
+            projectId={milestone.projectId}
+            milestoneId={milestone.id}
+            currentTestCases={milestone.testCases || []}
+            onClose={() => setShowTestCaseModal(false)}
+            onAssign={async (testCaseIds) => {
+              if (onAssignTestCases) {
+                await onAssignTestCases(milestone.id, testCaseIds);
+              }
+            }}
+          />
+        )}
+
+        {showDefectModal && (
+          <DefectAssignmentModal
+            projectId={milestone.projectId}
+            milestoneId={milestone.id}
+            currentDefects={milestone.defects || []}
+            onClose={() => setShowDefectModal(false)}
+            onAssign={async (defectIds) => {
+              if (onAssignDefects) {
+                await onAssignDefects(milestone.id, defectIds);
+              }
+            }}
+          />
+        )}
   );
 }
