@@ -1,5 +1,6 @@
 import { getPrismaClient } from '../lib/prisma.js';
 import { createAuthGuards } from '../lib/rbac.js';
+import { createNotification, getNotificationPreferences, isWithinQuietHours } from '../services/notificationService.js';
 
 const prisma = getPrismaClient();
 const MAX_MESSAGE_LENGTH = 2000;
@@ -210,6 +211,27 @@ export async function directMessageRoutes(fastify) {
         },
       },
     });
+
+    try {
+      const prefs = await getNotificationPreferences(recipient.id);
+      const inQuietHours = await isWithinQuietHours(recipient.id);
+
+      if (prefs.inAppEnabled && !inQuietHours) {
+        await createNotification(recipient.id, {
+          title: `New message from ${dm.sender?.name || 'Someone'}`,
+          message: message.trim(),
+          type: 'DIRECT_MESSAGE',
+          sourceType: 'DIRECT_MESSAGE',
+          sourceId: dm.id,
+          relatedUserId: senderId,
+          actionUrl: '/chat',
+          actionType: 'OPEN_CHAT',
+          metadata: { senderId, recipientId: recipient.id },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to create DM notification:', error);
+    }
 
     return { message: dm };
   });

@@ -66,6 +66,7 @@ model User {
   createdChannels ChannelMessage[] @relation("ChannelMessages")
   channelsCreated Channel[]        @relation("ChannelsCreatedBy")
   notifications   Notification[]
+  notificationPreferences NotificationPreference?
   apiKeys         ApiKey[]
 
   createdMilestones  Milestone[] @relation("CreatedBy")
@@ -708,6 +709,11 @@ model Notification {
   resourceType  String? // BUG, TESTCASE, EXECUTION, etc.
   resourceId    Int?
   relatedUserId Int?
+  sourceType    String?
+  sourceId      Int?
+  actionUrl     String?
+  actionType    String?
+  metadata      Json?
 
   isRead    Boolean   @default(false)
   readAt    DateTime?
@@ -715,11 +721,70 @@ model Notification {
   expiresAt DateTime? // Notification expiration
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries NotificationDelivery[]
 
   @@index([userId])
   @@index([isRead])
   @@index([createdAt])
   @@index([expiresAt])
+}
+
+model NotificationPreference {
+  id Int @id @default(autoincrement())
+  userId Int @unique
+
+  emailEnabled Boolean @default(true)
+  emailBugCreated Boolean @default(true)
+  emailBugAssigned Boolean @default(true)
+  emailBugCommented Boolean @default(true)
+  emailBugStatusChanged Boolean @default(true)
+  emailTestFailed Boolean @default(true)
+  emailMentioned Boolean @default(true)
+  emailAnnouncements Boolean @default(true)
+
+  inAppEnabled Boolean @default(true)
+  inAppBugCreated Boolean @default(true)
+  inAppBugAssigned Boolean @default(true)
+  inAppBugCommented Boolean @default(true)
+  inAppBugStatusChanged Boolean @default(true)
+  inAppTestFailed Boolean @default(true)
+  inAppMentioned Boolean @default(true)
+  inAppAnnouncements Boolean @default(true)
+
+  digestEnabled Boolean @default(false)
+  digestFrequency String @default("daily")
+  digestTime String @default("09:00")
+
+  quietHoursEnabled Boolean @default(false)
+  quietHourStart String @default("22:00")
+  quietHourEnd String @default("08:00")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model NotificationDelivery {
+  id Int @id @default(autoincrement())
+  notificationId Int
+  channel String
+  status String
+  failureReason String?
+  retryCount Int @default(0)
+  nextRetryAt DateTime?
+  deliveredAt DateTime?
+  openedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@index([notificationId])
+  @@index([status])
+  @@index([nextRetryAt])
 }
 
 model Channel {

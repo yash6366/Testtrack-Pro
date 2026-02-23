@@ -13,6 +13,7 @@ import {
 import {
   formatCommitData,
 } from './commitParserService.js';
+import { createNotification } from './notificationService.js';
 
 const prisma = getPrismaClient();
 
@@ -209,20 +210,16 @@ async function notifyBugOwners(sourceItem, bugs, projectId, type = 'COMMIT') {
     for (const bug of bugs) {
       // Create notification entry for bug assignee
       if (bug.assigneeId) {
-        await prisma.notification.create({
-          data: {
-            userId: bug.assigneeId,
-            type: type === 'PR' ? 'PR_LINKED' : 'COMMIT_LINKED',
-            title: `${type} linked to "${bug.title}"`,
-            description:
-              type === 'PR'
-                ? `PR #${sourceItem.prNumber}: ${sourceItem.title}`
-                : `Commit: ${sourceItem.commitHash.substring(0, 7)} - ${sourceItem.message.split('\n')[0]}`,
-            resourceType: 'DEFECT',
-            resourceId: bug.id,
-            projectId,
-            isRead: false,
-          },
+        await createNotification(bug.assigneeId, {
+          type: type === 'PR' ? 'PR_LINKED' : 'COMMIT_LINKED',
+          title: `${type} linked to "${bug.title}"`,
+          message: type === 'PR'
+            ? `PR #${sourceItem.prNumber}: ${sourceItem.title}`
+            : `Commit: ${sourceItem.commitHash.substring(0, 7)} - ${sourceItem.message.split('\n')[0]}`,
+          sourceType: 'BUG',
+          sourceId: bug.id,
+          actionUrl: `/bugs/${bug.id}`,
+          actionType: 'REVIEW',
         });
       }
     }

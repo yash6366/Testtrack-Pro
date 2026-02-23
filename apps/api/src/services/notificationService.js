@@ -92,9 +92,14 @@ export async function getUserNotifications(userId, filters = {}) {
     take = 20,
   } = filters;
 
+  const now = new Date();
+
   const where = {
     userId: Number(userId),
-    expiresAt: { gt: new Date() }, // Only non-expired notifications
+    OR: [
+      { expiresAt: { gt: now } },
+      { expiresAt: null },
+    ],
     ...(isRead !== undefined && { isRead }),
     ...(type && { type }),
     ...(sourceType && { sourceType }),
@@ -112,7 +117,10 @@ export async function getUserNotifications(userId, filters = {}) {
       where: {
         userId: Number(userId),
         isRead: false,
-        expiresAt: { gt: new Date() },
+        OR: [
+          { expiresAt: { gt: now } },
+          { expiresAt: null },
+        ],
       },
     }),
   ]);

@@ -44,7 +44,7 @@ export async function emitNotificationToUser(userId, notification, sendEmail = f
     actionUrl: notification.actionUrl,
     actionType: notification.actionType,
     relatedUserId: notification.relatedUserId,
-    metadata: notification.metadata ? JSON.parse(notification.metadata) : null,
+    metadata: parseNotificationMetadata(notification.metadata),
     createdAt: notification.createdAt,
     isRead: notification.isRead,
   };
@@ -268,6 +268,18 @@ export async function retryFailedDeliveries() {
     logError('Error in retryFailedDeliveries', { error });
     throw error;
   }
+}
+
+function parseNotificationMetadata(metadata) {
+  if (!metadata) return null;
+  if (typeof metadata === 'string') {
+    try {
+      return JSON.parse(metadata);
+    } catch {
+      return null;
+    }
+  }
+  return metadata;
 }
 
 /**

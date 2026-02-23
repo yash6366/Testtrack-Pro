@@ -96,6 +96,7 @@ export default function NotificationCenter() {
       TEST_EXECUTION_FAILED: '❌',
       USER_MENTIONED: '👉',
       ANNOUNCEMENT: '📢',
+      DIRECT_MESSAGE: '💬',
     };
     return icons[type] || '🔔';
   };
@@ -109,6 +110,7 @@ export default function NotificationCenter() {
       TESTCASE_EXECUTED: 'bg-green-50 border-l-4 border-green-400',
       TEST_EXECUTION_FAILED: 'bg-orange-50 border-l-4 border-orange-400',
       ANNOUNCEMENT: 'bg-indigo-50 border-l-4 border-indigo-400',
+      DIRECT_MESSAGE: 'bg-sky-50 border-l-4 border-sky-400',
     };
     return colors[type] || 'bg-gray-50 border-l-4 border-gray-400';
   };

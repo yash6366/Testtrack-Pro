@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import { Redis } from "@upstash/redis";
 import { getPrismaClient } from "./prisma.js";
 import { verifyTokenAndLoadUser } from "./rbac.js";
+import { createNotification, getNotificationPreferences, isWithinQuietHours } from "../services/notificationService.js";
 
 let redisClient = null;
 let logger = console; // Default logger, will be overridden
@@ -450,17 +451,14 @@ export function setupSocket(fastifyServer) {
             }).catch(() => null);
 
             // Store notification for mentioned user
-            await prisma.notification.create({
-              data: {
-                userId: mentionedUser.id,
-                type: 'USER_MENTIONED',
-                title: 'You were mentioned',
-                message: `${message.sender?.name || 'Someone'} mentioned you in #${channelId}`,
-                resourceType: 'CHAT_MESSAGE',
-                resourceId: message.id,
-                relatedUserId: userId,
-              },
-            }).catch(() => null);
+            await createNotification(mentionedUser.id, {
+              type: 'USER_MENTIONED',
+              title: 'You were mentioned',
+              message: `${message.sender?.name || 'Someone'} mentioned you in #${channelId}`,
+              sourceType: 'CHAT_MESSAGE',
+              sourceId: message.id,
+              relatedUserId: userId,
+            }, false).catch(() => null);
 
             // Emit live notification for mentioned user
             io.to(`user:${mentionedUser.id}`).emit('notification:new', {
@@ -722,6 +720,27 @@ export function setupSocket(fastifyServer) {
           sender: dmMessage.sender,
           replyToId: dmMessage.replyToId || null,
         };
+
+        try {
+          const prefs = await getNotificationPreferences(recipientId);
+          const inQuietHours = await isWithinQuietHours(recipientId);
+
+          if (prefs.inAppEnabled && !inQuietHours) {
+            await createNotification(recipientId, {
+              title: `New message from ${dmMessage.sender?.name || 'Someone'}`,
+              message: dmMessage.message,
+              type: 'DIRECT_MESSAGE',
+              sourceType: 'DIRECT_MESSAGE',
+              sourceId: dmMessage.id,
+              relatedUserId: userId,
+              actionUrl: '/chat',
+              actionType: 'OPEN_CHAT',
+              metadata: { senderId: userId, recipientId },
+            });
+          }
+        } catch (error) {
+          logger.warn({ err: error, userId, recipientId }, 'Failed to create DM notification');
+        }
 
         // Send to recipient's direct notification room
         io.to(`user:${recipientId}`).emit('dm_message', messagePayload);
