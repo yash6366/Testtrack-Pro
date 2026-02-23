@@ -23,7 +23,11 @@ const signupSchema = {
     properties: {
       name: { type: 'string', minLength: 2 },
       email: { type: 'string', format: 'email' },
-      password: { type: 'string', minLength: 6 },
+      password: { 
+        type: 'string', 
+        minLength: 8,
+        description: 'Must contain at least one uppercase, one lowercase, one number, and one special character'
+      },
       role: { type: 'string', enum: ['DEVELOPER', 'TESTER'] },
     },
   },

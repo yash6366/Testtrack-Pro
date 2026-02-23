@@ -5,10 +5,25 @@ const SignupRoleSchema = z.preprocess(
   z.enum(['DEVELOPER', 'TESTER'])
 );
 
+const StrongPasswordSchema = z.string()
+  .min(8, 'Password must be at least 8 characters long')
+  .refine((password) => /[a-z]/.test(password), {
+    message: 'Password must contain at least one lowercase letter',
+  })
+  .refine((password) => /[A-Z]/.test(password), {
+    message: 'Password must contain at least one uppercase letter',
+  })
+  .refine((password) => /[0-9]/.test(password), {
+    message: 'Password must contain at least one number',
+  })
+  .refine((password) => /[!@#$%^&*(),.?":{}|<>]/.test(password), {
+    message: 'Password must contain at least one special character',
+  });
+
 export const SignupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email format'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: StrongPasswordSchema,
   role: SignupRoleSchema.default('DEVELOPER'),
 });
 

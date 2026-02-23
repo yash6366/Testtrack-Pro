@@ -375,6 +375,30 @@ export async function changeBugStatus(bugId, newStatus, userId, role, auditConte
     throw new Error(`Invalid status: ${newStatus}`);
   }
 
+  // Strict workflow transition validation
+  const validTransitions = {
+    'NEW': ['ASSIGNED', 'IN_PROGRESS', 'CANNOT_REPRODUCE', 'DUPLICATE', 'WORKS_AS_DESIGNED', 'DEFERRED', 'WONTFIX'],
+    'ASSIGNED': ['IN_PROGRESS', 'CANNOT_REPRODUCE', 'DUPLICATE', 'WORKS_AS_DESIGNED', 'DEFERRED', 'WONTFIX'],
+    'IN_PROGRESS': ['FIXED', 'CANNOT_REPRODUCE', 'DUPLICATE', 'WORKS_AS_DESIGNED', 'DEFERRED', 'WONTFIX'],
+    'FIXED': ['AWAITING_VERIFICATION', 'REOPENED'],
+    'AWAITING_VERIFICATION': ['VERIFIED_FIXED', 'REOPENED'],
+    'VERIFIED_FIXED': ['CLOSED', 'REOPENED'],
+    'REOPENED': ['ASSIGNED', 'IN_PROGRESS'],
+    'CANNOT_REPRODUCE': ['CLOSED', 'REOPENED'],
+    'DUPLICATE': ['CLOSED'],
+    'WORKS_AS_DESIGNED': ['CLOSED', 'REOPENED'],
+    'DEFERRED': ['ASSIGNED', 'CLOSED'],
+    'WONTFIX': ['CLOSED', 'REOPENED'],
+    'CLOSED': [], // Terminal state, no transitions allowed
+  };
+
+  const allowedTransitions = validTransitions[bug.status] || [];
+  if (!allowedTransitions.includes(newStatus) && bug.status !== newStatus) {
+    throw new Error(
+      `Invalid transition from ${bug.status} to ${newStatus}. Allowed transitions: ${allowedTransitions.join(', ') || 'none'}`
+    );
+  }
+
   // Role-based restrictions
   if (newStatus === 'FIXED' && role !== 'DEVELOPER') {
     throw new Error('Only developers can mark bugs as FIXED');

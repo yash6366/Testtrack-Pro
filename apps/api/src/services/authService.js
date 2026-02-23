@@ -18,10 +18,10 @@ const MAIN_ADMIN_EMAIL = 'admin@gmail.com';
 
 // Account Security Constants
 const MAX_LOGIN_ATTEMPTS = 5;
-const LOCKOUT_DURATION_MINUTES = 30;
+const LOCKOUT_DURATION_MINUTES = 15;
 const PASSWORD_HISTORY_COUNT = 5;
 const PASSWORD_RESET_TOKEN_EXPIRY_HOURS = 1;
-const REFRESH_TOKEN_TTL_DAYS = 30;
+const REFRESH_TOKEN_TTL_DAYS = 7;
 
 function normalizeRole(role) {
   return typeof role === 'string' ? role.trim().toUpperCase() : role;
@@ -69,7 +69,7 @@ export async function signup(fastify, { name, email, password, role = 'DEVELOPER
   }
 
   // Hash password
-  const hashedPassword = await bcrypt.hash(validated.password, 10);
+  const hashedPassword = await bcrypt.hash(validated.password, 12);
 
   // Generate verification token
   const verificationToken = isMainAdmin ? null : generateVerificationToken();
@@ -232,7 +232,7 @@ export async function login(fastify, { email, password }, context = {}) {
       role: normalizeRole(user.role),
       tokenVersion: user.tokenVersion,
     },
-    { expiresIn: '7d' }
+    { expiresIn: '15m' }
   );
 
   const refreshToken = generateRefreshToken();
@@ -539,7 +539,7 @@ export async function resetPassword(token, newPassword) {
   await validatePasswordHistory(user, newPassword);
 
   // Hash new password
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
 
   // Update password history (keep last 5)
   const updatedHistory = [hashedPassword, ...user.passwordHistory].slice(0, PASSWORD_HISTORY_COUNT);
@@ -627,7 +627,7 @@ export async function changePassword(userId, currentPassword, newPassword) {
   await validatePasswordHistory(user, newPassword);
 
   // Hash new password
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
 
   // Update password history
   const updatedHistory = [hashedPassword, ...user.passwordHistory].slice(0, PASSWORD_HISTORY_COUNT);

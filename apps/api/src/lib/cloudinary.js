@@ -5,9 +5,9 @@ const {
   CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET,
   CLOUDINARY_FOLDER_ROOT = 'testtrack-pro',
-  CLOUDINARY_MAX_BYTES_IMAGE = '5242880',
-  CLOUDINARY_MAX_BYTES_VIDEO = '52428800',
-  CLOUDINARY_MAX_BYTES_LOG = '1048576',
+  CLOUDINARY_MAX_BYTES_IMAGE = '10485760',      // 10MB
+  CLOUDINARY_MAX_BYTES_VIDEO = '104857600',     // 100MB
+  CLOUDINARY_MAX_BYTES_LOG = '52428800',        // 50MB
 } = process.env;
 
 if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
@@ -21,9 +21,9 @@ cloudinary.config({
 });
 
 const evidenceLimits = {
-  image: Number.parseInt(CLOUDINARY_MAX_BYTES_IMAGE, 10) || 5242880,
-  video: Number.parseInt(CLOUDINARY_MAX_BYTES_VIDEO, 10) || 52428800,
-  log: Number.parseInt(CLOUDINARY_MAX_BYTES_LOG, 10) || 1048576,
+  image: Number.parseInt(CLOUDINARY_MAX_BYTES_IMAGE, 10) || 10485760,     // 10MB
+  video: Number.parseInt(CLOUDINARY_MAX_BYTES_VIDEO, 10) || 104857600,    // 100MB
+  log: Number.parseInt(CLOUDINARY_MAX_BYTES_LOG, 10) || 52428800,         // 50MB
 };
 
 const allowedFormatsByResource = {

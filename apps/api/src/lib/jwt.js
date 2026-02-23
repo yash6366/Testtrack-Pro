@@ -2,10 +2,10 @@
  * Sign JWT token with payload
  * @param {Object} fastify - Fastify instance
  * @param {Object} payload - Token payload data
- * @param {string} [expiresIn='7d'] - Token expiration time
+ * @param {string} [expiresIn='15m'] - Token expiration time
  * @returns {string} Signed JWT token
  */
-export function signToken(fastify, payload, expiresIn = '7d') {
+export function signToken(fastify, payload, expiresIn = '15m') {
   return fastify.jwt.sign(payload, { expiresIn });
 }
 

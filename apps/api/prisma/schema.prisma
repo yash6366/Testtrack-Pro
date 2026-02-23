@@ -266,9 +266,11 @@ model ProjectEnvironment {
 model TestCase {
   id                       Int      @id @default(autoincrement())
   projectId                Int
+  testCaseId               String?  @unique // Human-readable ID like PROJ-TC-001
   name                     String
   description              String?
   preconditions            String?
+  postconditions           String?
   testData                 String?
   environment              String?
   type                     String   @default("FUNCTIONAL") // FUNCTIONAL, PERFORMANCE, SECURITY, USABILITY
@@ -278,6 +280,9 @@ model TestCase {
   estimatedDurationMinutes Int?
   moduleArea               String?
   tags                     String[] @default([])
+  version                  Int      @default(1)
+  automationStatus         String?  @default("MANUAL") // MANUAL, AUTOMATED, SEMI_AUTOMATED
+  automationScriptLink     String?
 
   // Relationships
   assignedToId   Int?
@@ -323,6 +328,7 @@ model TestCaseStep {
   stepNumber     Int
   action         String
   expectedResult String
+  testData       String?
   notes          String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -577,7 +583,7 @@ model Bug {
   affectedVersion String?
   reproducibility String  @default("SOMETIMES") // ALWAYS, OFTEN, SOMETIMES, RARELY, CANNOT_REPRODUCE
 
-  status   String @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, VERIFIED, CLOSED, REOPEN
+  status   String @default("NEW") // NEW, ASSIGNED, IN_PROGRESS, FIXED, AWAITING_VERIFICATION, VERIFIED_FIXED, REOPENED, CANNOT_REPRODUCE, DUPLICATE, WORKS_AS_DESIGNED, CLOSED, DEFERRED, WONTFIX
   priority String @default("P3") // P0, P1, P2, P3
   severity String @default("MINOR") // CRITICAL, MAJOR, MINOR, TRIVIAL
 

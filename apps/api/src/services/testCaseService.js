@@ -241,12 +241,11 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
 
   // Update steps if provided
   if (steps && Array.isArray(steps)) {
-    const existingSteps = await prisma.testStep.findMany({
+    const existingSteps = await prisma.testCaseStep.findMany({
       where: { testCaseId },
       select: {
         id: true,
         stepNumber: true,
-        _count: { select: { executionSteps: true } },
       },
       orderBy: { stepNumber: 'asc' },
     });
@@ -262,7 +261,7 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
       const existingStep = existingSteps[index];
       if (existingStep) {
         operations.push(
-          prisma.testStep.update({
+          prisma.testCaseStep.update({
             where: { id: existingStep.id },
             data: {
               stepNumber: index + 1,
@@ -274,7 +273,7 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
         );
       } else {
         operations.push(
-          prisma.testStep.create({
+          prisma.testCaseStep.create({
             data: {
               testCaseId,
               stepNumber: index + 1,
@@ -288,14 +287,10 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
     });
 
     const extraSteps = existingSteps.slice(normalizedSteps.length);
-    const lockedSteps = extraSteps.filter((step) => step._count.executionSteps > 0);
-    if (lockedSteps.length > 0) {
-      throw new Error('Cannot remove steps that have execution history.');
-    }
 
     if (extraSteps.length > 0) {
       operations.push(
-        prisma.testStep.deleteMany({
+        prisma.testCaseStep.deleteMany({
           where: { id: { in: extraSteps.map((step) => step.id) } },
         })
       );
