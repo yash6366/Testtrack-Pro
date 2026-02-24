@@ -1053,3 +1053,1045 @@ curl -X POST http://localhost:3001/api/auth/login \
 curl -X GET http://localhost:3001/api/projects \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
+## Test Plans
+
+### Create Test Plan
+
+**POST** `/api/projects/:projectId/test-plans`
+
+Request:
+```json
+{
+  "name": "Sprint 10 Regression Plan",
+  "description": "Full regression testing for Sprint 10 release",
+  "scope": "All critical user flows",
+  "testCaseIds": [1, 2, 3, 5, 8],
+  "startDate": "2024-03-01T09:00:00Z",
+  "endDate": "2024-03-05T17:00:00Z",
+  "plannerNotes": "Focus on payment gateway changes"
+}
+```
+
+Response: `201 Created`
+
+### List Test Plans
+
+**GET** `/api/projects/:projectId/test-plans`
+
+Query Parameters:
+- `skip` (number): Pagination offset
+- `take` (number): Items per page
+- `status` (string): Filter by status (DRAFT, ACTIVE, COMPLETED, ARCHIVED)
+- `search` (string): Search by name or description
+
+Response:
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "projectId": 1,
+      "name": "Sprint 10 Regression Plan",
+      "status": "ACTIVE",
+      "totalTestCases": 15,
+      "startDate": "2024-03-01T09:00:00Z",
+      "planner": {
+        "id": 2,
+        "name": "Jane Smith"
+      }
+    }
+  ],
+  "total": 25
+}
+```
+
+### Get Test Plan
+
+**GET** `/api/projects/:projectId/test-plans/:testPlanId`
+
+Response:
+```json
+{
+  "id": 1,
+  "name": "Sprint 10 Regression Plan",
+  "description": "Full regression testing",
+  "scope": "All critical user flows",
+  "status": "ACTIVE",
+  "testCaseIds": [1, 2, 3],
+  "totalTestCases": 15,
+  "startDate": "2024-03-01T09:00:00Z",
+  "endDate": "2024-03-05T17:00:00Z",
+  "plannerNotes": "Focus on payment gateway"
+}
+```
+
+### Update Test Plan
+
+**PATCH** `/api/projects/:projectId/test-plans/:testPlanId`
+
+Request:
+```json
+{
+  "status": "COMPLETED",
+  "plannerNotes": "All tests passed"
+}
+```
+
+Response: `200 OK`
+
+### Delete Test Plan
+
+**DELETE** `/api/projects/:projectId/test-plans/:testPlanId`
+
+Response: `204 No Content`
+
+### Execute Test Plan
+
+**POST** `/api/projects/:projectId/test-plans/:testPlanId/execute`
+
+Request:
+```json
+{
+  "environment": "STAGING",
+  "buildVersion": "1.5.0"
+}
+```
+
+Response: `201 Created` (returns test run ID)
+
+### Clone Test Plan
+
+**POST** `/api/projects/:projectId/test-plans/:testPlanId/clone`
+
+Request:
+```json
+{
+  "name": "Sprint 11 Regression Plan"
+}
+```
+
+Response: `201 Created`
+
+## Milestones
+
+### Create Milestone
+
+**POST** `/api/projects/:projectId/milestones`
+
+Request:
+```json
+{
+  "name": "Q1 2024 Release",
+  "description": "Major feature release for Q1",
+  "targetStartDate": "2024-01-01T00:00:00Z",
+  "targetEndDate": "2024-03-31T23:59:59Z",
+  "priority": "HIGH",
+  "notes": "Critical release for enterprise clients"
+}
+```
+
+Response: `201 Created`
+
+### List Milestones
+
+**GET** `/api/projects/:projectId/milestones`
+
+Query Parameters:
+- `page` (number): Page number
+- `limit` (number): Items per page
+- `status` (string): PLANNED, IN_PROGRESS, COMPLETED, ON_HOLD, CANCELLED
+- `priority` (string): LOW, MEDIUM, HIGH, CRITICAL
+- `search` (string): Search in name/description
+
+Response:
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Q1 2024 Release",
+      "status": "IN_PROGRESS",
+      "priority": "HIGH",
+      "completionPercent": 65,
+      "targetEndDate": "2024-03-31T23:59:59Z",
+      "testCasesCount": 45,
+      "defectsCount": 12
+    }
+  ],
+  "total": 8
+}
+```
+
+### Get Milestone
+
+**GET** `/api/projects/:projectId/milestones/:milestoneId`
+
+Response:
+```json
+{
+  "id": 1,
+  "projectId": 1,
+  "name": "Q1 2024 Release",
+  "description": "Major feature release",
+  "status": "IN_PROGRESS",
+  "targetStartDate": "2024-01-01T00:00:00Z",
+  "targetEndDate": "2024-03-31T23:59:59Z",
+  "actualStartDate": "2024-01-05T09:00:00Z",
+  "completionPercent": 65,
+  "priority": "HIGH",
+  "notes": "Critical release"
+}
+```
+
+### Update Milestone
+
+**PATCH** `/api/projects/:projectId/milestones/:milestoneId`
+
+Request:
+```json
+{
+  "status": "COMPLETED",
+  "actualEndDate": "2024-03-28T17:00:00Z",
+  "completionPercent": 100
+}
+```
+
+Response: `200 OK`
+
+### Delete Milestone
+
+**DELETE** `/api/projects/:projectId/milestones/:milestoneId`
+
+Response: `204 No Content`
+
+### Assign Test Cases to Milestone
+
+**POST** `/api/projects/:projectId/milestones/:milestoneId/test-cases`
+
+Request:
+```json
+{
+  "testCaseIds": [1, 2, 3, 5, 8]
+}
+```
+
+Response: `200 OK`
+
+### Assign Defects to Milestone
+
+**POST** `/api/projects/:projectId/milestones/:milestoneId/defects`
+
+Request:
+```json
+{
+  "defectIds": [10, 11, 12]
+}
+```
+
+Response: `200 OK`
+
+### Get Milestone Progress
+
+**GET** `/api/projects/:projectId/milestones/:milestoneId/progress`
+
+Response:
+```json
+{
+  "milestoneId": 1,
+  "completionPercent": 65,
+  "testCases": {
+    "total": 45,
+    "passed": 30,
+    "failed": 5,
+    "blocked": 2,
+    "notRun": 8
+  },
+  "defects": {
+    "total": 12,
+    "open": 3,
+    "inProgress": 4,
+    "fixed": 5,
+    "closed": 0
+  }
+}
+```
+
+## API Keys
+
+### Create API Key
+
+**POST** `/api/projects/:projectId/api-keys`
+
+Request:
+```json
+{
+  "name": "CI/CD Pipeline Key",
+  "description": "For Jenkins integration",
+  "scopes": ["test:read", "test:execute", "bug:create"],
+  "expiresAt": "2024-12-31T23:59:59Z"
+}
+```
+
+Response:
+```json
+{
+  "id": 1,
+  "name": "CI/CD Pipeline Key",
+  "key": "ttk_live_a3f7c89d4e2b1f6a9c8e3d2f1a0b9c8d",
+  "scopes": ["test:read", "test:execute", "bug:create"],
+  "expiresAt": "2024-12-31T23:59:59Z",
+  "createdAt": "2024-02-12T10:00:00Z"
+}
+```
+
+**⚠️ Important:** The full API key is only shown once during creation. Store it securely.
+
+### List API Keys
+
+**GET** `/api/projects/:projectId/api-keys`
+
+Query Parameters:
+- `skip` (number): Pagination offset
+- `take` (number): Items per page
+- `isActive` (boolean): Filter by active status
+- `search` (string): Search by name
+
+Response:
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "CI/CD Pipeline Key",
+      "keyPreview": "ttk_live_...9c8d",
+      "scopes": ["test:read", "test:execute"],
+      "isActive": true,
+      "lastUsedAt": "2024-02-12T15:30:00Z",
+      "expiresAt": "2024-12-31T23:59:59Z"
+    }
+  ],
+  "total": 5
+}
+```
+
+### Get API Key
+
+**GET** `/api/projects/:projectId/api-keys/:keyId`
+
+Response: (Full key hash not included for security)
+
+### Update API Key
+
+**PATCH** `/api/projects/:projectId/api-keys/:keyId`
+
+Request:
+```json
+{
+  "name": "Updated CI Key",
+  "scopes": ["test:read", "test:execute", "bug:read"]
+}
+```
+
+Response: `200 OK`
+
+### Revoke API Key
+
+**POST** `/api/projects/:projectId/api-keys/:keyId/revoke`
+
+Response: `200 OK`
+
+### Regenerate API Key
+
+**POST** `/api/projects/:projectId/api-keys/:keyId/regenerate`
+
+Response:
+```json
+{
+  "key": "ttk_live_b4e8d90e5f3c2g7b0d9f4e3g2b1c0d9e"
+}
+```
+
+### Get API Key Stats
+
+**GET** `/api/projects/:projectId/api-keys/:keyId/stats`
+
+Response:
+```json
+{
+  "totalRequests": 1523,
+  "successRate": 98.5,
+  "lastUsedAt": "2024-02-12T15:30:00Z",
+  "usageByDay": []
+}
+```
+
+## Search
+
+### Global Search
+
+**GET** `/api/search`
+
+Query Parameters:
+- `projectId` (required): Project ID
+- `q` (required): Search query (min 2 chars)
+- `types` (string): Comma-separated types (TEST_CASE, BUG, EXECUTION)
+- `skip` (number): Pagination offset
+- `take` (number): Results per page
+
+Response:
+```json
+{
+  "results": [
+    {
+      "id": 15,
+      "type": "TEST_CASE",
+      "title": "User Login Flow",
+      "description": "Verify user can login with valid credentials",
+      "relevance": 0.95,
+      "highlights": ["User <em>Login</em> Flow"]
+    },
+    {
+      "id": 8,
+      "type": "BUG",
+      "title": "Login button not clickable",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "relevance": 0.87
+    }
+  ],
+  "total": 24,
+  "searchTime": 45
+}
+```
+
+### Search Suggestions
+
+**GET** `/api/search/suggestions`
+
+Query Parameters:
+- `projectId` (required): Project ID
+- `q` (string): Partial query for autocomplete
+- `types` (string): Resource types to search
+
+Response:
+```json
+{
+  "suggestions": [
+    "User Login Flow",
+    "Login button functionality",
+    "Login validation tests"
+  ]
+}
+```
+
+### Rebuild Search Index
+
+**POST** `/api/search/rebuild/:projectId`
+
+*Admin only*
+
+Response:
+```json
+{
+  "success": true,
+  "indexed": {
+    "testCases": 150,
+    "bugs": 45,
+    "executions": 320
+  },
+  "duration": 2300
+}
+```
+
+## Notifications
+
+### List Notifications
+
+**GET** `/api/notifications`
+
+Query Parameters:
+- `isRead` (boolean): Filter by read status
+- `type` (string): Filter by notification type
+- `sourceType` (string): TEST_CASE, BUG, EXECUTION, etc.
+- `skip` (number): Pagination offset
+- `take` (number): Items per page
+
+Response:
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "type": "BUG_ASSIGNED",
+      "title": "Bug assigned to you",
+      "message": "Bug #BUG-42 has been assigned to you",
+      "sourceType": "BUG",
+      "sourceId": 42,
+      "isRead": false,
+      "createdAt": "2024-02-12T15:30:00Z"
+    }
+  ],
+  "total": 15,
+  "unreadCount": 5
+}
+```
+
+### Get Notification
+
+**GET** `/api/notifications/:id`
+
+Response: Single notification object
+
+### Mark as Read
+
+**PATCH** `/api/notifications/:id/read`
+
+Response: `200 OK`
+
+### Mark All as Read
+
+**PATCH** `/api/notifications/mark-all-read`
+
+Response:
+```json
+{
+  "success": true,
+  "updated": 12
+}
+```
+
+### Delete Notification
+
+**DELETE** `/api/notifications/:id`
+
+Response: `204 No Content`
+
+### Get Notification Preferences
+
+**GET** `/api/notifications/preferences`
+
+Response:
+```json
+{
+  "email": {
+    "enabled": true,
+    "digest": "DAILY",
+    "quietHoursStart": "22:00",
+    "quietHoursEnd": "08:00"
+  },
+  "inApp": {
+    "enabled": true
+  },
+  "channels": {
+    "BUG_ASSIGNED": { "email": true, "inApp": true },
+    "TEST_COMPLETED": { "email": false, "inApp": true }
+  }
+}
+```
+
+### Update Notification Preferences
+
+**PATCH** `/api/notifications/preferences`
+
+Request:
+```json
+{
+  "email": {
+    "enabled": true,
+    "digest": "WEEKLY"
+  },
+  "channels": {
+    "BUG_ASSIGNED": { "email": true, "inApp": true }
+  }
+}
+```
+
+Response: `200 OK`
+
+## Scheduled Reports
+
+### Create Scheduled Report
+
+**POST** `/api/projects/:projectId/scheduled-reports`
+
+Request:
+```json
+{
+  "name": "Weekly Test Summary",
+  "type": "EXECUTION_SUMMARY",
+  "frequency": "WEEKLY",
+  "dayOfWeek": 1,
+  "time": "09:00",
+  "timezone": "America/New_York",
+  "recipientEmails": ["team@example.com"],
+  "includeMetrics": true,
+  "includeCharts": true,
+  "includeFailures": true
+}
+```
+
+Response: `201 Created`
+
+### List Scheduled Reports
+
+**GET** `/api/projects/:projectId/scheduled-reports`
+
+Query Parameters:
+- `skip`, `take` (pagination)
+- `isActive` (boolean): Filter by active status
+
+Response:
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Weekly Test Summary",
+      "type": "EXECUTION_SUMMARY",
+      "frequency": "WEEKLY",
+      "isActive": true,
+      "lastRunAt": "2024-02-12T09:00:00Z",
+      "nextRunAt": "2024-02-19T09:00:00Z"
+    }
+  ],
+  "total": 3
+}
+```
+
+### Get Scheduled Report
+
+**GET** `/api/projects/:projectId/scheduled-reports/:reportId`
+
+Response: Full report details including delivery history
+
+### Update Scheduled Report
+
+**PATCH** `/api/projects/:projectId/scheduled-reports/:reportId`
+
+Request:
+```json
+{
+  "frequency": "BIWEEKLY",
+  "isActive": false
+}
+```
+
+Response: `200 OK`
+
+### Delete Scheduled Report
+
+**DELETE** `/api/projects/:projectId/scheduled-reports/:reportId`
+
+Response: `204 No Content`
+
+### Trigger Report Now
+
+**POST** `/api/projects/:projectId/scheduled-reports/:reportId/send`
+
+Response:
+```json
+{
+  "success": true,
+  "sentTo": ["team@example.com"],
+  "sentAt": "2024-02-12T10:30:00Z"
+}
+```
+
+## Direct Messages
+
+### Get DM Contacts
+
+**GET** `/api/dm/contacts`
+
+Response:
+```json
+{
+  "contacts": [
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "role": "TESTER",
+      "picture": "https://...",
+      "isOnline": true
+    }
+  ]
+}
+```
+
+### Get DM Conversation
+
+**GET** `/api/dm/:userId/messages`
+
+Query Parameters:
+- `limit` (number): Max messages (1-100, default: 50)
+
+Response:
+```json
+{
+  "messages": [
+    {
+      "id": 1,
+      "senderId": 1,
+      "recipientId": 2,
+      "content": "Hi, can you review this test case?",
+      "isRead": true,
+      "createdAt": "2024-02-12T10:15:00Z",
+      "sender": {
+        "id": 1,
+        "name": "John Doe"
+      }
+    }
+  ]
+}
+```
+
+### Send DM
+
+**POST** `/api/dm/:userId/send`
+
+Request:
+```json
+{
+  "content": "Hi, can you review this test case?"
+}
+```
+
+Response: `201 Created`
+
+### Get DM Conversations
+
+**GET** `/api/dm/conversations`
+
+Response:
+```json
+{
+  "conversations": [
+    {
+      "userId": 2,
+      "userName": "Jane Smith",
+      "lastMessage": "Thanks for the review!",
+      "lastMessageAt": "2024-02-12T15:30:00Z",
+      "unreadCount": 3
+    }
+  ]
+}
+```
+
+### Mark DM as Read
+
+**POST** `/api/dm/:userId/mark-read`
+
+Response: `200 OK`
+
+### Add DM Reaction
+
+**POST** `/api/dm/messages/:messageId/react`
+
+Request:
+```json
+{
+  "emoji": "👍"
+}
+```
+
+Response: `200 OK`
+
+### Edit DM
+
+**PATCH** `/api/dm/messages/:messageId`
+
+Request:
+```json
+{
+  "content": "Updated message content"
+}
+```
+
+Response: `200 OK`
+
+### Delete DM
+
+**DELETE** `/api/dm/messages/:messageId`
+
+Response: `204 No Content`
+
+## Channels
+
+### Create Channel
+
+**POST** `/api/channels`
+
+Request:
+```json
+{
+  "name": "qa-team",
+  "description": "QA team discussions",
+  "type": "GROUP",
+  "isPrivate": false,
+  "allowedRoles": ["ADMIN", "TESTER"]
+}
+```
+
+Response: `201 Created`
+
+### List Channels
+
+**GET** `/api/channels`
+
+Query Parameters:
+- `type` (string): GROUP, DIRECT, PROJECT
+- `includeArchived` (boolean): Include archived channels
+
+Response:
+```json
+{
+  "channels": [
+    {
+      "id": 1,
+      "name": "qa-team",
+      "description": "QA team discussions",
+      "type": "GROUP",
+      "memberCount": 15,
+      "unreadCount": 3,
+      "lastMessage": {
+        "content": "See you tomorrow!",
+        "timestamp": "2024-02-12T17:30:00Z"
+      }
+    }
+  ]
+}
+```
+
+### Get Channel
+
+**GET** `/api/channels/:channelId`
+
+Response: Full channel details with members
+
+### Update Channel
+
+**PATCH** `/api/channels/:channelId`
+
+Request:
+```json
+{
+  "description": "Updated description",
+  "isArchived": false
+}
+```
+
+Response: `200 OK`
+
+### Delete Channel
+
+**DELETE** `/api/channels/:channelId`
+
+Response: `204 No Content`
+
+### Get Channel Messages
+
+**GET** `/api/channels/:channelId/messages`
+
+Query Parameters:
+- `limit` (number): Messages per page
+- `before` (string): Message ID for pagination
+
+Response:
+```json
+{
+  "messages": [
+    {
+      "id": 1,
+      "channelId": 1,
+      "userId": 2,
+      "content": "Hello team!",
+      "createdAt": "2024-02-12T10:00:00Z",
+      "user": {
+        "id": 2,
+        "name": "Jane Smith"
+      }
+    }
+  ]
+}
+```
+
+### Send Channel Message
+
+**POST** `/api/channels/:channelId/messages`
+
+Request:
+```json
+{
+  "content": "Hello team!"
+}
+```
+
+Response: `201 Created`
+
+### Join Channel
+
+**POST** `/api/channels/:channelId/join`
+
+Response: `200 OK`
+
+### Leave Channel
+
+**POST** `/api/channels/:channelId/leave`
+
+Response: `200 OK`
+
+### Add Member to Channel
+
+**POST** `/api/channels/:channelId/members`
+
+Request:
+```json
+{
+  "userId": 5
+}
+```
+
+Response: `200 OK`
+
+### Remove Member from Channel
+
+**DELETE** `/api/channels/:channelId/members/:userId`
+
+Response: `204 No Content`
+
+## GitHub Integration
+
+### Start OAuth Flow
+
+**GET** `/api/github/oauth/authorize`
+
+Query Parameters:
+- `projectId` (required): Project ID
+- `redirectUrl` (optional): Custom redirect URL
+
+Response:
+```json
+{
+  "authUrl": "https://github.com/login/oauth/authorize?client_id=...",
+  "state": "csrf_token_here"
+}
+```
+
+### OAuth Callback
+
+**POST** `/api/github/oauth/callback`
+
+Request:
+```json
+{
+  "code": "oauth_code_from_github",
+  "state": "csrf_token_here",
+  "projectId": 1,
+  "repositoryUrl": "https://github.com/org/repo"
+}
+```
+
+Response:
+```json
+{
+  "success": true,
+  "integration": {
+    "id": 1,
+    "projectId": 1,
+    "repositoryUrl": "https://github.com/org/repo",
+    "isActive": true
+  }
+}
+```
+
+### Get GitHub Integration
+
+**GET** `/api/projects/:projectId/github/integration`
+
+Response:
+```json
+{
+  "id": 1,
+  "projectId": 1,
+  "repositoryUrl": "https://github.com/org/repo",
+  "owner": "org",
+  "repo": "repo",
+  "isActive": true,
+  "webhookId": "12345",
+  "lastSyncAt": "2024-02-12T15:00:00Z"
+}
+```
+
+### Update GitHub Integration
+
+**PATCH** `/api/projects/:projectId/github/integration`
+
+Request:
+```json
+{
+  "repositoryUrl": "https://github.com/org/new-repo",
+  "isActive": true
+}
+```
+
+Response: `200 OK`
+
+### Delete GitHub Integration
+
+**DELETE** `/api/projects/:projectId/github/integration`
+
+Response: `204 No Content`
+
+### Get Recent Commits
+
+**GET** `/api/projects/:projectId/github/commits`
+
+Query Parameters:
+- `limit` (number): Number of commits (default: 20)
+- `branch` (string): Branch name (default: main)
+
+Response:
+```json
+{
+  "commits": [
+    {
+      "sha": "a3f7c89d4e2b1f6a9c8e3d2f1a0b9c8d7e6f5a4",
+      "message": "Fix login validation issue",
+      "author": "John Doe",
+      "authorEmail": "john@example.com",
+      "timestamp": "2024-02-12T14:30:00Z",
+      "url": "https://github.com/org/repo/commit/a3f7c89"
+    }
+  ]
+}
+```
+
+### Sync GitHub Data
+
+**POST** `/api/projects/:projectId/github/sync`
+
+Response:
+```json
+{
+  "success": true,
+  "synced": {
+    "commits": 50,
+    "branches": 3,
+    "pullRequests": 5
+  }
+}
+```
+
+### GitHub Webhook Handler
+
+**POST** `/api/github/webhook/:projectId`
+
+*Automatically called by GitHub. Requires webhook secret verification.*
+
+Handles events:
+- `push`: New commits
+- `pull_request`: PR opened/closed/merged
+- `ping`: Webhook test
+
+Response: `200 OK`
