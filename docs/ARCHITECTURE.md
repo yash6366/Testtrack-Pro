@@ -230,10 +230,20 @@ TestTrack Pro is a comprehensive software testing management platform built with
 
 **Infrastructure Services**
 - `emailService.js`: Email templates, verification, password reset
-- `channelService.js`: Chat channels, universal channel management
-- `githubService.js`: GitHub OAuth, commit linking
+- `channelService.js`: Chat channels, universal channel management, role-based auto-join
+- `githubService.js`: GitHub OAuth, commit linking, PR integration
 - `commitParserService.js`: Auto-linking commits to bugs via regex patterns
 - `auditService.js`: Comprehensive audit logging for compliance
+- `webhookService.js` & `webhookHandlerService.js`: Webhook creation and trigger handling
+- `apiKeyService.js`: API key generation, validation, and scope management
+- `evidenceService.js`: File upload/storage via Cloudinary, size optimization
+- `digestService.js`: Scheduled digest email generation
+- `scheduledReportService.js`: Automated report generation via node-cron
+- `chatAdminService.js`: Chat moderation, message deletion, user mutes
+- `testCaseTemplateService.js`: Template management and reusability
+- `bulkTestCaseService.js`: Bulk import/export operations
+- `oauthService.js`: OAuth provider integration (Google, GitHub)
+- `cronService.js`: Job scheduling for background tasks
 
 ## Database Schema (V1)
 

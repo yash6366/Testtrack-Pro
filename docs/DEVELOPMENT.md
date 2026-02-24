@@ -17,6 +17,37 @@ This guide covers setting up your local development environment and common devel
 - **Redis GUI**: RedisInsight
 - **API Testing**: Postman, Insomnia, or Bruno
 
+## Quick Reference: Common Commands
+
+```bash
+# Install all dependencies
+pnpm install
+
+# Start all dev servers (API + Web)
+pnpm dev
+
+# Run tests
+pnpm test
+
+# Lint code
+pnpm lint
+
+# Type checking
+pnpm typecheck
+
+# Build for production
+pnpm build
+
+# Database migrations
+cd apps/api
+pnpm prisma migrate dev  # Create and run migrations
+pnpm prisma studio      # Open visual schema editor
+
+# Build specific app
+pnpm --filter api build
+pnpm --filter web build
+```
+
 ## Initial Setup
 
 ### 1. Clone the Repository
@@ -125,25 +156,26 @@ VITE_SOCKET_URL=http://localhost:3001
 VITE_SENTRY_DSN=""
 ```
 
-#### Run Migrations
+#### Initialize Database
 
 ```bash
 cd apps/api
+
+# Run pending migrations
 pnpm prisma migrate dev
-```
 
-#### Seed Database (Optional)
-
-```bash
+# (Optional) Load seed data
 pnpm prisma db seed
+# This creates:
+# - Admin user: admin@testtrack.com / Admin@123
+# - Sample projects  
+# - Sample test cases
+
+# (Optional) Open visual editor
+pnpm prisma studio
 ```
 
-This creates:
-- Admin user: `admin@testtrack.com` / `Admin@123`
-- Sample projects
-- Sample test cases
-
-### 4. Start Development Servers
+### 5. Start Development Servers
 
 #### Option A: Start All Services
 
@@ -159,19 +191,23 @@ This starts:
 #### Option B: Start Services Individually
 
 ```bash
-# Terminal 1: Backend
+# Terminal 1: Backend (API Server)
 cd apps/api
 pnpm dev
+# Server runs with --watch, auto-reloads on file changes
+# Logs available in structured JSON format
 
-# Terminal 2: Frontend
+# Terminal 2: Frontend (Vite Dev Server)
 cd apps/web
 pnpm dev
+# Vite hot module replacement (HMR) enabled
+# Proxies /api requests to http://localhost:3001
 
 # Terminal 3: Redis (if not running as service)
 redis-server
 ```
 
-### 5. Verify Setup
+### 6. Verify Setup
 
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:3001
@@ -189,31 +225,45 @@ cd apps/api
 
 # Create migration after schema changes
 pnpm prisma migrate dev --name add_new_feature
+# This:
+# 1. Analyzes your schema.prisma changes
+# 2. Generates SQL migration file in prisma/migrations/
+# 3. Applies the migration immediately
+# 4. Regenerates Prisma client types
 
-# Reset database (WARNING: deletes all data)
-pnpm prisma migrate reset
+# Reset database (⚠️ WARNING: deletes all data!)
+pnpm prisma migrate reset --force
 
-# View database in Prisma Studio
+# View database in visual editor
 pnpm prisma studio
 ```
 
-#### Common Prisma Commands
+#### Database Commands
 
 ```bash
-# Generate Prisma Client after schema changes
-pnpm prisma generate
+# Analyze migration status
+pnpm prisma migrate status
+
+# Apply only pending migrations (use in CI/production)
+pnpm prisma migrate deploy
+
+# Rollback a migration
+pnpm prisma migrate resolve --rolled-back 20260224000000_feature_name
+
+# Apply schema changes without creating migration
+pnpm prisma db push
+
+# Pull schema from existing database
+pnpm prisma db pull
 
 # Format schema file
 pnpm prisma format
 
-# Validate schema
+# Validate schema syntax
 pnpm prisma validate
 
-# Pull schema from database
-pnpm prisma db pull
-
-# Push schema to database (without migration)
-pnpm prisma db push
+# Regenerate client (if manually modified)
+pnpm prisma generate
 ```
 
 ### Creating a New Feature

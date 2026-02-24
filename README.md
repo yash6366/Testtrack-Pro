@@ -27,7 +27,21 @@ Think of it as a mini version of tools like **TestRail + Jira** with modern tech
 - **⚡ High Performance**: Sub-second API responses, Smart caching with Redis
 - **🔄 Real-time Updates**: Socket.IO for live test execution and notifications
 
-## 🎉 What's New in V1
+## 📚 Documentation
+
+Complete documentation available in `/docs`:
+
+| Document | Purpose | Lines |
+|----------|---------|-------|
+| [CODEBASE-OVERVIEW.md](./docs/CODEBASE-OVERVIEW.md) | Complete codebase structure and architecture guide | 900+ |
+| [GETTING-STARTED.md](./docs/GETTING-STARTED.md) | User quick-start guide for testers | 200+ |
+| [DEVELOPMENT.md](./docs/DEVELOPMENT.md) | Complete dev setup and workflow guide | 1000+ |
+| [FEATURES.md](./docs/FEATURES.md) | Detailed feature documentation | 876 |
+| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | System design, tech stack, data model, real-time features | 500+ |
+| [API-REFERENCE.md](./docs/API-REFERENCE.md) | REST API documentation with examples | 2226 |
+| [ERROR-CODES.md](./docs/ERROR-CODES.md) | Error code reference with solutions | 800+ |
+| [FAQ.md](./docs/FAQ.md) | Troubleshooting and common questions | 600+ |
+| [CONTRIBUTING.md](./docs/CONTRIBUTING.md) | Contribution guidelines | 300+ |
 
 TestTrack Pro V1 introduces major enhancements for developer productivity and deeper quality insights:
 
@@ -106,7 +120,33 @@ testtrack-pro/
 └── README.md                   # This file
 ```
 
-##  Getting Started
+## 🚀 Technology Stack
+
+### Frontend
+- **React 18** + **Vite** (ultra-fast build)
+- **Tailwind CSS** for styling
+- **React Router v6** for navigation
+- **Socket.IO Client** for real-time updates
+- **Recharts** for analytics dashboards
+- **Lucide React** for icons
+
+### Backend
+- **Fastify** (high-performance web framework)
+- **Node.js 20+** runtime
+- **PostgreSQL 15+** database
+- **Prisma** ORM with 13 migrations
+- **Redis/Upstash** for caching and Socket.IO pub-sub
+- **Socket.IO** for real-time communication
+- **JWT + bcrypt** for authentication
+- **Sentry** for error monitoring
+- **Resend API** for email delivery
+- **Cloudinary** for file storage
+
+### Infrastructure
+- **pnpm workspaces** + **Turbo** for monorepo orchestration
+- **GitHub Actions** ready for CI/CD
+- **Docker** containerization support
+- **Structured JSON logging** for production observability
 
 ### Prerequisites
 
@@ -116,42 +156,38 @@ testtrack-pro/
 - **Redis**: v7+ (local or Upstash)
 - **Git**: Latest version
 
-### Quick Start (5 minutes)
+### Quick Start (5 minutes):
 
-1. **Clone repository**:
-```bash
-git clone https://github.com/your-org/testtrack-pro.git
-cd testtrack-pro
-```
+1. **Prerequisites**: Node.js 20+, pnpm 8+, PostgreSQL 15+, Redis 7+ (optional)
 
-2. **Install dependencies**:
-```bash
-pnpm install
-```
+2. **Clone & Install**:
+   ```bash
+   git clone https://github.com/your-org/testtrack-pro.git
+   cd testtrack-pro
+   pnpm install
+   ```
 
-3. **Configure environment** (see [DEVELOPMENT.md](./docs/DEVELOPMENT.md) for details):
-```bash
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
-# Edit with your database and API credentials
-```
+3. **Configure Environment** (see [DEVELOPMENT.md](./docs/DEVELOPMENT.md)):
+   ```bash
+   # Create apps/api/.env with database and service credentials
+   # See DEVELOPMENT.md for complete list of variables
+   ```
 
-4. **Setup database**:
-```bash
-cd apps/api
-pnpm prisma migrate dev
-```
+4. **Setup Database**:
+   ```bash
+   cd apps/api
+   pnpm prisma migrate dev  # Run migrations
+   pnpm prisma db seed      # (Optional) Load sample data
+   ```
 
-5. **Start development servers**:
-```bash
-# From root directory
-pnpm dev
-```
-
-Access:
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3001
-- **API Docs**: http://localhost:3001/documentation
+5. **Start Development Servers**:
+   ```bash
+   # From root directory
+   pnpm dev
+   ```
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:3001
+   - API Docs: http://localhost:3001/documentation
 
 ### Production Deployment
 
