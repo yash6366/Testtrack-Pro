@@ -40,7 +40,7 @@ const WebhookManagement = ({ project }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.delete(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/projects/${project.id}/webhooks/${webhookId}`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/projects/${project.id}/webhooks/${webhookId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -55,7 +55,7 @@ const WebhookManagement = ({ project }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.patch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/projects/${project.id}/webhooks/${webhookId}`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/projects/${project.id}/webhooks/${webhookId}`,
         { isActive: !isActive },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -71,7 +71,7 @@ const WebhookManagement = ({ project }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/projects/${project.id}/webhooks/${webhookId}/test`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/projects/${project.id}/webhooks/${webhookId}/test`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -284,7 +284,7 @@ function CreateWebhookModal({ project, onClose, onSuccess }) {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/projects/${project.id}/webhooks`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/projects/${project.id}/webhooks`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -414,7 +414,7 @@ function DeliveriesModal({ webhook, project, onClose }) {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/projects/${project.id}/webhooks/${webhook.id}/deliveries`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/projects/${project.id}/webhooks/${webhook.id}/deliveries`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

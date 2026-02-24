@@ -34,8 +34,6 @@ export default function EvidenceGalleryPage() {
       setLoading(true);
       setError('');
       
-      // Note: This endpoint would need to be implemented in the API
-      // For now, we'll simulate the structure based on the existing evidence API
       const response = await apiClient.get(`/api/projects/${projectId}/evidence`);
       setEvidence(response.evidence || response.data || response || []);
     } catch (err) {

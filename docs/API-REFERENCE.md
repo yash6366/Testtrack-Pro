@@ -425,6 +425,135 @@ Request:
 
 Response: `200 OK`
 
+## Evidence
+
+### List All Evidence for Project
+
+**GET** `/api/projects/:projectId/evidence`
+
+Get all evidence files across all test executions in a project.
+
+Response:
+```json
+{
+  "evidence": [
+    {
+      "id": 1,
+      "executionId": 123,
+      "stepId": 1,
+      "fileUrl": "https://res.cloudinary.com/...",
+      "fileName": "screenshot.png",
+      "fileType": "image/png",
+      "fileSize": 102400,
+      "uploadedAt": "2024-01-15T14:30:00Z",
+      "uploadedBy": 5,
+      "execution": {
+        "id": 123,
+        "testCaseId": 45,
+        "testCase": {
+          "id": 45,
+          "title": "Login Test"
+        }
+      }
+    }
+  ]
+}
+```
+
+### List Evidence for Test Execution
+
+**GET** `/api/projects/:projectId/test-executions/:executionId/evidence`
+
+Get all evidence files for a specific test execution.
+
+Response:
+```json
+{
+  "evidence": [
+    {
+      "id": 1,
+      "executionId": 123,
+      "stepId": 1,
+      "fileUrl": "https://res.cloudinary.com/...",
+      "fileName": "screenshot.png",
+      "fileType": "image/png",
+      "fileSize": 102400,
+      "uploadedAt": "2024-01-15T14:30:00Z",
+      "uploadedBy": 5
+    }
+  ]
+}
+```
+
+### List Evidence for Test Step
+
+**GET** `/api/projects/:projectId/test-executions/:executionId/steps/:stepId/evidence`
+
+Get all evidence files for a specific test execution step.
+
+### Create Signed Upload URL
+
+**POST** `/api/projects/:projectId/test-executions/:executionId/steps/:stepId/evidence/signature`
+
+Get a signed URL for uploading evidence to Cloudinary.
+
+Request:
+```json
+{
+  "fileName": "screenshot.png",
+  "fileType": "image/png",
+  "fileSize": 102400
+}
+```
+
+Response:
+```json
+{
+  "signature": "abc123...",
+  "timestamp": 1634567890,
+  "cloudName": "your-cloud",
+  "apiKey": "your-key",
+  "folder": "evidence/project-1"
+}
+```
+
+### Create Evidence Record
+
+**POST** `/api/projects/:projectId/test-executions/:executionId/steps/:stepId/evidence`
+
+Create an evidence record after uploading to Cloudinary.
+
+Request:
+```json
+{
+  "fileUrl": "https://res.cloudinary.com/...",
+  "fileName": "screenshot.png",
+  "fileType": "image/png",
+  "fileSize": 102400,
+  "metadata": {
+    "width": 1920,
+    "height": 1080
+  }
+}
+```
+
+Response: `201 Created`
+
+### Delete Evidence
+
+**DELETE** `/api/projects/:projectId/evidence/:evidenceId`
+
+Soft delete an evidence file.
+
+Response:
+```json
+{
+  "id": 1,
+  "isDeleted": true,
+  "deletedAt": "2024-01-15T15:00:00Z"
+}
+```
+
 ## Bugs/Defects
 
 ### List Bugs

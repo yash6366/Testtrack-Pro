@@ -45,8 +45,6 @@ export default function TestRunCreation() {
         }
 
         // Fetch test cases for project
-        // This endpoint should be created in your test routes
-        // For now, using a placeholder - you'll need to implement this
         const response = await apiClient.get(
           `/api/projects/${projectId}/test-cases`,
         );

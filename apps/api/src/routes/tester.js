@@ -815,7 +815,7 @@ export async function testerRoutes(fastify) {
   );
 
   /**
-   * Get pending test executions (incomplete)
+   * Get pending test executions
    */
   fastify.get(
     '/api/tester/executions/pending',

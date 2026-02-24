@@ -3,6 +3,7 @@ import {
   createSignedEvidenceUpload,
   createEvidenceRecord,
   listEvidence,
+  listAllProjectEvidence,
   parseEvidenceParams,
   softDeleteEvidence,
 } from '../services/evidenceService.js';
@@ -113,6 +114,26 @@ export async function evidenceRoutes(fastify) {
         reply.send({ evidence });
       } catch (error) {
         reply.code(404).send({ error: error.message });
+      }
+    },
+  );
+
+  fastify.get(
+    '/api/projects/:projectId/evidence',
+    { preHandler: [requireAuth, requireRoles(['TESTER', 'DEVELOPER', 'ADMIN'])] },
+    async (request, reply) => {
+      const projectId = Number.parseInt(request.params.projectId, 10);
+
+      if (Number.isNaN(projectId)) {
+        reply.code(400).send({ error: 'Invalid projectId' });
+        return;
+      }
+
+      try {
+        const evidence = await listAllProjectEvidence({ projectId });
+        reply.send({ evidence });
+      } catch (error) {
+        reply.code(500).send({ error: error.message });
       }
     },
   );

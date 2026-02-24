@@ -200,6 +200,35 @@ export async function listEvidence({ projectId, executionId, stepId }) {
   });
 }
 
+export async function listAllProjectEvidence({ projectId }) {
+  // List all evidence for a project across all test executions
+  return prisma.testExecutionEvidence.findMany({
+    where: {
+      execution: {
+        testRun: {
+          projectId,
+        },
+      },
+      isDeleted: false,
+    },
+    include: {
+      execution: {
+        select: {
+          id: true,
+          testCaseId: true,
+          testCase: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { uploadedAt: 'desc' },
+  });
+}
+
 export async function softDeleteEvidence({ projectId, evidenceId, userId }) {
   const evidence = await prisma.testExecutionEvidence.findUnique({
     where: { id: evidenceId },

@@ -1,5 +1,6 @@
 import React from 'react';
 import { RefreshCw, AlertCircle } from 'lucide-react';
+import * as Sentry from '@sentry/react';
 import { logError } from '../lib/errorLogger';
 
 /**
@@ -33,8 +34,8 @@ class ErrorBoundary extends React.Component {
 
     logError(error, 'Error caught by Error Boundary', { errorInfo });
 
-    // Optionally send error to error tracking service (Sentry, etc)
-    // this.logErrorToService(error, errorInfo);
+    // Send error to Sentry
+    this.logErrorToService(error, errorInfo);
   }
 
   handleReset = () => {
@@ -45,10 +46,20 @@ class ErrorBoundary extends React.Component {
     });
   };
 
-  logErrorToService = (_error, _errorInfo) => {
-    // TODO: Integrate with Sentry or similar error tracking service
-    // Example:
-    // Sentry.captureException(_error, { contexts: { react: _errorInfo } });
+  logErrorToService = (error, errorInfo) => {
+    // Send error to Sentry if available
+    if (typeof Sentry !== 'undefined' && Sentry.captureException) {
+      Sentry.captureException(error, {
+        contexts: {
+          react: {
+            componentStack: errorInfo?.componentStack,
+          },
+        },
+        tags: {
+          errorBoundary: true,
+        },
+      });
+    }
   };
 
   render() {
