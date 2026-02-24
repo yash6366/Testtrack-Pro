@@ -1,6 +1,7 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/hooks';
 import { apiClient } from '@/lib/apiClient';
+import { logError } from '@/lib/errorLogger';
 
 export const ProjectContext = createContext(null);
 
@@ -58,7 +59,7 @@ export function ProjectProvider({ children }) {
       // Root cause fix: ensure a valid project is selected on app load for all pages.
       resolveSelection(nextProjects);
     } catch (err) {
-      console.error('Failed to load projects:', err);
+      logError(err, 'Failed to load projects');
       setProjects([]);
       setSelectedProjectId(null);
       localStorage.removeItem(STORAGE_KEY);

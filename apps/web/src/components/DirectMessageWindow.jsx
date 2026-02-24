@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth, useSocket } from '@/hooks';
 import { useChat } from '@/context/ChatContext';
 import MuteBanner from '@/components/MuteBanner';
+import { logError } from '@/lib/errorLogger';
 
 const REACTION_EMOJIS = ['👍', '👀', '✅', '❗'];
 
@@ -70,7 +71,7 @@ export default function DirectMessageWindow({
         setLoading(true);
         await loadDMConversation(recipientId, 50, 0);
       } catch (error) {
-        console.error('Failed to load DM conversation:', error);
+        logError(error, 'Failed to load DM conversation');
       } finally {
         setLoading(false);
       }
@@ -180,7 +181,7 @@ export default function DirectMessageWindow({
       emitDMStopTyping(recipientId);
       setIsTyping(false);
     } catch (error) {
-      console.error('Failed to send message:', error);
+      logError(error, 'Failed to send message');
     }
   };
 
@@ -217,10 +218,10 @@ export default function DirectMessageWindow({
           const nextReactions = Array.isArray(msg.reactions) ? [...msg.reactions] : [];
           nextReactions.push({ emoji, userId: user?.id });
           return { ...msg, reactions: nextReactions };
-        })
+        }),
       );
     } catch (error) {
-      console.error('Failed to add reaction:', error);
+      logError(error, 'Failed to add reaction');
     }
   };
 
@@ -234,10 +235,10 @@ export default function DirectMessageWindow({
             ? msg.reactions.filter((reaction) => !(reaction.emoji === emoji && reaction.userId === user?.id))
             : [];
           return { ...msg, reactions: nextReactions };
-        })
+        }),
       );
     } catch (error) {
-      console.error('Failed to remove reaction:', error);
+      logError(error, 'Failed to remove reaction');
     }
   };
 
@@ -407,7 +408,7 @@ export default function DirectMessageWindow({
                 <div className="hidden group-hover:flex justify-end gap-2 mt-1 pr-2">
                   <button
                     onClick={() => setShowReactionPicker(
-                      showReactionPicker === msg.id ? null : msg.id
+                      showReactionPicker === msg.id ? null : msg.id,
                     )}
                     className="text-xs px-2 py-1 rounded hover:bg-[var(--bg-elevated)] transition-colors"
                     title="Add reaction"

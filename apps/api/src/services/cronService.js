@@ -99,7 +99,7 @@ function alertJobFailure(jobName, failureCount, error) {
   //
   // Priority: Email > Slack > PagerDuty (implement as needed)
   // Current fallback: Ensure it's visible in logs with special marker
-  console.error('🚨 CRITICAL:', message);
+  logError('🚨 CRITICAL:', message);
 }
 
 /**

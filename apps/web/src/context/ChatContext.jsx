@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth, useSocket } from '@/hooks';
+import { logError } from '@/lib/errorLogger';
 
 const ChatContext = createContext();
 
@@ -56,7 +57,7 @@ export function ChatProvider({ children }) {
       setConversations(data.conversations || []);
     } catch (err) {
       setError(err.message);
-      console.error('Error loading conversations:', err);
+      logError(err, 'Error loading conversations');
     } finally {
       setLoading(false);
     }
@@ -79,7 +80,7 @@ export function ChatProvider({ children }) {
             headers: {
               'Authorization': `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -96,10 +97,10 @@ export function ChatProvider({ children }) {
 
         return data.messages || [];
       } catch (err) {
-        console.error(`Error loading DM conversation with user ${userId}:`, err);
+        logError(err, `Error loading DM conversation with user ${userId}`);
       }
     },
-    [token, apiUrl]
+    [token, apiUrl],
   );
 
   /**
@@ -138,11 +139,11 @@ export function ChatProvider({ children }) {
 
         return data;
       } catch (err) {
-        console.error('Error sending DM:', err);
+        logError(err, 'Error sending DM');
         throw err;
       }
     },
-    [token, apiUrl]
+    [token, apiUrl],
   );
 
   /**
@@ -168,14 +169,14 @@ export function ChatProvider({ children }) {
         // Update conversations to clear unread count
         setConversations((prev) =>
           prev.map((conv) =>
-            conv.userId === userId ? { ...conv, unreadCount: 0 } : conv
-          )
+            conv.userId === userId ? { ...conv, unreadCount: 0 } : conv,
+          ),
         );
       } catch (err) {
-        console.error('Error marking DMs as read:', err);
+        logError(err, 'Error marking DMs as read');
       }
     },
-    [token, apiUrl]
+    [token, apiUrl],
   );
 
   /**
@@ -207,11 +208,11 @@ export function ChatProvider({ children }) {
 
         return await response.json();
       } catch (err) {
-        console.error('Error reacting to DM:', err);
+        logError(err, 'Error reacting to DM');
         throw err;
       }
     },
-    [token, apiUrl]
+    [token, apiUrl],
   );
 
   /**
@@ -241,7 +242,7 @@ export function ChatProvider({ children }) {
       });
     } catch (err) {
       setError(err.message);
-      console.error('Error loading channels:', err);
+        logError(err, 'Error loading channels');
     } finally {
       setLoading(false);
     }
@@ -268,7 +269,7 @@ export function ChatProvider({ children }) {
       const data = await response.json();
       setArchivedProjects(data.channels || []);
     } catch (err) {
-      console.error('Error loading archived channels:', err);
+        logError(err, 'Error loading archived channels');
     }
   }, [token, apiUrl]);
 
@@ -334,11 +335,11 @@ export function ChatProvider({ children }) {
 
         return newChannel;
       } catch (err) {
-        console.error('Error creating channel:', err);
+          logError(err, 'Error creating channel');
         throw err;
       }
     },
-    [token, apiUrl]
+    [token, apiUrl],
   );
 
   /**
@@ -373,17 +374,17 @@ export function ChatProvider({ children }) {
         setChannels((prev) => ({
           ...prev,
           projects: prev.projects.map((ch) =>
-            ch.id === channelId ? channelData : ch
+            ch.id === channelId ? channelData : ch,
           ),
         }));
 
         return channelData;
       } catch (err) {
-        console.error('Error updating channel:', err);
+          logError(err, 'Error updating channel');
         throw err;
       }
     },
-    [token, apiUrl]
+    [token, apiUrl],
   );
 
   /**
@@ -408,11 +409,11 @@ export function ChatProvider({ children }) {
         const data = await response.json();
         return data.hasAccess || false;
       } catch (err) {
-        console.error('Error checking channel access:', err);
+          logError(err, 'Error checking channel access');
         return false;
       }
     },
-    [token, apiUrl]
+    [token, apiUrl],
   );
 
   // Load conversations and channels on mount

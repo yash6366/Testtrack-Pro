@@ -124,7 +124,7 @@ function AppRoutes() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <Dashboard />
               </Suspense>
@@ -136,7 +136,7 @@ function AppRoutes() {
         path="/chat"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <Chat />
               </Suspense>
@@ -148,7 +148,7 @@ function AppRoutes() {
         path="/projects/:projectId/test-runs/create"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["TESTER", "DEVELOPER"]}>
+            <RoleRoute allowedRoles={['TESTER', 'DEVELOPER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestRunCreation />
               </Suspense>
@@ -160,7 +160,7 @@ function AppRoutes() {
         path="/test-execution/:executionId"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestExecution />
               </Suspense>
@@ -172,7 +172,7 @@ function AppRoutes() {
         path="/test-execution/:executionId/summary"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestExecutionSummary />
               </Suspense>
@@ -184,7 +184,7 @@ function AppRoutes() {
         path="/bugs"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <BugsPage />
               </Suspense>
@@ -196,7 +196,7 @@ function AppRoutes() {
         path="/bugs/create"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <BugCreationForm />
               </Suspense>
@@ -208,7 +208,7 @@ function AppRoutes() {
         path="/bugs/:bugId"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <BugDetailsPage />
               </Suspense>
@@ -220,7 +220,7 @@ function AppRoutes() {
         path="/test-suites"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestSuitesPage />
               </Suspense>
@@ -232,7 +232,7 @@ function AppRoutes() {
         path="/test-suites/create"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestSuiteCreatePage />
               </Suspense>
@@ -244,7 +244,7 @@ function AppRoutes() {
         path="/test-suites/:suiteId"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestSuiteDetailPage />
               </Suspense>
@@ -256,7 +256,7 @@ function AppRoutes() {
         path="/suite-runs/:suiteRunId"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <SuiteRunDetailPage />
               </Suspense>
@@ -268,7 +268,7 @@ function AppRoutes() {
         path="/reports"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <ReportsPage />
               </Suspense>
@@ -280,7 +280,7 @@ function AppRoutes() {
         path="/scheduled-reports"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <ScheduledReportsPage />
               </Suspense>
@@ -292,7 +292,7 @@ function AppRoutes() {
         path="/test-cases/:testCaseId"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestCaseDetailPage />
               </Suspense>
@@ -304,7 +304,7 @@ function AppRoutes() {
         path="/test-run/:testRunId"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestRunDetailPage />
               </Suspense>
@@ -316,7 +316,7 @@ function AppRoutes() {
         path="/search"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <SearchResultsPage />
               </Suspense>
@@ -328,7 +328,7 @@ function AppRoutes() {
         path="/admin/users/:userId"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN"]}>
+            <RoleRoute allowedRoles={['ADMIN']}>
               <Suspense fallback={<PageLoader />}>
                 <AdminUserDetailPage />
               </Suspense>
@@ -340,7 +340,7 @@ function AppRoutes() {
         path="/projects/:projectId/analytics"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <AnalyticsDashboard />
               </Suspense>
@@ -352,7 +352,7 @@ function AppRoutes() {
         path="/analytics"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <AnalyticsDashboard />
               </Suspense>
@@ -364,7 +364,7 @@ function AppRoutes() {
         path="/test-plans"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestPlansPage />
               </Suspense>
@@ -376,7 +376,7 @@ function AppRoutes() {
         path="/projects/:projectId/test-plans"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestPlansPage />
               </Suspense>
@@ -388,7 +388,7 @@ function AppRoutes() {
         path="/test-plans/:planId"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestPlanDetailPage />
               </Suspense>
@@ -400,7 +400,7 @@ function AppRoutes() {
         path="/projects/:projectId/test-plans/:planId"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TestPlanDetailPage />
               </Suspense>
@@ -412,7 +412,7 @@ function AppRoutes() {
         path="/webhooks"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER']}>
               <Suspense fallback={<PageLoader />}>
                 <WebhooksPage />
               </Suspense>
@@ -424,7 +424,7 @@ function AppRoutes() {
         path="/projects/:projectId/webhooks"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER']}>
               <Suspense fallback={<PageLoader />}>
                 <WebhooksPage />
               </Suspense>
@@ -436,7 +436,7 @@ function AppRoutes() {
         path="/evidence"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <EvidenceGalleryPage />
               </Suspense>
@@ -448,7 +448,7 @@ function AppRoutes() {
         path="/projects/:projectId/evidence"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <EvidenceGalleryPage />
               </Suspense>
@@ -460,7 +460,7 @@ function AppRoutes() {
         path="/api-keys"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER']}>
               <Suspense fallback={<PageLoader />}>
                 <ApiKeysPage />
               </Suspense>
@@ -472,7 +472,7 @@ function AppRoutes() {
         path="/projects/:projectId/api-keys"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER']}>
               <Suspense fallback={<PageLoader />}>
                 <ApiKeysPage />
               </Suspense>
@@ -484,7 +484,7 @@ function AppRoutes() {
         path="/integrations"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER']}>
               <Suspense fallback={<PageLoader />}>
                 <IntegrationsPage />
               </Suspense>
@@ -496,7 +496,7 @@ function AppRoutes() {
         path="/projects/:projectId/integrations"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER']}>
               <Suspense fallback={<PageLoader />}>
                 <IntegrationsPage />
               </Suspense>
@@ -508,7 +508,7 @@ function AppRoutes() {
         path="/milestones"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <MilestonesPage />
               </Suspense>
@@ -520,7 +520,7 @@ function AppRoutes() {
         path="/projects/:projectId/milestones"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <MilestonesPage />
               </Suspense>
@@ -532,7 +532,7 @@ function AppRoutes() {
         path="/notifications"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <NotificationsPage />
               </Suspense>
@@ -544,7 +544,7 @@ function AppRoutes() {
         path="/projects/:projectId"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <ProjectDetailPage />
               </Suspense>
@@ -556,7 +556,7 @@ function AppRoutes() {
         path="/projects/:projectId/test-cases"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <ProjectTestCasesPage />
               </Suspense>
@@ -568,7 +568,7 @@ function AppRoutes() {
         path="/projects/:projectId/templates"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <TemplateManagementPage />
               </Suspense>
@@ -580,7 +580,7 @@ function AppRoutes() {
         path="/projects"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <ProjectsListPage />
               </Suspense>
@@ -592,7 +592,7 @@ function AppRoutes() {
         path="/settings"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <SettingsPage />
               </Suspense>
@@ -604,7 +604,7 @@ function AppRoutes() {
         path="/profile"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN", "DEVELOPER", "TESTER"]}>
+            <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <ProfilePage />
               </Suspense>
@@ -616,7 +616,7 @@ function AppRoutes() {
         path="/admin"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN"]}>
+            <RoleRoute allowedRoles={['ADMIN']}>
               <Suspense fallback={<PageLoader />}>
                 <AdminPanelPage />
               </Suspense>
@@ -628,7 +628,7 @@ function AppRoutes() {
         path="/audit-logs"
         element={
           <ProtectedRoute>
-            <RoleRoute allowedRoles={["ADMIN"]}>
+            <RoleRoute allowedRoles={['ADMIN']}>
               <Suspense fallback={<PageLoader />}>
                 <AuditLogsPage />
               </Suspense>

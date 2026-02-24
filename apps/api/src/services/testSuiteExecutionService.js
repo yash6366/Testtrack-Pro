@@ -103,8 +103,8 @@ export async function executeSuite(suiteId, options, userId) {
           id: true,
           testCaseId: true,
         },
-      })
-    )
+      }),
+    ),
   );
 
   // Seed execution steps from test case steps
@@ -158,7 +158,7 @@ export async function executeSuite(suiteId, options, userId) {
           ...options,
           name: `${name || suite.name} > ${childSuite.name}`,
         },
-        userId
+        userId,
       );
     }
   }
@@ -430,7 +430,7 @@ export async function getSuiteExecutionReport(suiteRunId) {
   // Calculate duration
   const duration = suiteRun.actualEndDate && suiteRun.actualStartDate
     ? Math.floor(
-        (suiteRun.actualEndDate.getTime() - suiteRun.actualStartDate.getTime()) / 1000
+        (suiteRun.actualEndDate.getTime() - suiteRun.actualStartDate.getTime()) / 1000,
       )
     : null;
 
@@ -523,7 +523,7 @@ export async function getSuiteExecutionTrends(suiteId, options = {}) {
     const duration =
       run.actualEndDate && run.actualStartDate
         ? Math.floor(
-            (run.actualEndDate.getTime() - run.actualStartDate.getTime()) / 1000
+            (run.actualEndDate.getTime() - run.actualStartDate.getTime()) / 1000,
           )
         : null;
 
@@ -552,7 +552,7 @@ export async function getSuiteExecutionTrends(suiteId, options = {}) {
           trends
             .filter((t) => t.duration)
             .reduce((sum, t) => sum + t.duration, 0) /
-            trends.filter((t) => t.duration).length
+            trends.filter((t) => t.duration).length,
         )
       : null;
 
@@ -590,18 +590,18 @@ export async function compareSuiteExecutions(suiteRunId1, suiteRunId2) {
 
   // Find new failures
   const run1FailedIds = new Set(
-    run1.executionsByStatus.FAILED.map((e) => e.testCaseId)
+    run1.executionsByStatus.FAILED.map((e) => e.testCaseId),
   );
   const run2FailedIds = new Set(
-    run2.executionsByStatus.FAILED.map((e) => e.testCaseId)
+    run2.executionsByStatus.FAILED.map((e) => e.testCaseId),
   );
 
   const newFailures = run2.executionsByStatus.FAILED.filter(
-    (e) => !run1FailedIds.has(e.testCaseId)
+    (e) => !run1FailedIds.has(e.testCaseId),
   );
 
   const fixedTests = run1.executionsByStatus.FAILED.filter(
-    (e) => !run2FailedIds.has(e.testCaseId)
+    (e) => !run2FailedIds.has(e.testCaseId),
   );
 
   return {

@@ -234,7 +234,7 @@ export default function DirectMessagesPanel({ onSelectConversation }) {
                           {conversation.lastMessageAt
                             ? new Date(conversation.lastMessageAt).toLocaleDateString(
                                 'en-US',
-                                { month: 'short', day: 'numeric' }
+                                { month: 'short', day: 'numeric' },
                               )
                             : '—'}
                         </span>
@@ -244,7 +244,7 @@ export default function DirectMessagesPanel({ onSelectConversation }) {
                       <div className="mb-1">
                         <span
                           className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${getRoleColor(
-                            conversation.role
+                            conversation.role,
                           )}`}
                         >
                           {getRoleBadgeText(conversation.role)}

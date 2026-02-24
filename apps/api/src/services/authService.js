@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { getPrismaClient } from '../lib/prisma.js';
+import { logError } from '../lib/logger.js';
 import { SignupSchema, LoginSchema } from '../schemas/auth.js';
 import { 
   sendVerificationEmail, 
@@ -8,7 +9,7 @@ import {
   getVerificationTokenExpiry,
   sendPasswordResetEmail,
   sendAccountLockedEmail,
-  sendPasswordChangedEmail
+  sendPasswordChangedEmail,
 } from './emailService.js';
 import { ensureUserInUniversalChannel } from './channelService.js';
 import { autoJoinRoleChannels } from '../routes/channels.js';
@@ -244,7 +245,7 @@ export async function login(fastify, { email, password, rememberMe }, context = 
       role: normalizeRole(user.role),
       tokenVersion: user.tokenVersion,
     },
-    { expiresIn: '15m' }
+    { expiresIn: '15m' },
   );
 
   const refreshToken = generateRefreshToken();
@@ -414,7 +415,7 @@ export async function refreshSession(fastify, refreshToken, context = {}) {
       role: normalizeRole(session.user.role),
       tokenVersion: session.user.tokenVersion,
     },
-    { expiresIn: '7d' }
+    { expiresIn: '7d' },
   );
 
   return {
@@ -572,7 +573,7 @@ export async function resetPassword(token, newPassword) {
 
   // Send confirmation email
   await sendPasswordChangedEmail(user.email, user.name).catch(err => {
-    console.error('Failed to send password changed email:', err);
+    logError('Failed to send password changed email', err);
   });
 
   return {
@@ -656,7 +657,7 @@ export async function changePassword(userId, currentPassword, newPassword) {
 
   // Send confirmation email
   await sendPasswordChangedEmail(user.email, user.name).catch(err => {
-    console.error('Failed to send password changed email:', err);
+    logError('Failed to send password changed email', err);
   });
 
   return {

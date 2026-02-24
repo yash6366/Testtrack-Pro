@@ -263,8 +263,8 @@ export async function executeTestPlan(testPlanId, executionData, userId, project
           status: 'BLOCKED',
           executedBy: userId,
         },
-      })
-    )
+      }),
+    ),
   );
 
   // Update test plan status

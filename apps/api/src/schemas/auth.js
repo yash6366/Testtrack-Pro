@@ -2,7 +2,7 @@ import z from 'zod';
 
 const SignupRoleSchema = z.preprocess(
   (value) => (typeof value === 'string' ? value.trim().toUpperCase() : value),
-  z.enum(['DEVELOPER', 'TESTER'])
+  z.enum(['DEVELOPER', 'TESTER']),
 );
 
 const StrongPasswordSchema = z.string()

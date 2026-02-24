@@ -11,7 +11,7 @@ export default function BulkTestCaseOperations({
   projectId, 
   onSuccess, 
   onError,
-  onClearSelection 
+  onClearSelection, 
 }) {
   const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
@@ -34,7 +34,7 @@ export default function BulkTestCaseOperations({
 
     // Filter out empty values
     const updates = Object.fromEntries(
-      Object.entries(bulkUpdates).filter(([_, value]) => value !== '')
+      Object.entries(bulkUpdates).filter(([_, value]) => value !== ''),
     );
 
     if (Object.keys(updates).length === 0) {
@@ -49,7 +49,7 @@ export default function BulkTestCaseOperations({
         {
           testCaseIds: selectedTestCases,
           updates,
-        }
+        },
       );
 
       const { updated, failed, denied } = response.data;
@@ -87,7 +87,7 @@ export default function BulkTestCaseOperations({
         `/api/projects/${projectId}/test-cases/bulk/delete`,
         {
           testCaseIds: selectedTestCases,
-        }
+        },
       );
 
       const { deleted, failed, denied } = response.data;
@@ -118,7 +118,7 @@ export default function BulkTestCaseOperations({
         {
           testCaseIds: selectedTestCases,
         },
-        { responseType: 'blob' }
+        { responseType: 'blob' },
       );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));

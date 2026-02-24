@@ -4,6 +4,7 @@ import { apiClient } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import BackButton from '@/components/ui/BackButton';
 import Breadcrumb from '@/components/ui/Breadcrumb';
+import { logError } from '@/lib/errorLogger';
 
 export default function BugDetailsPage() {
   const { bugId } = useParams();
@@ -34,7 +35,7 @@ export default function BugDetailsPage() {
       } catch (err) {
         if (isMounted) {
           setError(err.message || 'Failed to load bug');
-          console.error(err);
+          logError(err, 'Failed to load bug in BugDetailsPage (initial load)');
         }
       } finally {
         if (isMounted) {
@@ -61,7 +62,7 @@ export default function BugDetailsPage() {
       setNewStatus(response.status);
     } catch (err) {
       setError(err.message || 'Failed to load bug');
-      console.error(err);
+      logError(err, 'Failed to load bug in BugDetailsPage');
     } finally {
       setLoading(false);
     }
@@ -74,7 +75,7 @@ export default function BugDetailsPage() {
       setSubmitting(true);
       await apiClient.post(`/api/bugs/${bugId}/comments`, {
         body: newComment,
-        isInternal
+        isInternal,
       });
       setNewComment('');
       setIsInternal(false);
@@ -94,7 +95,7 @@ export default function BugDetailsPage() {
       setError('');
       await apiClient.patch(`/api/bugs/${bugId}/status`, {
         newStatus,
-        reason: 'Manual status change'
+        reason: 'Manual status change',
       });
       await loadBug();
     } catch (err) {
@@ -110,7 +111,7 @@ export default function BugDetailsPage() {
     try {
       await apiClient.patch(`/api/bugs/${bugId}/assign`, {
         assigneeId,
-        reason: 'Manual assignment'
+        reason: 'Manual assignment',
       });
       await loadBug();
     } catch (err) {
@@ -129,7 +130,7 @@ export default function BugDetailsPage() {
       await apiClient.patch(`/api/bugs/${bugId}/link-commit`, {
         commitHash: commitHash.trim(),
         branchName: branchName.trim() || undefined,
-        codeReviewUrl: codeReviewUrl.trim() || undefined
+        codeReviewUrl: codeReviewUrl.trim() || undefined,
       });
       // Clear inputs
       document.getElementById('commitHash').value = '';
@@ -146,7 +147,7 @@ export default function BugDetailsPage() {
   const handleRequestRetest = async () => {
     try {
       await apiClient.post(`/api/bugs/${bugId}/retest-request`, {
-        notes: 'Requesting re-test for fix verification'
+        notes: 'Requesting re-test for fix verification',
       });
       await loadBug();
     } catch (err) {
@@ -187,7 +188,7 @@ export default function BugDetailsPage() {
     VERIFIED_FIXED: ['CLOSED', 'REOPENED'],
     REOPENED: ['ASSIGNED', 'IN_PROGRESS'],
     CANNOT_REPRODUCE: ['REOPENED', 'CLOSED'],
-    CLOSED: ['REOPENED']
+    CLOSED: ['REOPENED'],
   };
 
   const getValidStatusOptions = () => {

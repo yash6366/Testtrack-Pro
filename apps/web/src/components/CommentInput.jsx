@@ -44,7 +44,7 @@ export default function CommentInput({ bugId, onCommentAdded, teamMembers = [] }
   };
 
   const filteredMembers = teamMembers.filter(member =>
-    member.name.toLowerCase().includes(mentionQuery.toLowerCase())
+    member.name.toLowerCase().includes(mentionQuery.toLowerCase()),
   );
 
   const handleSubmit = async (e) => {

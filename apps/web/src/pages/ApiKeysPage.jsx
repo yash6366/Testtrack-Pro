@@ -7,6 +7,7 @@ import EmptyState from '@/components/common/EmptyState';
 import LoadingState from '@/components/common/LoadingState';
 import { FolderKanban } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
+import { logError } from '@/lib/errorLogger';
 
 export default function ApiKeysPage() {
   const navigate = useNavigate();
@@ -51,13 +52,13 @@ export default function ApiKeysPage() {
       setLoading(true);
       setError('');
       const response = await apiClient.get(
-        `/api/projects/${projectId}/api-keys?page=${page}&limit=10&search=${search}`
+        `/api/projects/${projectId}/api-keys?page=${page}&limit=10&search=${search}`,
       );
       setApiKeys(response.data || response || []);
       setTotal(response.total || 0);
     } catch (err) {
       setError(err.message || 'Failed to load API keys');
-      console.error(err);
+      logError(err, 'Failed to load API keys in ApiKeysPage');
     } finally {
       setLoading(false);
     }
@@ -88,7 +89,7 @@ export default function ApiKeysPage() {
       }, 500);
     } catch (err) {
       setError(err.message || 'Failed to create API key');
-      console.error(err);
+      logError(err, 'Failed to create API key in ApiKeysPage');
     }
   };
 
@@ -104,7 +105,7 @@ export default function ApiKeysPage() {
       setSelectedKey(keyId);
     } catch (err) {
       setError(err.message || 'Failed to load key stats');
-      console.error(err);
+      logError(err, 'Failed to load key stats in ApiKeysPage');
     }
   };
 
@@ -118,7 +119,7 @@ export default function ApiKeysPage() {
       setKeyStats(null);
     } catch (err) {
       setError(err.message || 'Failed to revoke API key');
-      console.error(err);
+      logError(err, 'Failed to revoke API key in ApiKeysPage');
     }
   };
 
@@ -127,14 +128,14 @@ export default function ApiKeysPage() {
 
     try {
       const response = await apiClient.post(
-        `/api/projects/${projectId}/api-keys/${keyId}/regenerate`
+        `/api/projects/${projectId}/api-keys/${keyId}/regenerate`,
       );
       setGeneratedKey(response.key);
       setShowKeyModal(true);
       loadApiKeys();
     } catch (err) {
       setError(err.message || 'Failed to regenerate API key');
-      console.error(err);
+      logError(err, 'Failed to regenerate API key in ApiKeysPage');
     }
   };
 
@@ -148,7 +149,7 @@ export default function ApiKeysPage() {
       setKeyStats(null);
     } catch (err) {
       setError(err.message || 'Failed to delete API key');
-      console.error(err);
+      logError(err, 'Failed to delete API key in ApiKeysPage');
     }
   };
 

@@ -2,6 +2,7 @@ import { getPrismaClient } from '../lib/prisma.js';
 import { createAuthGuards } from '../lib/rbac.js';
 import { requirePermission } from '../lib/policy.js';
 import { requireEditPermission, requireDeletePermission, validateBulkPermissions } from '../lib/testCasePermissions.js';
+import { logError } from '../lib/logger.js';
 import {
   createTestCase,
   updateTestCase,
@@ -608,7 +609,7 @@ export async function testRoutes(fastify) {
 
         reply.code(201).send(testCase);
       } catch (error) {
-        console.error('Error creating test case:', error);
+        logError('Error creating test case:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -634,7 +635,7 @@ export async function testRoutes(fastify) {
         const result = await getProjectTestCases(Number(projectId), filters);
         reply.send(result);
       } catch (error) {
-        console.error('Error fetching test cases:', error);
+        logError('Error fetching test cases:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -676,7 +677,7 @@ export async function testRoutes(fastify) {
 
         reply.send(testCase);
       } catch (error) {
-        console.error('Error fetching test case:', error);
+        logError('Error fetching test case:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -700,7 +701,7 @@ export async function testRoutes(fastify) {
         );
         reply.send(updated);
       } catch (error) {
-        console.error('Error updating test case:', error);
+        logError('Error updating test case:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -723,7 +724,7 @@ export async function testRoutes(fastify) {
         );
         reply.send({ success: true, testCase: deleted });
       } catch (error) {
-        console.error('Error deleting test case:', error);
+        logError('Error deleting test case:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -746,7 +747,7 @@ export async function testRoutes(fastify) {
         );
         reply.send({ success: true, testCase: restored });
       } catch (error) {
-        console.error('Error restoring test case:', error);
+        logError('Error restoring test case:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -775,7 +776,7 @@ export async function testRoutes(fastify) {
         );
         reply.code(201).send(cloned);
       } catch (error) {
-        console.error('Error cloning test case:', error);
+        logError('Error cloning test case:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -806,7 +807,7 @@ export async function testRoutes(fastify) {
 
         reply.send({ versions });
       } catch (error) {
-        console.error('Error fetching version history:', error);
+        logError('Error fetching version history:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -877,7 +878,7 @@ export async function testRoutes(fastify) {
           hasChanges,
         });
       } catch (error) {
-        console.error('Error comparing versions:', error);
+        logError('Error comparing versions:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -898,7 +899,7 @@ export async function testRoutes(fastify) {
           .header('Content-Disposition', `attachment; filename="testcases-project-${projectId}.csv"`)
           .send(csv);
       } catch (error) {
-        console.error('Error exporting test cases:', error);
+        logError('Error exporting test cases:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -928,7 +929,7 @@ export async function testRoutes(fastify) {
 
         reply.send(results);
       } catch (error) {
-        console.error('Error importing test cases:', error);
+        logError('Error importing test cases:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -956,7 +957,7 @@ export async function testRoutes(fastify) {
         );
         reply.send(results);
       } catch (error) {
-        console.error('Error bulk updating test cases:', error);
+        logError('Error bulk updating test cases:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -987,7 +988,7 @@ export async function testRoutes(fastify) {
         );
         reply.send(results);
       } catch (error) {
-        console.error('Error bulk deleting test cases:', error);
+        logError('Error bulk deleting test cases:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -1015,7 +1016,7 @@ export async function testRoutes(fastify) {
         );
         reply.send(results);
       } catch (error) {
-        console.error('Error bulk restoring test cases:', error);
+        logError('Error bulk restoring test cases:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -1040,7 +1041,7 @@ export async function testRoutes(fastify) {
           .header('Content-Disposition', `attachment; filename="testcases-bulk-export-${Date.now()}.csv"`)
           .send(csv);
       } catch (error) {
-        console.error('Error bulk exporting test cases:', error);
+        logError('Error bulk exporting test cases:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -1065,7 +1066,7 @@ export async function testRoutes(fastify) {
         const result = await getProjectTemplates(Number(projectId), filters);
         reply.send(result);
       } catch (error) {
-        console.error('Error fetching templates:', error);
+        logError('Error fetching templates:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -1081,7 +1082,7 @@ export async function testRoutes(fastify) {
         const template = await getTemplateById(Number(templateId));
         reply.send(template);
       } catch (error) {
-        console.error('Error fetching template:', error);
+        logError('Error fetching template:', error);
         reply.code(404).send({ error: error.message });
       }
     },
@@ -1108,7 +1109,7 @@ export async function testRoutes(fastify) {
 
         reply.code(201).send(template);
       } catch (error) {
-        console.error('Error creating template:', error);
+        logError('Error creating template:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -1132,7 +1133,7 @@ export async function testRoutes(fastify) {
         );
         reply.send(updated);
       } catch (error) {
-        console.error('Error updating template:', error);
+        logError('Error updating template:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -1155,7 +1156,7 @@ export async function testRoutes(fastify) {
         );
         reply.send({ success: true, message: 'Template deleted successfully' });
       } catch (error) {
-        console.error('Error deleting template:', error);
+        logError('Error deleting template:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -1185,7 +1186,7 @@ export async function testRoutes(fastify) {
 
         reply.code(201).send(testCase);
       } catch (error) {
-        console.error('Error creating test case from template:', error);
+        logError('Error creating test case from template:', error);
         reply.code(500).send({ error: error.message });
       }
     },

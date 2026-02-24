@@ -35,7 +35,7 @@ async function generateTestCaseId(projectId) {
       isolationLevel: 'Serializable',
       maxWait: 5000,
       timeout: 10000,
-    }
+    },
   );
 }
 
@@ -323,7 +323,7 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
               testData: step.testData,
               notes: step.notes,
             },
-          })
+          }),
         );
       } else {
         operations.push(
@@ -336,7 +336,7 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
               testData: step.testData,
               notes: step.notes,
             },
-          })
+          }),
         );
       }
     });
@@ -347,7 +347,7 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
       operations.push(
         prisma.testCaseStep.deleteMany({
           where: { id: { in: extraSteps.map((step) => step.id) } },
-        })
+        }),
       );
     }
 

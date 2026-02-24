@@ -189,7 +189,7 @@ export async function getSearchSuggestions(projectId, query, resourceTypes = ['T
         id: tc.id,
         text: tc.name,
         url: `/tests/${tc.id}`,
-      }))
+      })),
     );
   }
 
@@ -213,7 +213,7 @@ export async function getSearchSuggestions(projectId, query, resourceTypes = ['T
         id: bug.id,
         text: `${bug.bugNumber} - ${bug.title}`,
         url: `/bugs/${bug.id}`,
-      }))
+      })),
     );
   }
 

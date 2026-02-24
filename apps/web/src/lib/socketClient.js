@@ -1,7 +1,7 @@
-import { io } from "socket.io-client";
+import { io } from 'socket.io-client';
+import { logError, logInfo, logWarning } from './errorLogger';
 
 let socket = null;
-let listeners = new Map(); // Store event listeners for cleanup
 
 /**
  * Initialize Socket.IO connection with user credentials
@@ -15,7 +15,7 @@ export function connectSocket(token, userId, userRole) {
     return socket;
   }
 
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   socket = io(apiUrl, {
     auth: {
@@ -23,7 +23,7 @@ export function connectSocket(token, userId, userRole) {
       userId,
       role: userRole,
     },
-    transports: ["websocket", "polling"],
+    transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
@@ -31,19 +31,19 @@ export function connectSocket(token, userId, userRole) {
   });
 
   // Connection events
-  socket.on("connect", () => {
+  socket.on('connect', () => {
     // Connection established
   });
 
-  socket.on("disconnect", (reason) => {
+  socket.on('disconnect', (reason) => {
     // Disconnected from server
   });
 
-  socket.on("error", (error) => {
+  socket.on('error', (error) => {
     // Socket error occurred
   });
 
-  socket.on("connect_error", (error) => {
+  socket.on('connect_error', (error) => {
     // Connection error occurred
   });
 
@@ -64,10 +64,10 @@ export function getSocket() {
  */
 export function joinRoom(room) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return;
   }
-  socket.emit("joinRoom", room);
+  socket.emit('joinRoom', room);
 }
 
 /**
@@ -76,10 +76,10 @@ export function joinRoom(room) {
  */
 export function leaveRoom(room) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return;
   }
-  socket.emit("leaveRoom", room);
+  socket.emit('leaveRoom', room);
 }
 
 /**
@@ -89,13 +89,13 @@ export function leaveRoom(room) {
  * @param {string} type - GENERAL, BUG_DISCUSSION, TEST_EXECUTION, ANNOUNCEMENT
  * @param {object} metadata - Additional data like bugId, testId, etc
  */
-export function sendMessage(room, text, type = "GENERAL", metadata = {}) {
+export function sendMessage(room, text, type = 'GENERAL', metadata = {}) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return;
   }
 
-  socket.emit("message", {
+  socket.emit('message', {
     room,
     text,
     type,
@@ -112,11 +112,11 @@ export function sendMessage(room, text, type = "GENERAL", metadata = {}) {
  */
 export function sendNotification(targetUserId, type, message, metadata = {}) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return;
   }
 
-  socket.emit("notification", {
+  socket.emit('notification', {
     targetUserId,
     type,
     message,
@@ -130,10 +130,10 @@ export function sendNotification(targetUserId, type, message, metadata = {}) {
  */
 export function emitTyping(room) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return;
   }
-  socket.emit("typing", { room });
+  socket.emit('typing', { room });
 }
 
 /**
@@ -142,10 +142,10 @@ export function emitTyping(room) {
  */
 export function emitStopTyping(room) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return;
   }
-  socket.emit("stopTyping", { room });
+  socket.emit('stopTyping', { room });
 }
 
 /**
@@ -155,17 +155,17 @@ export function emitStopTyping(room) {
  */
 export function onMessage(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("message", callback);
+  currentSocket.on('message', callback);
 
   // Return unsubscribe function
   return () => {
     if (currentSocket) {
-      currentSocket.off("message", callback);
+      currentSocket.off('message', callback);
     }
   };
 }
@@ -177,16 +177,16 @@ export function onMessage(callback) {
  */
 export function onNotification(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("notification:new", callback);
+  currentSocket.on('notification:new', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("notification:new", callback);
+      currentSocket.off('notification:new', callback);
     }
   };
 }
@@ -198,16 +198,16 @@ export function onNotification(callback) {
  */
 export function onMessageDeleted(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("message_deleted", callback);
+  currentSocket.on('message_deleted', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("message_deleted", callback);
+      currentSocket.off('message_deleted', callback);
     }
   };
 }
@@ -219,32 +219,32 @@ export function onMessageDeleted(callback) {
  */
 export function onUserMuted(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("user_muted", callback);
+  currentSocket.on('user_muted', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("user_muted", callback);
+      currentSocket.off('user_muted', callback);
     }
   };
 }
 
 export function onUserUnmuted(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("user_unmuted", callback);
+  currentSocket.on('user_unmuted', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("user_unmuted", callback);
+      currentSocket.off('user_unmuted', callback);
     }
   };
 }
@@ -256,64 +256,64 @@ export function onUserUnmuted(callback) {
  */
 export function onChannelLocked(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("channel_locked", callback);
+  currentSocket.on('channel_locked', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("channel_locked", callback);
+      currentSocket.off('channel_locked', callback);
     }
   };
 }
 
 export function onChannelUnlocked(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("channel_unlocked", callback);
+  currentSocket.on('channel_unlocked', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("channel_unlocked", callback);
+      currentSocket.off('channel_unlocked', callback);
     }
   };
 }
 
 export function onChatDisabled(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("chat_disabled", callback);
+  currentSocket.on('chat_disabled', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("chat_disabled", callback);
+      currentSocket.off('chat_disabled', callback);
     }
   };
 }
 
 export function onChatEnabled(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("chat_enabled", callback);
+  currentSocket.on('chat_enabled', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("chat_enabled", callback);
+      currentSocket.off('chat_enabled', callback);
     }
   };
 }
@@ -325,16 +325,16 @@ export function onChatEnabled(callback) {
  */
 export function onUserJoined(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("userJoined", callback);
+  currentSocket.on('userJoined', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("userJoined", callback);
+      currentSocket.off('userJoined', callback);
     }
   };
 }
@@ -346,16 +346,16 @@ export function onUserJoined(callback) {
  */
 export function onUserLeft(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("userLeft", callback);
+  currentSocket.on('userLeft', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("userLeft", callback);
+      currentSocket.off('userLeft', callback);
     }
   };
 }
@@ -367,16 +367,16 @@ export function onUserLeft(callback) {
  */
 export function onUserTyping(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("userTyping", callback);
+  currentSocket.on('userTyping', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("userTyping", callback);
+      currentSocket.off('userTyping', callback);
     }
   };
 }
@@ -388,16 +388,16 @@ export function onUserTyping(callback) {
  */
 export function onUserStoppedTyping(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("userStoppedTyping", callback);
+  currentSocket.on('userStoppedTyping', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("userStoppedTyping", callback);
+      currentSocket.off('userStoppedTyping', callback);
     }
   };
 }
@@ -409,16 +409,16 @@ export function onUserStoppedTyping(callback) {
  */
 export function onAnnouncement(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("announcement", callback);
+  currentSocket.on('announcement', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("announcement", callback);
+      currentSocket.off('announcement', callback);
     }
   };
 }
@@ -430,7 +430,7 @@ export function onAnnouncement(callback) {
  */
 export function onReaction(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
@@ -438,17 +438,17 @@ export function onReaction(callback) {
   const handleAdd = (data) => callback({ type: 'add', ...data });
   const handleRemove = (data) => callback({ type: 'remove', ...data });
 
-  currentSocket.on("reaction_add", handleAdd);
-  currentSocket.on("reaction_remove", handleRemove);
-  currentSocket.on("reaction_added", handleAdd);
-  currentSocket.on("reaction_removed", handleRemove);
+  currentSocket.on('reaction_add', handleAdd);
+  currentSocket.on('reaction_remove', handleRemove);
+  currentSocket.on('reaction_added', handleAdd);
+  currentSocket.on('reaction_removed', handleRemove);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("reaction_add", handleAdd);
-      currentSocket.off("reaction_remove", handleRemove);
-      currentSocket.off("reaction_added", handleAdd);
-      currentSocket.off("reaction_removed", handleRemove);
+      currentSocket.off('reaction_add', handleAdd);
+      currentSocket.off('reaction_remove', handleRemove);
+      currentSocket.off('reaction_added', handleAdd);
+      currentSocket.off('reaction_removed', handleRemove);
     }
   };
 }
@@ -460,7 +460,7 @@ export function onReaction(callback) {
  */
 export function onUserPresence(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
@@ -468,17 +468,17 @@ export function onUserPresence(callback) {
   const handleOnline = (data) => callback({ type: 'joined', ...data });
   const handleOffline = (data) => callback({ type: 'left', ...data });
 
-  currentSocket.on("user_joined", handleOnline);
-  currentSocket.on("user_left", handleOffline);
-  currentSocket.on("user_online", handleOnline);
-  currentSocket.on("user_offline", handleOffline);
+  currentSocket.on('user_joined', handleOnline);
+  currentSocket.on('user_left', handleOffline);
+  currentSocket.on('user_online', handleOnline);
+  currentSocket.on('user_offline', handleOffline);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("user_joined", handleOnline);
-      currentSocket.off("user_left", handleOffline);
-      currentSocket.off("user_online", handleOnline);
-      currentSocket.off("user_offline", handleOffline);
+      currentSocket.off('user_joined', handleOnline);
+      currentSocket.off('user_left', handleOffline);
+      currentSocket.off('user_online', handleOnline);
+      currentSocket.off('user_offline', handleOffline);
     }
   };
 }
@@ -490,16 +490,16 @@ export function onUserPresence(callback) {
  */
 export function onChannelCreated(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("channel_created", callback);
+  currentSocket.on('channel_created', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("channel_created", callback);
+      currentSocket.off('channel_created', callback);
     }
   };
 }
@@ -511,16 +511,16 @@ export function onChannelCreated(callback) {
  */
 export function onChannelArchived(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("channel_archived", callback);
+  currentSocket.on('channel_archived', callback);
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("channel_archived", callback);
+      currentSocket.off('channel_archived', callback);
     }
   };
 }
@@ -532,18 +532,18 @@ export function onChannelArchived(callback) {
  */
 export function onPinnedMessage(callback) {
   if (!socket) {
-    console.error("Socket not connected");
+    logWarning('Socket not connected');
     return () => {};
   }
 
   const currentSocket = socket;
-  currentSocket.on("message_pinned", (data) => callback({ type: 'pinned', ...data }));
-  currentSocket.on("message_unpinned", (data) => callback({ type: 'unpinned', ...data }));
+  currentSocket.on('message_pinned', (data) => callback({ type: 'pinned', ...data }));
+  currentSocket.on('message_unpinned', (data) => callback({ type: 'unpinned', ...data }));
 
   return () => {
     if (currentSocket) {
-      currentSocket.off("message_pinned", callback);
-      currentSocket.off("message_unpinned", callback);
+      currentSocket.off('message_pinned', callback);
+      currentSocket.off('message_unpinned', callback);
     }
   };
 }
@@ -571,7 +571,7 @@ export async function sendReaction(messageId, emoji, action = 'add') {
     
     return await response.json();
   } catch (error) {
-    console.error('Error sending reaction:', error);
+    logError(error, 'Error sending reaction');
     throw error;
   }
 }
@@ -599,7 +599,7 @@ export async function sendReply(messageId, channelId, body) {
     
     return await response.json();
   } catch (error) {
-    console.error('Error sending reply:', error);
+    logError(error, 'Error sending reply');
     throw error;
   }
 }
@@ -622,7 +622,7 @@ export async function getReactions(messageId) {
     
     return await response.json();
   } catch (error) {
-    console.error('Error getting reactions:', error);
+    logError(error, 'Error getting reactions');
     throw error;
   }
 }
@@ -645,7 +645,7 @@ export async function getPinnedMessages(channelId) {
     
     return await response.json();
   } catch (error) {
-    console.error('Error getting pinned messages:', error);
+    logError(error, 'Error getting pinned messages');
     throw error;
   }
 }
@@ -669,7 +669,7 @@ export async function pinMessage(messageId) {
     
     return await response.json();
   } catch (error) {
-    console.error('Error pinning message:', error);
+    logError(error, 'Error pinning message');
     throw error;
   }
 }
@@ -693,7 +693,7 @@ export async function unpinMessage(messageId) {
     
     return await response.json();
   } catch (error) {
-    console.error('Error unpinning message:', error);
+    logError(error, 'Error unpinning message');
     throw error;
   }
 }
@@ -716,7 +716,7 @@ export async function getChannelMembers(channelId) {
     
     return await response.json();
   } catch (error) {
-    console.error('Error getting channel members:', error);
+    logError(error, 'Error getting channel members');
     throw error;
   }
 }
@@ -745,7 +745,7 @@ export function sendDirectMessage(recipientId, message, replyToId = null, onAck)
  */
 export function markDMRead(senderId) {
   if (!socket?.connected) {
-    console.warn('Socket not connected - DM read status may not update');
+    logWarning('Socket not connected - DM read status may not update');
     return;
   }
   
@@ -862,7 +862,7 @@ export function onDMStopTyping(callback) {
 export function disconnectSocket() {
   if (socket?.connected) {
     socket.disconnect();
-    console.log("✓ Socket disconnected");
+    logInfo('Socket disconnected');
   }
   socket = null;
 }

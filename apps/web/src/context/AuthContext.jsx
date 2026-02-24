@@ -1,4 +1,5 @@
 import { createContext, useState, useCallback, useEffect } from 'react';
+import { logWarning } from '../lib/errorLogger';
 
 export const AuthContext = createContext(null);
 
@@ -154,7 +155,7 @@ export function AuthProvider({ children }) {
 
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
-          console.warn('Logout API failed:', data.error || 'Logout failed');
+          logWarning('Logout API failed', { error: data.error || 'Logout failed' });
         }
       }
 
@@ -167,7 +168,7 @@ export function AuthProvider({ children }) {
       clearAuth();
 
       const message = err instanceof Error ? err.message : 'Logout failed';
-      console.warn('Logout error:', message);
+      logWarning('Logout error', { error: message });
       setError(message);
       setLoading(false);
       return { success: false, error: message };
@@ -194,7 +195,7 @@ export function AuthProvider({ children }) {
 
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
-          console.warn('Logout all API failed:', data.error || 'Logout from all devices failed');
+          logWarning('Logout all API failed', { error: data.error || 'Logout from all devices failed' });
         }
       }
 
@@ -207,7 +208,7 @@ export function AuthProvider({ children }) {
       clearAuth();
 
       const message = err instanceof Error ? err.message : 'Logout failed';
-      console.warn('Logout all error:', message);
+      logWarning('Logout all error', { error: message });
       setError(message);
       setLoading(false);
       return { success: false, error: message };

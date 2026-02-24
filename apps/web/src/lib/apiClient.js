@@ -1,3 +1,5 @@
+import { logWarning } from './errorLogger';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 class ApiClient {
@@ -56,7 +58,7 @@ class ApiClient {
       return await response.json();
     } catch (parseError) {
       // If response is not JSON, return empty object
-      console.warn('Response is not valid JSON:', parseError);
+      logWarning('Response is not valid JSON:', { error: parseError });
       return {};
     }
   }

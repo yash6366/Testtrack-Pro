@@ -4,7 +4,8 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import API from '../lib/api';
+import API from '../lib/apiClient';
+import { logError } from '../lib/errorLogger';
 
 export function useMilestones(projectId) {
   const [milestones, setMilestones] = useState([]);
@@ -49,7 +50,7 @@ export function useMilestones(projectId) {
       });
       setFilters(queryFilters);
     } catch (err) {
-      console.error('Failed to fetch milestones:', err);
+      logError(err, 'Failed to fetch milestones');
       setError(err.response?.data?.error || 'Failed to fetch milestones');
     } finally {
       setLoading(false);
@@ -70,7 +71,7 @@ export function useMilestones(projectId) {
       setMilestones([...milestones, response.data]);
       return response.data;
     } catch (err) {
-      console.error('Failed to create milestone:', err);
+      logError(err, 'Failed to create milestone');
       throw err.response?.data?.error || 'Failed to create milestone';
     }
   }, [projectId, milestones]);
@@ -80,14 +81,14 @@ export function useMilestones(projectId) {
     try {
       const response = await API.patch(
         `/api/projects/${projectId}/milestones/${milestoneId}`,
-        data
+        data,
       );
       setMilestones(
-        milestones.map(m => (m.id === milestoneId ? response.data : m))
+        milestones.map(m => (m.id === milestoneId ? response.data : m)),
       );
       return response.data;
     } catch (err) {
-      console.error('Failed to update milestone:', err);
+      logError(err, 'Failed to update milestone');
       throw err.response?.data?.error || 'Failed to update milestone';
     }
   }, [projectId, milestones]);
@@ -98,7 +99,7 @@ export function useMilestones(projectId) {
       await API.delete(`/api/projects/${projectId}/milestones/${milestoneId}`);
       setMilestones(milestones.filter(m => m.id !== milestoneId));
     } catch (err) {
-      console.error('Failed to delete milestone:', err);
+      logError(err, 'Failed to delete milestone');
       throw err.response?.data?.error || 'Failed to delete milestone';
     }
   }, [projectId, milestones]);
@@ -108,11 +109,11 @@ export function useMilestones(projectId) {
     try {
       await API.post(
         `/api/projects/${projectId}/milestones/${milestoneId}/assign-test-cases`,
-        { ids: testCaseIds }
+        { ids: testCaseIds },
       );
       await fetchMilestones({}, {});
     } catch (err) {
-      console.error('Failed to assign test cases:', err);
+      logError(err, 'Failed to assign test cases');
       throw err.response?.data?.error || 'Failed to assign test cases';
     }
   }, [projectId]);
@@ -122,11 +123,11 @@ export function useMilestones(projectId) {
     try {
       await API.post(
         `/api/projects/${projectId}/milestones/${milestoneId}/assign-defects`,
-        { ids: defectIds }
+        { ids: defectIds },
       );
       await fetchMilestones({}, {});
     } catch (err) {
-      console.error('Failed to assign defects:', err);
+      logError(err, 'Failed to assign defects');
       throw err.response?.data?.error || 'Failed to assign defects';
     }
   }, [projectId]);
@@ -135,11 +136,11 @@ export function useMilestones(projectId) {
   const getMilestoneProgress = useCallback(async (milestoneId) => {
     try {
       const response = await API.get(
-        `/api/projects/${projectId}/milestones/${milestoneId}/progress`
+        `/api/projects/${projectId}/milestones/${milestoneId}/progress`,
       );
       return response.data;
     } catch (err) {
-      console.error('Failed to fetch milestone progress:', err);
+      logError(err, 'Failed to fetch milestone progress');
       throw err.response?.data?.error || 'Failed to fetch milestone progress';
     }
   }, [projectId]);
@@ -148,11 +149,11 @@ export function useMilestones(projectId) {
   const getProjectSummary = useCallback(async () => {
     try {
       const response = await API.get(
-        `/api/projects/${projectId}/milestones-summary`
+        `/api/projects/${projectId}/milestones-summary`,
       );
       return response.data;
     } catch (err) {
-      console.error('Failed to fetch milestones summary:', err);
+      logError(err, 'Failed to fetch milestones summary');
       throw err.response?.data?.error || 'Failed to fetch milestones summary';
     }
   }, [projectId]);

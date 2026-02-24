@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { apiClient } from '../lib/apiClient';
+import { logError } from '../lib/errorLogger';
 import { useProject } from '../hooks/useProject';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingState from '@/components/common/LoadingState';
@@ -105,7 +106,7 @@ export default function ReportsPage() {
       const response = await apiClient.get(endpoint);
       setPerformanceReport(response);
     } catch (err) {
-      console.error('Failed to load performance report:', err);
+      logError(err, 'Failed to load performance report');
     } finally {
       setPerfLoading(false);
     }

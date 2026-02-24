@@ -186,7 +186,7 @@ export function generateJSDocStub(functionName, line) {
     }
   }
   
-  jsdoc += ` * @returns {*} \n`;
+  jsdoc += ' * @returns {*} \n';
   jsdoc += ' */\n';
 
   return jsdoc;
@@ -301,7 +301,7 @@ export function printCleanupReport(report) {
   console.log(`Files with Unused Imports: ${report.summary.filesWithUnusedImports}`);
   console.log(`Files with Non-Standard Errors: ${report.summary.filesWithNonStandardErrors}`);
   console.log(`Files with Missing JSDoc: ${report.summary.filesWithMissingJSDoc}`);
-  console.log(`\nTotal Issues Found:`);
+  console.log('\nTotal Issues Found:');
   console.log(`  • Unused Imports: ${report.summary.totalUnusedImports}`);
   console.log(`  • Non-Standard Error Messages: ${report.summary.totalNonStandardErrors}`);
   console.log(`  • Missing JSDoc Comments: ${report.summary.totalMissingJSDoc}`);

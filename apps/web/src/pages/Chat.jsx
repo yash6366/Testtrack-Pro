@@ -1,8 +1,8 @@
 import ThemeToggle from '@/components/ThemeToggle';
 import ChatLayout from '@/components/ChatLayout';
 import { ChatProvider } from '@/context/ChatContext';
-import { useAuth } from "../hooks";
-import { useSocket } from "../hooks/useSocket";
+import { useAuth } from '../hooks';
+import { useSocket } from '../hooks/useSocket';
 import BackButton from '@/components/ui/BackButton';
 
 export default function Chat() {

@@ -21,7 +21,7 @@ export default function BugCreationForm({ executionId = null, testCaseId = null,
     affectedVersion: '',
     projectId: localStorage.getItem('selectedProjectId') || '',
     sourceExecutionId: executionId,
-    sourceTestCaseId: testCaseId ? String(testCaseId) : ''
+    sourceTestCaseId: testCaseId ? String(testCaseId) : '',
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -32,7 +32,7 @@ export default function BugCreationForm({ executionId = null, testCaseId = null,
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -71,7 +71,7 @@ export default function BugCreationForm({ executionId = null, testCaseId = null,
           testCaseId: formData.sourceTestCaseId ? Number(formData.sourceTestCaseId) : undefined,
           executionId: formData.sourceExecutionId || undefined,
           assigneeId: undefined,
-        }
+        },
       );
 
       setSuccess(true);

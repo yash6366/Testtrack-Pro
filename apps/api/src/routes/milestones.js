@@ -321,7 +321,7 @@ async function milestoneRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get all milestones for project
@@ -338,14 +338,14 @@ async function milestoneRoutes(fastify) {
         const result = await getProjectMilestones(
           projectId,
           { status, priority, search, sortBy, sortOrder },
-          { skip, take }
+          { skip, take },
         );
 
         reply.send(result);
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get single milestone
@@ -361,7 +361,7 @@ async function milestoneRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Update milestone
@@ -380,7 +380,7 @@ async function milestoneRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Delete milestone
@@ -399,7 +399,7 @@ async function milestoneRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Assign test cases to milestone
@@ -419,7 +419,7 @@ async function milestoneRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Assign defects to milestone
@@ -439,7 +439,7 @@ async function milestoneRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get milestone progress
@@ -457,7 +457,7 @@ async function milestoneRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get project milestones summary
@@ -475,7 +475,7 @@ async function milestoneRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }
 

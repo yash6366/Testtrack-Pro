@@ -4,6 +4,7 @@
  */
 
 import * as Sentry from '@sentry/react';
+import { logInfo, logWarning } from './errorLogger';
 
 /**
  * Initialize Sentry for frontend monitoring
@@ -14,7 +15,7 @@ export function initializeMonitoring() {
 
   // Only initialize if DSN is provided
   if (!sentryDsn) {
-    console.warn('⚠️  Sentry DSN not configured. Error tracking disabled.');
+    logWarning('Sentry DSN not configured. Error tracking disabled.');
     return;
   }
 
@@ -86,7 +87,7 @@ export function initializeMonitoring() {
     },
   });
 
-  console.log('✅ Sentry monitoring initialized');
+  logInfo('Sentry monitoring initialized');
 }
 
 /**

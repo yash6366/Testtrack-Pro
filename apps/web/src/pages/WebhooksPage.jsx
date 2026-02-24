@@ -70,7 +70,7 @@ export default function WebhooksPage() {
     try {
       setActionLoading(true);
       const response = await apiClient.get(
-        `/api/projects/${projectId}/webhooks/${webhookId}/deliveries`
+        `/api/projects/${projectId}/webhooks/${webhookId}/deliveries`,
       );
       setDeliveries(response.deliveries || response.data || []);
       setShowDeliveriesModal(true);
@@ -142,7 +142,7 @@ export default function WebhooksPage() {
       setError('');
       await apiClient.patch(
         `/api/projects/${projectId}/webhooks/${selectedWebhook.id}`,
-        formData
+        formData,
       );
       setSuccessMessage('Webhook updated successfully');
       setShowEditModal(false);

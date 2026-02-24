@@ -179,7 +179,7 @@ export async function validateBulkPermissions(testCaseIds, userId, userRole, ope
     } else {
       denied.push({ 
         id: tc.id, 
-        reason: `User does not have permission to ${operation} this test case` 
+        reason: `User does not have permission to ${operation} this test case`, 
       });
     }
   }
@@ -204,7 +204,7 @@ export async function requireEditPermission(request, reply) {
     if (!canEdit) {
       return reply.code(403).send({ 
         error: 'You do not have permission to edit this test case',
-        message: 'Only the creator, assignee, or owner can edit this test case'
+        message: 'Only the creator, assignee, or owner can edit this test case',
       });
     }
   } catch (error) {
@@ -229,7 +229,7 @@ export async function requireDeletePermission(request, reply) {
     if (!canDelete) {
       return reply.code(403).send({ 
         error: 'You do not have permission to delete this test case',
-        message: 'Only the creator can delete this test case'
+        message: 'Only the creator can delete this test case',
       });
     }
   } catch (error) {

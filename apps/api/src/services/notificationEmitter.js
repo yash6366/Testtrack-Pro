@@ -152,7 +152,7 @@ export async function updateDeliveryStatus(
   channel,
   status,
   timestamp = null,
-  failureReason = null
+  failureReason = null,
 ) {
   try {
     const data = { status };
@@ -240,7 +240,7 @@ export async function retryFailedDeliveries() {
             await updateDeliveryStatus(
               delivery.notificationId,
               delivery.channel,
-              'DELIVERED'
+              'DELIVERED',
             );
             succeeded++;
           }
@@ -257,7 +257,7 @@ export async function retryFailedDeliveries() {
             delivery.channel,
             'BOUNCED',
             null,
-            'Max retries exceeded'
+            'Max retries exceeded',
           );
         }
       }

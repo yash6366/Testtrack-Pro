@@ -85,7 +85,7 @@ function calculateNextDigestTime(frequency, preferredTime, timezone) {
   const [hours, minutes] = preferredTime.split(':').map(Number);
   const now = new Date();
 
-  let nextTime = new Date();
+  const nextTime = new Date();
   nextTime.setHours(hours, minutes, 0, 0);
 
   if (frequency === 'DAILY') {
@@ -220,7 +220,7 @@ function groupNotificationsByType(notifications) {
   });
 
   return Object.fromEntries(
-    Object.entries(grouped).filter(([type, items]) => items.length > 0)
+    Object.entries(grouped).filter(([type, items]) => items.length > 0),
   );
 }
 
@@ -262,7 +262,7 @@ export async function sendDigestEmail(digestData) {
 function generateDigestHtml(user, frequencyLabel, frequencyText, grouped, totalCount, unreadCount) {
   const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-  let notificationsHtml = Object.entries(grouped)
+  const notificationsHtml = Object.entries(grouped)
     .map(([type, items]) => {
       const typeLabel = formatType(type);
       const itemsHtml = items.slice(0, 5).map(item => `
@@ -379,7 +379,7 @@ export async function sendPendingDigests() {
         const nextDigestAt = calculateNextDigestTime(
           schedule.frequency,
           schedule.preferredTime,
-          schedule.timezone
+          schedule.timezone,
         );
 
         await prisma.digestSchedule.update({

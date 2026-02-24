@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { apiClient } from '../lib/apiClient';
+import { logError } from '../lib/errorLogger';
 
 /**
  * AdvancedFiltersPanel Component
@@ -42,7 +43,7 @@ export default function AdvancedFiltersPanel({ resourceType = 'BUG', onFilterSel
       });
       setFilters(response.data.filters || []);
     } catch (error) {
-      console.error('Failed to fetch filters:', error);
+      logError(error, 'Failed to fetch filters');
     } finally {
       setLoading(false);
     }
@@ -73,7 +74,7 @@ export default function AdvancedFiltersPanel({ resourceType = 'BUG', onFilterSel
             isDefault: filterForm.isDefault,
             isFavorite: filterForm.isFavorite,
           },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
       } else {
         // Create new filter
@@ -89,7 +90,7 @@ export default function AdvancedFiltersPanel({ resourceType = 'BUG', onFilterSel
             isDefault: filterForm.isDefault,
             isFavorite: filterForm.isFavorite,
           },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
       }
 
@@ -97,7 +98,7 @@ export default function AdvancedFiltersPanel({ resourceType = 'BUG', onFilterSel
       resetForm();
       setShowForm(false);
     } catch (error) {
-      console.error('Failed to save filter:', error);
+      logError(error, 'Failed to save filter');
       alert('Failed to save filter');
     }
   };
@@ -111,7 +112,7 @@ export default function AdvancedFiltersPanel({ resourceType = 'BUG', onFilterSel
       });
       await fetchFilters();
     } catch (error) {
-      console.error('Failed to delete filter:', error);
+      logError(error, 'Failed to delete filter');
       alert('Failed to delete filter');
     }
   };

@@ -38,7 +38,7 @@ export async function evidenceRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   fastify.post(
@@ -68,7 +68,7 @@ export async function evidenceRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   fastify.get(
@@ -91,7 +91,7 @@ export async function evidenceRoutes(fastify) {
       } catch (error) {
         reply.code(404).send({ error: error.message });
       }
-    }
+    },
   );
 
   fastify.get(
@@ -114,7 +114,7 @@ export async function evidenceRoutes(fastify) {
       } catch (error) {
         reply.code(404).send({ error: error.message });
       }
-    }
+    },
   );
 
   fastify.delete(
@@ -136,7 +136,7 @@ export async function evidenceRoutes(fastify) {
       } catch (error) {
         reply.code(404).send({ error: error.message });
       }
-    }
+    },
   );
 }
 

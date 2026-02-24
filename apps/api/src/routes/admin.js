@@ -542,7 +542,7 @@ export async function adminRoutes(fastify) {
 
         const project = await adminProjectService.createProject(
           { name, key, description, modules },
-          request.user.id
+          request.user.id,
         );
 
         reply.code(201).send(project);
@@ -550,7 +550,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -575,7 +575,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -595,7 +595,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -612,7 +612,7 @@ export async function adminRoutes(fastify) {
         const project = await adminProjectService.updateProject(
           Number(projectId),
           { name, description, modules, isActive },
-          request.user.id
+          request.user.id,
         );
 
         reply.send(project);
@@ -620,7 +620,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -637,7 +637,7 @@ export async function adminRoutes(fastify) {
         const environment = await adminProjectService.addProjectEnvironment(
           Number(projectId),
           { name, url, description },
-          request.user.id
+          request.user.id,
         );
 
         reply.code(201).send(environment);
@@ -645,7 +645,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -665,7 +665,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -682,7 +682,7 @@ export async function adminRoutes(fastify) {
         const customField = await adminProjectService.addProjectCustomField(
           Number(projectId),
           { name, label, type, required, options, defaultValue, order },
-          request.user.id
+          request.user.id,
         );
 
         reply.code(201).send(customField);
@@ -690,7 +690,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -710,7 +710,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -732,7 +732,7 @@ export async function adminRoutes(fastify) {
           Number(projectId),
           Number(userId),
           { role },
-          request.user.id
+          request.user.id,
         );
 
         reply.code(201).send(allocation);
@@ -740,7 +740,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -756,7 +756,7 @@ export async function adminRoutes(fastify) {
         await adminProjectService.deallocateUserFromProject(
           Number(projectId),
           Number(userId),
-          request.user.id
+          request.user.id,
         );
 
         reply.send({ message: 'User removed from project' });
@@ -764,7 +764,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -784,7 +784,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ==========================================
@@ -806,7 +806,7 @@ export async function adminRoutes(fastify) {
         const { messages, total } = await chatAdminService.getRecentMessages(
           limit,
           offset,
-          channelId ? Number(channelId) : null
+          channelId ? Number(channelId) : null,
         );
 
         reply.send({ messages, pagination: { total, limit, offset } });
@@ -814,7 +814,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -832,7 +832,7 @@ export async function adminRoutes(fastify) {
           Number(messageId),
           request.user.id,
           request.user.name,
-          reason
+          reason,
         );
 
         // Broadcast deletion via WebSocket to channel and admins
@@ -861,7 +861,7 @@ export async function adminRoutes(fastify) {
         }
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -883,7 +883,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -906,7 +906,7 @@ export async function adminRoutes(fastify) {
           request.user.id,
           request.user.name,
           new Date(mutedUntil),
-          reason
+          reason,
         );
 
         // Broadcast mute via WebSocket to user and admins
@@ -938,7 +938,7 @@ export async function adminRoutes(fastify) {
         }
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -954,7 +954,7 @@ export async function adminRoutes(fastify) {
         const unmutedUser = await chatAdminService.unmuteUser(
           Number(userId),
           request.user.id,
-          request.user.name
+          request.user.name,
         );
 
         // Broadcast unmute via WebSocket to user and admins
@@ -982,7 +982,7 @@ export async function adminRoutes(fastify) {
         }
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1004,7 +1004,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1022,7 +1022,7 @@ export async function adminRoutes(fastify) {
           Number(channelId),
           request.user.id,
           request.user.name,
-          reason
+          reason,
         );
 
         // Broadcast lock via WebSocket to channel and admins
@@ -1053,7 +1053,7 @@ export async function adminRoutes(fastify) {
         }
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1069,7 +1069,7 @@ export async function adminRoutes(fastify) {
         const unlockedChannel = await chatAdminService.unlockChannel(
           Number(channelId),
           request.user.id,
-          request.user.name
+          request.user.name,
         );
 
         // Broadcast unlock via WebSocket to channel and admins
@@ -1099,7 +1099,7 @@ export async function adminRoutes(fastify) {
         }
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1117,7 +1117,7 @@ export async function adminRoutes(fastify) {
           Number(channelId),
           request.user.id,
           request.user.name,
-          reason
+          reason,
         );
 
         // Broadcast disable via WebSocket to channel and admins
@@ -1148,7 +1148,7 @@ export async function adminRoutes(fastify) {
         }
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1164,7 +1164,7 @@ export async function adminRoutes(fastify) {
         const enabledChannel = await chatAdminService.enableChat(
           Number(channelId),
           request.user.id,
-          request.user.name
+          request.user.name,
         );
 
         // Broadcast enable via WebSocket to channel and admins
@@ -1194,7 +1194,7 @@ export async function adminRoutes(fastify) {
         }
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1223,7 +1223,7 @@ export async function adminRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }
 

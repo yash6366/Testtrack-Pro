@@ -9,7 +9,7 @@ import { FileTemplate, Plus, Edit2, Trash2, Copy, X } from 'lucide-react';
 export default function TestCaseTemplateSelector({ 
   projectId, 
   onSelectTemplate,
-  onClose 
+  onClose, 
 }) {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -47,7 +47,7 @@ export default function TestCaseTemplateSelector({
         {
           projectId: Number(projectId),
           testCaseName,
-        }
+        },
       );
 
       onSelectTemplate(response.data);

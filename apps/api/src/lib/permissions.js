@@ -3,6 +3,8 @@
  * Industry-grade role-based access control (RBAC) with explicit permission tracking
  */
 
+import { logWarn } from './logger.js';
+
 export const ROLES = {
   ADMIN: 'ADMIN',
   DEVELOPER: 'DEVELOPER',
@@ -698,7 +700,7 @@ export function hasPermission(role, permission) {
   const perm = PERMISSIONS[permission];
 
   if (!perm) {
-    console.warn(`Unknown permission: ${permission}`);
+    logWarn(`Unknown permission: ${permission}`);
     return false;
   }
 

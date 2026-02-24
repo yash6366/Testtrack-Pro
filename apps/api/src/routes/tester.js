@@ -6,6 +6,7 @@
 import { getPrismaClient } from '../lib/prisma.js';
 import { createAuthGuards } from '../lib/rbac.js';
 import { requirePermission } from '../lib/policy.js';
+import { logError } from '../lib/logger.js';
 import {
   generateExecutionReport,
   generateTesterPerformanceReport,
@@ -132,10 +133,10 @@ export async function testerRoutes(fastify) {
           },
         });
       } catch (error) {
-        console.error('Error fetching tester projects:', error);
+        logError('Error fetching tester projects:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -161,10 +162,10 @@ export async function testerRoutes(fastify) {
         const result = await getUserAssignedTestCases(userId, filters);
         reply.send(result);
       } catch (error) {
-        console.error('Error fetching assigned test cases:', error);
+        logError('Error fetching assigned test cases:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -186,10 +187,10 @@ export async function testerRoutes(fastify) {
         const result = await getUserOwnedTestCases(userId, filters);
         reply.send(result);
       } catch (error) {
-        console.error('Error fetching owned test cases:', error);
+        logError('Error fetching owned test cases:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -211,15 +212,15 @@ export async function testerRoutes(fastify) {
           },
           userId,
           getClientContext(request),
-          request.permissionContext
+          request.permissionContext,
         );
 
         reply.code(201).send(testCase);
       } catch (error) {
-        console.error('Error creating test case:', error);
+        logError('Error creating test case:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -266,15 +267,15 @@ export async function testerRoutes(fastify) {
           request.body,
           userId,
           getClientContext(request),
-          request.permissionContext
+          request.permissionContext,
         );
 
         reply.send(updated);
       } catch (error) {
-        console.error('Error updating test case:', error);
+        logError('Error updating test case:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -298,15 +299,15 @@ export async function testerRoutes(fastify) {
           assignedToId,
           userId,
           getClientContext(request),
-          request.permissionContext
+          request.permissionContext,
         );
 
         reply.send(updated);
       } catch (error) {
-        console.error('Error assigning test case:', error);
+        logError('Error assigning test case:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -358,15 +359,15 @@ export async function testerRoutes(fastify) {
           ownedById,
           userId,
           getClientContext(request),
-          request.permissionContext
+          request.permissionContext,
         );
 
         reply.send(updated);
       } catch (error) {
-        console.error('Error setting test case owner:', error);
+        logError('Error setting test case owner:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -390,15 +391,15 @@ export async function testerRoutes(fastify) {
           csvContent,
           userId,
           getClientContext(request),
-          request.permissionContext
+          request.permissionContext,
         );
 
         reply.code(201).send(results);
       } catch (error) {
-        console.error('Error importing test cases:', error);
+        logError('Error importing test cases:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -424,10 +425,10 @@ export async function testerRoutes(fastify) {
         const result = await getProjectTemplates(Number(projectId), filters);
         reply.send(result);
       } catch (error) {
-        console.error('Error fetching templates:', error);
+        logError('Error fetching templates:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -442,10 +443,10 @@ export async function testerRoutes(fastify) {
         const template = await getTemplateById(Number(templateId));
         reply.send(template);
       } catch (error) {
-        console.error('Error fetching template:', error);
+        logError('Error fetching template:', error);
         reply.code(404).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -471,15 +472,15 @@ export async function testerRoutes(fastify) {
           Number(projectId),
           testCaseName,
           userId,
-          getClientContext(request)
+          getClientContext(request),
         );
 
         reply.code(201).send(testCase);
       } catch (error) {
-        console.error('Error creating test case from template:', error);
+        logError('Error creating test case from template:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -505,10 +506,10 @@ export async function testerRoutes(fastify) {
 
         reply.code(201).send(template);
       } catch (error) {
-        console.error('Error creating template:', error);
+        logError('Error creating template:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -532,10 +533,10 @@ export async function testerRoutes(fastify) {
 
         reply.send(updated);
       } catch (error) {
-        console.error('Error updating template:', error);
+        logError('Error updating template:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -558,10 +559,10 @@ export async function testerRoutes(fastify) {
 
         reply.code(204).send();
       } catch (error) {
-        console.error('Error deleting template:', error);
+        logError('Error deleting template:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -673,7 +674,7 @@ export async function testerRoutes(fastify) {
         },
         recentExecutions,
       };
-    }
+    },
   );
 
   /**
@@ -767,7 +768,7 @@ export async function testerRoutes(fastify) {
         testRunsParticipated: testRuns.length,
         recentTestRuns: testRuns,
       };
-    }
+    },
   );
 
   /**
@@ -810,7 +811,7 @@ export async function testerRoutes(fastify) {
       });
 
       return { testRuns };
-    }
+    },
   );
 
   /**
@@ -854,7 +855,7 @@ export async function testerRoutes(fastify) {
       });
 
       return { pendingExecutions };
-    }
+    },
   );
 
   /**
@@ -916,7 +917,7 @@ export async function testerRoutes(fastify) {
         skip: Number(skip),
         take: Number(take),
       };
-    }
+    },
   );
 
   /**
@@ -943,7 +944,7 @@ export async function testerRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -984,7 +985,7 @@ export async function testerRoutes(fastify) {
         changePercent: change.toFixed(2),
         trend: change > 0 ? 'up' : change < 0 ? 'down' : 'stable',
       };
-    }
+    },
   );
 
   // ============================================
@@ -1003,10 +1004,10 @@ export async function testerRoutes(fastify) {
         const report = await generateExecutionReport(Number(runId));
         reply.send(report);
       } catch (error) {
-        console.error('Error generating report:', error);
+        logError('Error generating report:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1025,10 +1026,10 @@ export async function testerRoutes(fastify) {
           .header('Content-Disposition', `attachment; filename="test-run-${runId}.csv"`)
           .send(csv);
       } catch (error) {
-        console.error('Error exporting test run:', error);
+        logError('Error exporting test run:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1047,10 +1048,10 @@ export async function testerRoutes(fastify) {
           .header('Content-Disposition', `attachment; filename="test-run-${runId}.pdf"`)
           .send(Buffer.from(pdf));
       } catch (error) {
-        console.error('Error exporting test run to PDF:', error);
+        logError('Error exporting test run to PDF:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1069,10 +1070,10 @@ export async function testerRoutes(fastify) {
           .header('Content-Disposition', `attachment; filename="test-run-${runId}.xlsx"`)
           .send(Buffer.from(excel));
       } catch (error) {
-        console.error('Error exporting test run to Excel:', error);
+        logError('Error exporting test run to Excel:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1100,10 +1101,10 @@ export async function testerRoutes(fastify) {
         const report = await generateTesterPerformanceReport(userId, options);
         reply.send(report);
       } catch (error) {
-        console.error('Error generating performance report:', error);
+        logError('Error generating performance report:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1131,10 +1132,10 @@ export async function testerRoutes(fastify) {
           .header('Content-Disposition', `attachment; filename="tester-performance-${userId}.pdf"`)
           .send(Buffer.from(pdf));
       } catch (error) {
-        console.error('Error exporting performance report to PDF:', error);
+        logError('Error exporting performance report to PDF:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -1149,10 +1150,10 @@ export async function testerRoutes(fastify) {
         const metrics = await getProjectTestMetrics(Number(projectId));
         reply.send(metrics);
       } catch (error) {
-        console.error('Error fetching project metrics:', error);
+        logError('Error fetching project metrics:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }
 

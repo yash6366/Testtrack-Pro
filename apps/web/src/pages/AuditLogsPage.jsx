@@ -4,6 +4,7 @@ import { apiClient } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import DashboardLayout from '../components/DashboardLayout';
 import BackButton from '@/components/ui/BackButton';
+import { logError } from '@/lib/errorLogger';
 
 export default function AuditLogsPage() {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ export default function AuditLogsPage() {
       setPagination(response.pagination || { skip: 0, take: 50, total: 0, pages: 0 });
     } catch (err) {
       setError(err.message || 'Failed to load audit logs');
-      console.error(err);
+      logError(err, 'Failed to load audit logs in AuditLogsPage');
     } finally {
       setLoading(false);
     }
@@ -144,7 +145,7 @@ export default function AuditLogsPage() {
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       setError(err.message || 'Failed to export audit logs');
-      console.error(err);
+      logError(err, 'Failed to export audit logs in AuditLogsPage');
     } finally {
       setExportLoading(false);
     }
@@ -180,16 +181,15 @@ export default function AuditLogsPage() {
 
   return (
     <DashboardLayout
-        <div className="mb-4">
-          <BackButton label="Back to Dashboard" fallback="/dashboard" />
-        </div>
-
       user={user}
       dashboardLabel="Audit Logs"
       headerTitle="Audit Logs"
       headerSubtitle="Complete audit trail of all system activities"
     >
       <div className="p-6 space-y-6">
+        <div className="mb-4">
+          <BackButton label="Back to Dashboard" fallback="/dashboard" />
+        </div>
         {/* Messages */}
         {error && (
           <div className="bg-red-50 dark:bg-red-900 border border-red-200 text-red-800 dark:text-red-200 px-4 py-3 rounded">
@@ -382,7 +382,7 @@ export default function AuditLogsPage() {
                       <td className="px-6 py-4">
                         <span
                           className={`px-2 py-1 text-xs rounded whitespace-nowrap ${getActionBadgeColor(
-                            log.action
+                            log.action,
                           )}`}
                         >
                           {log.action.replace(/_/g, ' ')}
@@ -470,7 +470,7 @@ export default function AuditLogsPage() {
                   </h2>
                   <span
                     className={`px-2 py-1 text-xs rounded ${getActionBadgeColor(
-                      selectedLog.action
+                      selectedLog.action,
                     )}`}
                   >
                     {selectedLog.action.replace(/_/g, ' ')}

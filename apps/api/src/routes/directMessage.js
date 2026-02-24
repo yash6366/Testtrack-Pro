@@ -1,6 +1,7 @@
 import { getPrismaClient } from '../lib/prisma.js';
 import { createAuthGuards } from '../lib/rbac.js';
 import { createNotification, getNotificationPreferences, isWithinQuietHours } from '../services/notificationService.js';
+import { logError } from '../lib/logger.js';
 
 const prisma = getPrismaClient();
 const MAX_MESSAGE_LENGTH = 2000;
@@ -140,7 +141,7 @@ export async function directMessageRoutes(fastify) {
 
       return { conversations };
     } catch (error) {
-      console.error('Error fetching conversations:', error);
+      logError('Error fetching conversations:', error);
       throw error;
     }
   });
@@ -230,7 +231,7 @@ export async function directMessageRoutes(fastify) {
         });
       }
     } catch (error) {
-      console.error('Failed to create DM notification:', error);
+      logError('Failed to create DM notification:', error);
     }
 
     return { message: dm };

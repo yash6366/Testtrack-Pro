@@ -42,7 +42,7 @@ export default function TestCaseImportModal({ projectId, isOpen, onClose, onSucc
         
         const response = await axios.post(
           `/api/projects/${projectId}/test-cases/import/csv`,
-          { csvContent }
+          { csvContent },
         );
 
         setImportResults(response.data);
@@ -50,7 +50,7 @@ export default function TestCaseImportModal({ projectId, isOpen, onClose, onSucc
         if (response.data.imported.length > 0) {
           onSuccess(
             `Successfully imported ${response.data.imported.length} test case(s). ` +
-            `${response.data.failed.length} failed.`
+            `${response.data.failed.length} failed.`,
           );
         }
       } catch (err) {

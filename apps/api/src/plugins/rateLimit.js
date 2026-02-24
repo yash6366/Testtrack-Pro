@@ -5,6 +5,7 @@
  */
 
 import { getRedisClient } from '../lib/socket.js';
+import { logError } from '../lib/logger.js';
 
 const REDIS_PREFIX = 'ratelimit:';
 
@@ -68,7 +69,7 @@ class RateLimiter {
 
       return true;
     } catch (error) {
-      console.error('Redis rate limiting failed, using in-memory fallback:', error);
+      logError('Redis rate limiting failed, using in-memory fallback:', error);
       return this._isAllowedMemory(key);
     }
   }
@@ -116,7 +117,7 @@ class RateLimiter {
       try {
         await redisClient.del(`${REDIS_PREFIX}${key}`);
       } catch (error) {
-        console.error('Redis rate limit reset failed:', error);
+        logError('Redis rate limit reset failed:', error);
       }
     }
 
@@ -136,7 +137,7 @@ class RateLimiter {
           await Promise.all(keys.map(key => redisClient.del(key)));
         }
       } catch (error) {
-        console.error('Redis rate limit clear failed:', error);
+        logError('Redis rate limit clear failed:', error);
       }
     }
 

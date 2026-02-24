@@ -105,7 +105,7 @@ export async function createSignedEvidenceUpload({
       public_id: publicId,
       resource_type: config.resourceType,
     },
-    process.env.CLOUDINARY_API_SECRET
+    process.env.CLOUDINARY_API_SECRET,
   );
 
   return {

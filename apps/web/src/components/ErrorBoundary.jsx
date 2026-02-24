@@ -1,5 +1,6 @@
 import React from 'react';
 import { RefreshCw, AlertCircle } from 'lucide-react';
+import { logError } from '../lib/errorLogger';
 
 /**
  * Error Boundary Component
@@ -30,15 +31,7 @@ class ErrorBoundary extends React.Component {
       errorCount: prevState.errorCount + 1,
     }));
 
-    // Log to console in development
-    if (import.meta.env.MODE === 'development') {
-      // eslint-disable-next-line no-console
-      console.error('Error caught by Error Boundary:');
-      // eslint-disable-next-line no-console
-      console.error(error);
-      // eslint-disable-next-line no-console
-      console.error('Error Info:', errorInfo);
-    }
+    logError(error, 'Error caught by Error Boundary', { errorInfo });
 
     // Optionally send error to error tracking service (Sentry, etc)
     // this.logErrorToService(error, errorInfo);

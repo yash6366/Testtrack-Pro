@@ -6,6 +6,7 @@
 import { getPrismaClient } from '../lib/prisma.js';
 import { createAuthGuards } from '../lib/rbac.js';
 import { requireNotAdmin } from '../lib/adminConstraints.js';
+import { logError } from '../lib/logger.js';
 import {
   createTestSuite,
   updateTestSuite,
@@ -58,15 +59,15 @@ export async function testSuiteRoutes(fastify) {
             ...request.body,
             projectId: Number(projectId),
           },
-          userId
+          userId,
         );
 
         reply.code(201).send(suite);
       } catch (error) {
-        console.error('Error creating test suite:', error);
+        logError('Error creating test suite:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get test suites for project
@@ -88,10 +89,10 @@ export async function testSuiteRoutes(fastify) {
 
         reply.send(suites);
       } catch (error) {
-        console.error('Error fetching test suites:', error);
+        logError('Error fetching test suites:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get suite hierarchy
@@ -104,10 +105,10 @@ export async function testSuiteRoutes(fastify) {
         const hierarchy = await getSuiteHierarchy(Number(projectId));
         reply.send(hierarchy);
       } catch (error) {
-        console.error('Error fetching suite hierarchy:', error);
+        logError('Error fetching suite hierarchy:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get single test suite
@@ -120,10 +121,10 @@ export async function testSuiteRoutes(fastify) {
         const suite = await getTestSuiteById(Number(suiteId));
         reply.send(suite);
       } catch (error) {
-        console.error('Error fetching test suite:', error);
+        logError('Error fetching test suite:', error);
         reply.code(404).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Update test suite
@@ -138,10 +139,10 @@ export async function testSuiteRoutes(fastify) {
         const updated = await updateTestSuite(Number(suiteId), request.body, userId);
         reply.send(updated);
       } catch (error) {
-        console.error('Error updating test suite:', error);
+        logError('Error updating test suite:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Delete test suite
@@ -156,10 +157,10 @@ export async function testSuiteRoutes(fastify) {
         const result = await deleteTestSuite(Number(suiteId), userId);
         reply.send(result);
       } catch (error) {
-        console.error('Error deleting test suite:', error);
+        logError('Error deleting test suite:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -184,15 +185,15 @@ export async function testSuiteRoutes(fastify) {
           Number(suiteId),
           newName,
           userId,
-          { includeTestCases, includeChildSuites }
+          { includeTestCases, includeChildSuites },
         );
 
         reply.code(201).send(cloned);
       } catch (error) {
-        console.error('Error cloning test suite:', error);
+        logError('Error cloning test suite:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Archive test suite
@@ -207,10 +208,10 @@ export async function testSuiteRoutes(fastify) {
         const archived = await archiveTestSuite(Number(suiteId), userId);
         reply.send(archived);
       } catch (error) {
-        console.error('Error archiving test suite:', error);
+        logError('Error archiving test suite:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Restore test suite
@@ -225,10 +226,10 @@ export async function testSuiteRoutes(fastify) {
         const restored = await restoreTestSuite(Number(suiteId), userId);
         reply.send(restored);
       } catch (error) {
-        console.error('Error restoring test suite:', error);
+        logError('Error restoring test suite:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Move suite to different parent
@@ -244,15 +245,15 @@ export async function testSuiteRoutes(fastify) {
         const moved = await moveSuiteToParent(
           Number(suiteId),
           newParentId ? Number(newParentId) : null,
-          userId
+          userId,
         );
 
         reply.send(moved);
       } catch (error) {
-        console.error('Error moving test suite:', error);
+        logError('Error moving test suite:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get child suites
@@ -267,10 +268,10 @@ export async function testSuiteRoutes(fastify) {
         const children = await getChildSuites(Number(suiteId), recursive === 'true');
         reply.send(children);
       } catch (error) {
-        console.error('Error fetching child suites:', error);
+        logError('Error fetching child suites:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -294,10 +295,10 @@ export async function testSuiteRoutes(fastify) {
 
         reply.send(testCases);
       } catch (error) {
-        console.error('Error fetching suite test cases:', error);
+        logError('Error fetching suite test cases:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Add test cases to suite
@@ -317,10 +318,10 @@ export async function testSuiteRoutes(fastify) {
         const added = await addTestCasesToSuite(Number(suiteId), testCaseIds, userId);
         reply.code(201).send(added);
       } catch (error) {
-        console.error('Error adding test cases to suite:', error);
+        logError('Error adding test cases to suite:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Remove test case from suite
@@ -334,10 +335,10 @@ export async function testSuiteRoutes(fastify) {
         const result = await removeTestCasesFromSuite(Number(suiteId), [Number(testCaseId)]);
         reply.send(result);
       } catch (error) {
-        console.error('Error removing test case from suite:', error);
+        logError('Error removing test case from suite:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Bulk remove test cases from suite
@@ -356,10 +357,10 @@ export async function testSuiteRoutes(fastify) {
         const result = await removeTestCasesFromSuite(Number(suiteId), testCaseIds);
         reply.send(result);
       } catch (error) {
-        console.error('Error removing test cases from suite:', error);
+        logError('Error removing test cases from suite:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Reorder test cases in suite
@@ -378,10 +379,10 @@ export async function testSuiteRoutes(fastify) {
         const result = await reorderTestCasesInSuite(Number(suiteId), orderMap);
         reply.send(result);
       } catch (error) {
-        console.error('Error reordering test cases:', error);
+        logError('Error reordering test cases:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -416,15 +417,15 @@ export async function testSuiteRoutes(fastify) {
             stopOnFailure,
             executeChildSuites,
           },
-          userId
+          userId,
         );
 
         reply.code(201).send(suiteRun);
       } catch (error) {
-        console.error('Error executing test suite:', error);
+        logError('Error executing test suite:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get suite runs for project
@@ -445,10 +446,10 @@ export async function testSuiteRoutes(fastify) {
 
         reply.send(suiteRuns);
       } catch (error) {
-        console.error('Error fetching suite runs:', error);
+        logError('Error fetching suite runs:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get suite execution history
@@ -468,10 +469,10 @@ export async function testSuiteRoutes(fastify) {
 
         reply.send(history);
       } catch (error) {
-        console.error('Error fetching suite execution history:', error);
+        logError('Error fetching suite execution history:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get single suite run
@@ -484,10 +485,10 @@ export async function testSuiteRoutes(fastify) {
         const suiteRun = await getSuiteRunById(Number(suiteRunId));
         reply.send(suiteRun);
       } catch (error) {
-        console.error('Error fetching suite run:', error);
+        logError('Error fetching suite run:', error);
         reply.code(404).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get suite execution report
@@ -500,10 +501,10 @@ export async function testSuiteRoutes(fastify) {
         const report = await getSuiteExecutionReport(Number(suiteRunId));
         reply.send(report);
       } catch (error) {
-        console.error('Error fetching suite execution report:', error);
+        logError('Error fetching suite execution report:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Update suite run metrics
@@ -516,10 +517,10 @@ export async function testSuiteRoutes(fastify) {
         const updated = await updateSuiteRunMetrics(Number(suiteRunId));
         reply.send(updated);
       } catch (error) {
-        console.error('Error updating suite run metrics:', error);
+        logError('Error updating suite run metrics:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Cancel suite run
@@ -534,10 +535,10 @@ export async function testSuiteRoutes(fastify) {
         const cancelled = await cancelSuiteRun(Number(suiteRunId), userId);
         reply.send(cancelled);
       } catch (error) {
-        console.error('Error cancelling suite run:', error);
+        logError('Error cancelling suite run:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get suite execution trends
@@ -555,10 +556,10 @@ export async function testSuiteRoutes(fastify) {
 
         reply.send(trends);
       } catch (error) {
-        console.error('Error fetching suite execution trends:', error);
+        logError('Error fetching suite execution trends:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Compare two suite executions
@@ -576,9 +577,9 @@ export async function testSuiteRoutes(fastify) {
         const comparison = await compareSuiteExecutions(Number(run1Id), Number(run2Id));
         reply.send(comparison);
       } catch (error) {
-        console.error('Error comparing suite executions:', error);
+        logError('Error comparing suite executions:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }

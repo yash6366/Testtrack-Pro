@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { apiClient } from '../lib/apiClient';
+import { logError } from '../lib/errorLogger';
 
 /**
  * SavedViewsDashboard Component
@@ -26,7 +27,7 @@ export default function SavedViewsDashboard() {
       });
       setFilters(response.data.filters || []);
     } catch (error) {
-      console.error('Failed to fetch filters:', error);
+      logError(error, 'Failed to fetch filters');
     } finally {
       setLoading(false);
     }
@@ -37,11 +38,11 @@ export default function SavedViewsDashboard() {
       await apiClient.patch(
         `/notifications/filters/${filterId}`,
         { isDefault: true },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       await fetchFilters();
     } catch (error) {
-      console.error('Failed to set default filter:', error);
+      logError(error, 'Failed to set default filter');
     }
   };
 
@@ -51,11 +52,11 @@ export default function SavedViewsDashboard() {
       await apiClient.patch(
         `/notifications/filters/${filterId}`,
         { isFavorite: !filter.isFavorite },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       await fetchFilters();
     } catch (error) {
-      console.error('Failed to toggle favorite:', error);
+      logError(error, 'Failed to toggle favorite');
     }
   };
 
@@ -64,11 +65,11 @@ export default function SavedViewsDashboard() {
       await apiClient.patch(
         `/notifications/filters/${filterId}/usage`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       // Could trigger filtering logic here
     } catch (error) {
-      console.error('Failed to track filter usage:', error);
+      logError(error, 'Failed to track filter usage');
     }
   };
 

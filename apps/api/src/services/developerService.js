@@ -246,7 +246,7 @@ export async function getDeveloperMetrics(userId, options = {}) {
 
   // Calculate resolution time statistics
   const resolutionTimesInHours = resolutionTimes.map(
-    (r) => (r.closedAt - r.createdAt) / (1000 * 60 * 60)
+    (r) => (r.closedAt - r.createdAt) / (1000 * 60 * 60),
   );
   const avgResolutionTime =
     resolutionTimesInHours.length > 0
@@ -728,10 +728,10 @@ export async function getDeveloperBugAnalytics(userId, filters = {}) {
     weekEnd.setDate(weekEnd.getDate() + 7);
 
     const weekBugs = bugs.filter(
-      (b) => b.createdAt >= weekStart && b.createdAt < weekEnd
+      (b) => b.createdAt >= weekStart && b.createdAt < weekEnd,
     );
     const weekResolved = bugs.filter(
-      (b) => b.closedAt && b.closedAt >= weekStart && b.closedAt < weekEnd
+      (b) => b.closedAt && b.closedAt >= weekStart && b.closedAt < weekEnd,
     );
 
     weeklyTrends.push({

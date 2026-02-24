@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks';
 import { useChat } from '@/context/ChatContext';
 import DirectMessagesPanel from './DirectMessagesPanel';
+import { logError } from '@/lib/errorLogger';
 
 /**
  * ChatSidebar - Unified chat sidebar with 4 sections
@@ -64,7 +65,7 @@ export default function ChatSidebar({
       });
       setShowNewChannelForm(false);
     } catch (error) {
-      console.error('Failed to create channel:', error);
+      logError(error, 'Failed to create channel');
     }
   };
 

@@ -10,7 +10,7 @@ export async function apiKeyAuthPlugin(fastify, options) {
    * API Key Authentication Decorator
    * Use with @fastify.authenticate
    */
-  fastify.decorate('authenticateApiKey', async function (request, reply) {
+  fastify.decorate('authenticateApiKey', async (request, reply) => {
     const apiKey = request.headers['x-api-key'];
 
     if (!apiKey) {
@@ -36,7 +36,7 @@ export async function apiKeyAuthPlugin(fastify, options) {
   /**
    * Pre-handler for routes requiring API key auth
    */
-  fastify.decorate('authenticate APIKey', async function (request, reply) {
+  fastify.decorate('authenticate APIKey', async (request, reply) => {
     const apiKey = request.headers['x-api-key'];
 
     if (!apiKey) {

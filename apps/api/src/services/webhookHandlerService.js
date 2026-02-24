@@ -122,7 +122,7 @@ export async function handlePullRequestEvent(payload, integrationId) {
     // Parse PR title and description for linked bugs
     const commitData = await formatCommitData(
       `${pull_request.title}\n${pull_request.body || ''}`,
-      projectId
+      projectId,
     );
 
     // Store PR in database
@@ -257,7 +257,7 @@ export async function syncGitHubData(integrationId, githubService) {
       accessToken,
       repoOwner,
       repoName,
-      { per_page: 50 }
+      { per_page: 50 },
     );
 
     // Process commits
@@ -292,7 +292,7 @@ export async function syncGitHubData(integrationId, githubService) {
       accessToken,
       repoOwner,
       repoName,
-      { per_page: 30 }
+      { per_page: 30 },
     );
 
     let prCount = 0;
@@ -300,7 +300,7 @@ export async function syncGitHubData(integrationId, githubService) {
       try {
         const commitData = await formatCommitData(
           `${pr.title}\n${pr.body || ''}`,
-          projectId
+          projectId,
         );
 
         await storeGitPullRequest(integrationId, {

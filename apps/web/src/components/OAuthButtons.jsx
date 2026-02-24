@@ -19,7 +19,7 @@ export default function OAuthButtons() {
         `${API_BASE_URL}/api/auth/oauth/${provider.toLowerCase()}`,
         {
           method: 'GET',
-        }
+        },
       );
 
       if (!response.ok) {

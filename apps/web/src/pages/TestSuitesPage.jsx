@@ -91,7 +91,7 @@ export default function TestSuitesPage() {
   };
 
   const handleCloneSuite = async (suiteId, suiteName) => {
-    const newName = prompt(`Enter name for cloned suite:`, `${suiteName} (Copy)`);
+    const newName = prompt('Enter name for cloned suite:', `${suiteName} (Copy)`);
     if (newName) {
       try {
         await apiClient.post(`/api/test-suites/${suiteId}/clone`, {

@@ -80,7 +80,7 @@ export default function EnhancedTestCaseManagement() {
     try {
       const response = await axios.get(
         `/api/projects/${projectId}/test-cases`,
-        { params: filters }
+        { params: filters },
       );
       setTestCases(response.data.testCases || []);
     } catch (err) {
@@ -130,7 +130,7 @@ export default function EnhancedTestCaseManagement() {
 
       await axios.patch(
         `/api/projects/${projectId}/test-cases/${editingTestCase.id}`,
-        testCaseData
+        testCaseData,
       );
 
       setSuccess('Test case updated successfully');
@@ -157,13 +157,13 @@ export default function EnhancedTestCaseManagement() {
   };
 
   const handleCloneTestCase = async (tc) => {
-    const newName = prompt(`Clone test case as:`, `${tc.name} (Clone)`);
+    const newName = prompt('Clone test case as:', `${tc.name} (Clone)`);
     if (!newName) return;
 
     try {
       await axios.post(
         `/api/projects/${projectId}/test-cases/${tc.id}/clone`,
-        { newName }
+        { newName },
       );
       setSuccess('Test case cloned successfully');
       loadTestCases();
@@ -176,7 +176,7 @@ export default function EnhancedTestCaseManagement() {
     try {
       const response = await axios.get(
         `/api/projects/${projectId}/test-cases/export/csv`,
-        { responseType: 'blob' }
+        { responseType: 'blob' },
       );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -202,7 +202,7 @@ export default function EnhancedTestCaseManagement() {
     setSelectedTestCases(prev =>
       prev.includes(id)
         ? prev.filter(tid => tid !== id)
-        : [...prev, id]
+        : [...prev, id],
     );
   };
 

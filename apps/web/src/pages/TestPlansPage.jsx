@@ -102,7 +102,7 @@ export default function TestPlansPage() {
       // Add test case to plan
       await apiClient.post(
         `/api/projects/${projectId}/test-plans/${planId}/test-cases`,
-        { testCaseId: draggedCase.id }
+        { testCaseId: draggedCase.id },
       );
 
       // Reload test cases for the plan
@@ -119,7 +119,7 @@ export default function TestPlansPage() {
   const handleRemoveTestCase = async (testCaseId, planId) => {
     try {
       await apiClient.delete(
-        `/api/projects/${projectId}/test-plans/${planId}/test-cases/${testCaseId}`
+        `/api/projects/${projectId}/test-plans/${planId}/test-cases/${testCaseId}`,
       );
       // Reload test cases for the plan
       if (selectedPlan === planId) {
@@ -127,7 +127,7 @@ export default function TestPlansPage() {
       }
     } catch (err) {
       setError(err.message || 'Failed to remove test case');
-      console.error(err);
+      logError(err, 'TestPlansPage.handleRemoveTestCase');
     }
   };
 
@@ -143,7 +143,7 @@ export default function TestPlansPage() {
       }
     } catch (err) {
       setError(err.message || 'Failed to delete test plan');
-      console.error(err);
+      logError(err, 'TestPlansPage.handleDeletePlan');
     }
   };
 

@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import { logWarn } from './logger.js';
 
 const {
   CLOUDINARY_CLOUD_NAME,
@@ -11,7 +12,7 @@ const {
 } = process.env;
 
 if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
-  console.warn('Cloudinary credentials are not fully configured.');
+  logWarn('Cloudinary credentials are not fully configured.');
 }
 
 cloudinary.config({

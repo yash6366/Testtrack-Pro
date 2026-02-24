@@ -4,7 +4,7 @@ import { apiClient } from '@/lib/apiClient';
 export default function BugsList({ 
   onBugSelect, 
   onStatusUpdate,
-  onRequestRetest 
+  onRequestRetest, 
 }) {
   const [bugs, setBugs] = useState([]);
   const [loading, setLoading] = useState(true);

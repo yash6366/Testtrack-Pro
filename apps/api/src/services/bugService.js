@@ -6,6 +6,7 @@
 import { getPrismaClient } from '../lib/prisma.js';
 import { parseId, validateEnum } from '../lib/validation.js';
 import { logAuditAction } from './auditService.js';
+import { logError } from '../lib/logger.js';
 import { assertPermissionContext } from '../lib/policy.js';
 import {
   createNotification,
@@ -181,28 +182,28 @@ export async function createBugFromExecution(data, userId, permissionContext = n
     environment,
     ['DEVELOPMENT', 'STAGING', 'UAT', 'PRODUCTION'],
     'environment',
-    false
+    false,
   );
 
   const validatedSeverity = validateEnum(
     severity,
     ['CRITICAL', 'MAJOR', 'MINOR', 'TRIVIAL'],
     'severity',
-    false
+    false,
   );
 
   const validatedPriority = validateEnum(
     priority,
     ['P0', 'P1', 'P2', 'P3', 'P4'],
     'priority',
-    false
+    false,
   );
 
   const validatedReproducibility = validateEnum(
     reproducibility,
     ['ALWAYS', 'OFTEN', 'SOMETIMES', 'RARELY', 'CANNOT_REPRODUCE'],
     'reproducibility',
-    false
+    false,
   );
 
   // Validate project exists
@@ -296,7 +297,7 @@ export async function createBugFromExecution(data, userId, permissionContext = n
   try {
     await triggerBugCreatedNotifications(bug, userId);
   } catch (error) {
-    console.error('Error triggering bug created notifications:', error);
+    logError('Error triggering bug created notifications', error);
     // Don't fail the request if notifications fail
   }
 
@@ -304,7 +305,7 @@ export async function createBugFromExecution(data, userId, permissionContext = n
   try {
     await indexBug(bug.id, bug.projectId);
   } catch (error) {
-    console.error('Error indexing bug:', error);
+    logError('Error indexing bug', error);
   }
 
   // Broadcast to project members
@@ -319,7 +320,7 @@ export async function createBugFromExecution(data, userId, permissionContext = n
       createdAt: bug.createdAt,
     });
   } catch (error) {
-    console.error('Error broadcasting bug creation:', error);
+    logError('Error broadcasting bug creation', error);
   }
 
   return bug;
@@ -455,7 +456,7 @@ export async function changeBugStatus(bugId, newStatus, userId, role, auditConte
   const allowedTransitions = validTransitions[bug.status] || [];
   if (!allowedTransitions.includes(newStatus) && bug.status !== newStatus) {
     throw new Error(
-      `Invalid transition from ${bug.status} to ${newStatus}. Allowed transitions: ${allowedTransitions.join(', ') || 'none'}`
+      `Invalid transition from ${bug.status} to ${newStatus}. Allowed transitions: ${allowedTransitions.join(', ') || 'none'}`,
     );
   }
 
@@ -479,7 +480,7 @@ export async function changeBugStatus(bugId, newStatus, userId, role, auditConte
     !developerAllowedStatuses.includes(newStatus)
   ) {
     throw new Error(
-      `Developers can only transition to: ${developerAllowedStatuses.join(', ')}`
+      `Developers can only transition to: ${developerAllowedStatuses.join(', ')}`,
     );
   }
 
@@ -526,14 +527,14 @@ export async function changeBugStatus(bugId, newStatus, userId, role, auditConte
   try {
     await triggerBugStatusChangedNotifications(updated, bug.status, newStatus, userId);
   } catch (error) {
-    console.error('Error triggering bug status changed notifications:', error);
+    logError('Error triggering bug status changed notifications', error);
   }
 
   // Index for search
   try {
     await indexBug(bugId, updated.projectId);
   } catch (error) {
-    console.error('Error indexing bug:', error);
+    logError('Error indexing bug', error);
   }
 
   // Broadcast to project members
@@ -548,7 +549,7 @@ export async function changeBugStatus(bugId, newStatus, userId, role, auditConte
       createdAt: updated.updatedAt,
     });
   } catch (error) {
-    console.error('Error broadcasting bug status change:', error);
+    logError('Error broadcasting bug status change', error);
   }
 
   return updated;
@@ -604,7 +605,7 @@ export async function assignBug(bugId, assigneeId, userId, projectId, permission
   try {
     await triggerBugAssignedNotifications(updated, userId);
   } catch (error) {
-    console.error('Error triggering bug assigned notifications:', error);
+    logError('Error triggering bug assigned notifications', error);
   }
 
   return updated;
@@ -658,7 +659,7 @@ export async function addBugComment(bugId, body, userId, isInternal = false, pro
     const mentionedUsernames = extractMentionedUsernames(body);
     const { users: mentionedUsers, unknown } = await resolveMentionedUsers(
       mentionedUsernames,
-      projectId
+      projectId,
     );
 
     if (unknown.length > 0) {
@@ -690,7 +691,7 @@ export async function addBugComment(bugId, body, userId, isInternal = false, pro
     await logAuditAction(userId, 'BUG_COMMENTED', {
       resourceType: 'BUG',
       resourceId: bugId,
-      description: `Added comment to bug`,
+      description: 'Added comment to bug',
     });
 
     return comment;
@@ -712,7 +713,7 @@ export async function addBugComment(bugId, body, userId, isInternal = false, pro
   await logAuditAction(userId, 'BUG_COMMENTED', {
     resourceType: 'BUG',
     resourceId: bugId,
-    description: `Added comment to bug`,
+    description: 'Added comment to bug',
   });
 
   return comment;
@@ -763,7 +764,7 @@ export async function updateBugComment(bugId, commentId, body, userId, projectId
   const mentionedUsernames = extractMentionedUsernames(body);
   const { users: mentionedUsers, unknown } = await resolveMentionedUsers(
     mentionedUsernames,
-    projectId
+    projectId,
   );
 
   if (unknown.length > 0) {
@@ -1026,15 +1027,15 @@ async function triggerBugCreatedNotifications(bug, reporterUserId) {
           await sendBugCreatedEmail(
             member.email,
             { id: bug.id, ...bug },
-            bug.reporter.name
+            bug.reporter.name,
           );
         } catch (error) {
-          console.error(`Failed to send email to ${member.email}:`, error);
+          logError(`Failed to send email to ${member.email}`, error);
         }
       }
     }
   } catch (error) {
-    console.error('Error in triggerBugCreatedNotifications:', error);
+    logError('Error in triggerBugCreatedNotifications', error);
   }
 }
 
@@ -1075,14 +1076,14 @@ async function triggerBugAssignedNotifications(bug, assignerUserId) {
         await sendBugAssignedEmail(
           bug.assignee.email,
           { id: bug.id, ...bug },
-          assigner.name
+          assigner.name,
         );
       } catch (error) {
-        console.error(`Failed to send email to ${bug.assignee.email}:`, error);
+        logError(`Failed to send email to ${bug.assignee.email}`, error);
       }
     }
   } catch (error) {
-    console.error('Error in triggerBugAssignedNotifications:', error);
+    logError('Error in triggerBugAssignedNotifications', error);
   }
 }
 
@@ -1140,15 +1141,15 @@ async function triggerBugStatusChangedNotifications(bug, oldStatus, newStatus, c
             { id: bug.id, ...bug },
             oldStatus,
             newStatus,
-            changedByUser.name
+            changedByUser.name,
           );
         } catch (error) {
-          console.error(`Failed to send status email to ${userId}:`, error);
+          logError(`Failed to send status email to ${userId}`, error);
         }
       }
     }
   } catch (error) {
-    console.error('Error in triggerBugStatusChangedNotifications:', error);
+    logError('Error in triggerBugStatusChangedNotifications', error);
   }
 }
 

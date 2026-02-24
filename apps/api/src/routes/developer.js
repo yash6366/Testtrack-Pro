@@ -5,6 +5,7 @@
 
 import { createAuthGuards } from '../lib/rbac.js';
 import { requirePermission } from '../lib/policy.js';
+import { logError } from '../lib/logger.js';
 import {
   getDeveloperAssignedBugs,
   updateFixDocumentation,
@@ -48,10 +49,10 @@ export async function developerRoutes(fastify) {
         const overview = await getDeveloperOverview(userId);
         reply.send(overview);
       } catch (error) {
-        console.error('Error fetching developer overview:', error);
+        logError('Error fetching developer overview:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -72,10 +73,10 @@ export async function developerRoutes(fastify) {
 
         reply.send(metrics);
       } catch (error) {
-        console.error('Error fetching developer metrics:', error);
+        logError('Error fetching developer metrics:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -104,10 +105,10 @@ export async function developerRoutes(fastify) {
 
         reply.send(result);
       } catch (error) {
-        console.error('Error fetching assigned bugs:', error);
+        logError('Error fetching assigned bugs:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -123,10 +124,10 @@ export async function developerRoutes(fastify) {
 
         reply.send(bug);
       } catch (error) {
-        console.error('Error fetching bug:', error);
+        logError('Error fetching bug:', error);
         reply.code(404).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -149,11 +150,11 @@ export async function developerRoutes(fastify) {
 
         reply.send(bug);
       } catch (error) {
-        console.error('Error updating fix documentation:', error);
+        logError('Error updating fix documentation:', error);
         const statusCode = error.message.includes('not found') ? 404 : 400;
         reply.code(statusCode).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -184,11 +185,11 @@ export async function developerRoutes(fastify) {
 
         reply.send(bug);
       } catch (error) {
-        console.error('Error marking bug as fixed:', error);
+        logError('Error marking bug as fixed:', error);
         const statusCode = error.message.includes('not found') ? 404 : 400;
         reply.code(statusCode).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -238,11 +239,11 @@ export async function developerRoutes(fastify) {
 
         reply.code(201).send(result);
       } catch (error) {
-        console.error('Error requesting retest:', error);
+        logError('Error requesting retest:', error);
         const statusCode = error.message.includes('not found') ? 404 : 400;
         reply.code(statusCode).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -277,10 +278,10 @@ export async function developerRoutes(fastify) {
 
         reply.code(201).send(comment);
       } catch (error) {
-        console.error('Error adding comment:', error);
+        logError('Error adding comment:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -311,10 +312,10 @@ export async function developerRoutes(fastify) {
 
         reply.send(bug);
       } catch (error) {
-        console.error('Error starting work on bug:', error);
+        logError('Error starting work on bug:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -329,10 +330,10 @@ export async function developerRoutes(fastify) {
           error: 'Bug rejection reasons are not supported in the current workflow.',
         });
       } catch (error) {
-        console.error('Error rejecting bug:', error);
+        logError('Error rejecting bug:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -357,10 +358,10 @@ export async function developerRoutes(fastify) {
 
         reply.send(testCase);
       } catch (error) {
-        console.error('Error fetching test case:', error);
+        logError('Error fetching test case:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -385,10 +386,10 @@ export async function developerRoutes(fastify) {
 
         reply.send(report);
       } catch (error) {
-        console.error('Error generating developer report:', error);
+        logError('Error generating developer report:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -409,10 +410,10 @@ export async function developerRoutes(fastify) {
 
         reply.send(analytics);
       } catch (error) {
-        console.error('Error generating bug analytics:', error);
+        logError('Error generating bug analytics:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -442,10 +443,10 @@ export async function developerRoutes(fastify) {
           .header('Content-Disposition', 'attachment; filename="developer-bugs.csv"')
           .send(csvContent);
       } catch (error) {
-        console.error('Error exporting bug report:', error);
+        logError('Error exporting bug report:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -461,21 +462,21 @@ export async function developerRoutes(fastify) {
 
         const csvContent = await generateDeveloperPerformanceCSV(
           userId,
-          Number(weeks)
+          Number(weeks),
         );
 
         reply
           .header('Content-Type', 'text/csv')
           .header(
             'Content-Disposition',
-            `attachment; filename="developer-performance-${weeks}w.csv"`
+            `attachment; filename="developer-performance-${weeks}w.csv"`,
           )
           .send(csvContent);
       } catch (error) {
-        console.error('Error exporting performance report:', error);
+        logError('Error exporting performance report:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -504,10 +505,10 @@ export async function developerRoutes(fastify) {
           .header('Content-Disposition', `attachment; filename="${filename}"`)
           .send(csvContent);
       } catch (error) {
-        console.error('Error exporting bug analytics:', error);
+        logError('Error exporting bug analytics:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }
 
@@ -529,25 +530,25 @@ function generateBugAnalyticsCSV(analytics) {
     'RESOLUTION TIME DISTRIBUTION',
     'Timeframe,Count',
     ...Object.entries(analytics.resolutionTimeAnalysis.buckets).map(
-      ([bucket, count]) => `${bucket},${count}`
+      ([bucket, count]) => `${bucket},${count}`,
     ),
     '',
     'SLOWEST RESOLUTIONS',
     'Bug Number,Hours',
     ...analytics.resolutionTimeAnalysis.slowest.map(
-      (r) => `${r.bugNumber},${r.hours.toFixed(2)}`
+      (r) => `${r.bugNumber},${r.hours.toFixed(2)}`,
     ),
     '',
     'FASTEST RESOLUTIONS',
     'Bug Number,Hours',
     ...analytics.resolutionTimeAnalysis.fastest.map(
-      (r) => `${r.bugNumber},${r.hours.toFixed(2)}`
+      (r) => `${r.bugNumber},${r.hours.toFixed(2)}`,
     ),
     '',
     'ENVIRONMENT BREAKDOWN',
     'Environment,Count',
     ...Object.entries(analytics.environmentBreakdown).map(
-      ([env, count]) => `${env},${count}`
+      ([env, count]) => `${env},${count}`,
     ),
   ];
 

@@ -26,7 +26,7 @@ const signupSchema = {
       password: { 
         type: 'string', 
         minLength: 8,
-        description: 'Must contain at least one uppercase, one lowercase, one number, and one special character'
+        description: 'Must contain at least one uppercase, one lowercase, one number, and one special character',
       },
       role: { type: 'string', enum: ['DEVELOPER', 'TESTER'] },
     },
@@ -218,7 +218,7 @@ export async function authRoutes(fastify) {
       fastify.log.error(error);
       // Always return 200 to prevent email enumeration
       reply.code(200).send({ 
-        message: 'If an account exists with that email, a password reset link has been sent.' 
+        message: 'If an account exists with that email, a password reset link has been sent.', 
       });
     }
   });
@@ -238,7 +238,7 @@ export async function authRoutes(fastify) {
   });
 
   fastify.post('/api/auth/change-password', { 
-    preHandler: requireAuth 
+    preHandler: requireAuth, 
   }, async (request, reply) => {
     try {
       const { currentPassword, newPassword } = request.body;
@@ -255,7 +255,7 @@ export async function authRoutes(fastify) {
 
   fastify.post('/api/auth/logout', { 
     schema: logoutSchema, 
-    preHandler: requireAuth 
+    preHandler: requireAuth, 
   }, async (request, reply) => {
     try {
       const { refreshToken } = request.body || {};
@@ -324,7 +324,7 @@ export async function authRoutes(fastify) {
           email: user.email,
           role: user.role,
         },
-        { expiresIn: '7d' }
+        { expiresIn: '7d' },
       );
 
       reply.code(200).send({
@@ -391,7 +391,7 @@ export async function authRoutes(fastify) {
           email: user.email,
           role: user.role,
         },
-        { expiresIn: '7d' }
+        { expiresIn: '7d' },
       );
 
       reply.code(200).send({

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '@/lib/apiClient';
+import { logError } from '@/lib/errorLogger';
 
 /**
  * Custom hook for managing test execution state
@@ -23,7 +24,7 @@ export function useTestExecution(executionId) {
       const data = await apiClient.get(`/api/test-executions/${executionId}`);
       setExecution(data);
     } catch (err) {
-      console.error('Failed to load execution:', err);
+      logError(err, 'Failed to load execution');
       setError(err.message || 'Failed to load execution');
     } finally {
       setLoading(false);
@@ -55,7 +56,7 @@ export function useTestExecution(executionId) {
             status,
             actualResult: actualResult?.trim() || null,
             notes: notes?.trim() || null,
-          }
+          },
         );
 
         // Update local state
@@ -66,13 +67,13 @@ export function useTestExecution(executionId) {
       } catch (err) {
         const errorMessage = err.message || 'Failed to update step';
         setError(errorMessage);
-        console.error('Failed to update step:', err);
+        logError(err, 'Failed to update step');
         throw new Error(errorMessage);
       } finally {
         setIsSaving(false);
       }
     },
-    [executionId]
+    [executionId],
   );
 
   // Complete execution
@@ -87,7 +88,7 @@ export function useTestExecution(executionId) {
         setError(null);
         const response = await apiClient.patch(
           `/api/test-executions/${executionId}/complete`,
-          { comments: comments?.trim() || '' }
+          { comments: comments?.trim() || '' },
         );
         if (response) {
           setExecution(response);
@@ -96,13 +97,13 @@ export function useTestExecution(executionId) {
       } catch (err) {
         const errorMessage = err.message || 'Failed to complete execution';
         setError(errorMessage);
-        console.error('Failed to complete execution:', err);
+        logError(err, 'Failed to complete execution');
         throw new Error(errorMessage);
       } finally {
         setIsSaving(false);
       }
     },
-    [executionId]
+    [executionId],
   );
 
   // Auto-save progress
@@ -112,11 +113,11 @@ export function useTestExecution(executionId) {
     try {
       const response = await apiClient.patch(
         `/api/test-executions/${executionId}/progress`,
-        {}
+        {},
       );
       return response;
     } catch (err) {
-      console.error('Failed to save progress:', err);
+      logError(err, 'Failed to save progress');
       // Don't throw - auto-save failures shouldn't break the app
     }
   }, [executionId]);
@@ -127,11 +128,11 @@ export function useTestExecution(executionId) {
 
     try {
       const response = await apiClient.get(
-        `/api/test-cases/${testCaseId}/execution-history`
+        `/api/test-cases/${testCaseId}/execution-history`,
       );
       return response.history;
     } catch (err) {
-      console.error('Failed to fetch execution history:', err);
+      logError(err, 'Failed to fetch execution history');
       return null;
     }
   }, []);
@@ -143,15 +144,15 @@ export function useTestExecution(executionId) {
 
       try {
         const response = await apiClient.get(
-          `/api/test-executions/${executionId}/compare/${otherExecutionId}`
+          `/api/test-executions/${executionId}/compare/${otherExecutionId}`,
         );
         return response;
       } catch (err) {
-        console.error('Failed to compare executions:', err);
+        logError(err, 'Failed to compare executions');
         return null;
       }
     },
-    [executionId]
+    [executionId],
   );
 
   // Link or clear a defect for this execution
@@ -171,24 +172,24 @@ export function useTestExecution(executionId) {
         setError(null);
         const response = await apiClient.patch(
           `/api/test-executions/${executionId}/defect`,
-          { defectId }
+          { defectId },
         );
 
         setExecution((prev) =>
-          prev ? { ...prev, defectId: response.defectId } : response
+          prev ? { ...prev, defectId: response.defectId } : response,
         );
 
         return response;
       } catch (err) {
         const errorMessage = err.message || 'Failed to link defect';
         setError(errorMessage);
-        console.error('Failed to link defect:', err);
+        logError(err, 'Failed to link defect');
         throw new Error(errorMessage);
       } finally {
         setIsSaving(false);
       }
     },
-    [executionId]
+    [executionId],
   );
 
   return {

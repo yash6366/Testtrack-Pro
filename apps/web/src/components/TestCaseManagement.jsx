@@ -64,7 +64,7 @@ export default function TestCaseManagement() {
         `/api/projects/${projectId}/test-cases`,
         {
           params: filters,
-        }
+        },
       );
       setTestCases(response.data.testCases || []);
     } catch (err) {
@@ -90,7 +90,7 @@ export default function TestCaseManagement() {
 
       const response = await axios.post(
         `/api/projects/${projectId}/test-cases`,
-        testCaseData
+        testCaseData,
       );
 
       setSuccess('Test case created successfully');
@@ -118,7 +118,7 @@ export default function TestCaseManagement() {
 
       await axios.patch(
         `/api/projects/${projectId}/test-cases/${editingTestCase.id}`,
-        testCaseData
+        testCaseData,
       );
 
       setSuccess('Test case updated successfully');
@@ -137,7 +137,7 @@ export default function TestCaseManagement() {
 
     try {
       await axios.delete(
-        `/api/projects/${projectId}/test-cases/${id}`
+        `/api/projects/${projectId}/test-cases/${id}`,
       );
       setSuccess('Test case deleted successfully');
       loadTestCases();
@@ -147,13 +147,13 @@ export default function TestCaseManagement() {
   };
 
   const handleCloneTestCase = async (tc) => {
-    const newName = prompt(`Clone test case as:`, `${tc.name} (Clone)`);
+    const newName = prompt('Clone test case as:', `${tc.name} (Clone)`);
     if (!newName) return;
 
     try {
       await axios.post(
         `/api/projects/${projectId}/test-cases/${tc.id}/clone`,
-        { newName }
+        { newName },
       );
       setSuccess('Test case cloned successfully');
       loadTestCases();
@@ -176,11 +176,11 @@ export default function TestCaseManagement() {
         const csvContent = event.target.result;
         const response = await axios.post(
           `/api/tester/projects/${projectId}/test-cases/import`,
-          { csvContent }
+          { csvContent },
         );
 
         setSuccess(
-          `Import complete: ${response.data.imported.length} imported, ${response.data.failed.length} failed`
+          `Import complete: ${response.data.imported.length} imported, ${response.data.failed.length} failed`,
         );
         setShowImportModal(false);
         loadTestCases();
@@ -195,7 +195,7 @@ export default function TestCaseManagement() {
     try {
       const response = await axios.get(
         `/api/projects/${projectId}/test-cases/export/csv`,
-        { responseType: 'blob' }
+        { responseType: 'blob' },
       );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));

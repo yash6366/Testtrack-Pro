@@ -4,6 +4,7 @@
  */
 
 import { createAuthGuards } from '../lib/rbac.js';
+import { logError } from '../lib/logger.js';
 import {
   getExecutionTrendReport,
   getFlakyTests,
@@ -38,14 +39,14 @@ export async function analyticsRoutes(fastify) {
 
         const trend = await getExecutionTrendReport(
           Number(projectId),
-          Number(weeks)
+          Number(weeks),
         );
         reply.send(trend);
       } catch (error) {
-        console.error('Error fetching execution trend:', error);
+        logError('Error fetching execution trend:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -61,14 +62,14 @@ export async function analyticsRoutes(fastify) {
 
         const flaky = await getFlakyTests(
           Number(projectId),
-          Number(runsThreshold)
+          Number(runsThreshold),
         );
         reply.send({ count: flaky.length, tests: flaky });
       } catch (error) {
-        console.error('Error fetching flaky tests:', error);
+        logError('Error fetching flaky tests:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -84,14 +85,14 @@ export async function analyticsRoutes(fastify) {
 
         const speed = await getExecutionSpeedAnalysis(
           Number(projectId),
-          Number(days)
+          Number(days),
         );
         reply.send(speed);
       } catch (error) {
-        console.error('Error fetching execution speed:', error);
+        logError('Error fetching execution speed:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -111,14 +112,14 @@ export async function analyticsRoutes(fastify) {
 
         const trend = await getBugTrendAnalysis(
           Number(projectId),
-          Number(weeks)
+          Number(weeks),
         );
         reply.send(trend);
       } catch (error) {
-        console.error('Error fetching bug trend:', error);
+        logError('Error fetching bug trend:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -134,14 +135,14 @@ export async function analyticsRoutes(fastify) {
 
         const reopens = await getReopenedBugsAnalysis(
           Number(projectId),
-          Number(weeks)
+          Number(weeks),
         );
         reply.send(reopens);
       } catch (error) {
-        console.error('Error fetching reopen analysis:', error);
+        logError('Error fetching reopen analysis:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -157,10 +158,10 @@ export async function analyticsRoutes(fastify) {
         const age = await getBugAgeReport(Number(projectId));
         reply.send(age);
       } catch (error) {
-        console.error('Error fetching bug age:', error);
+        logError('Error fetching bug age:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -176,10 +177,10 @@ export async function analyticsRoutes(fastify) {
         const density = await getDefectDensity(Number(projectId));
         reply.send(density);
       } catch (error) {
-        console.error('Error fetching defect density:', error);
+        logError('Error fetching defect density:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -204,10 +205,10 @@ export async function analyticsRoutes(fastify) {
         const efficiency = await getTesterEfficiency(userId, weeks);
         reply.send(efficiency);
       } catch (error) {
-        console.error('Error fetching tester efficiency:', error);
+        logError('Error fetching tester efficiency:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -223,14 +224,14 @@ export async function analyticsRoutes(fastify) {
 
         const comparison = await getTesterTeamComparison(
           Number(projectId),
-          Number(weeks)
+          Number(weeks),
         );
         reply.send(comparison);
       } catch (error) {
-        console.error('Error fetching tester comparison:', error);
+        logError('Error fetching tester comparison:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -255,10 +256,10 @@ export async function analyticsRoutes(fastify) {
         const quality = await getDeveloperFixQuality(userId, weeks);
         reply.send(quality);
       } catch (error) {
-        console.error('Error fetching developer quality:', error);
+        logError('Error fetching developer quality:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -279,10 +280,10 @@ export async function analyticsRoutes(fastify) {
         const time = await getDeveloperResolutionTime(userId, weeks);
         reply.send(time);
       } catch (error) {
-        console.error('Error fetching developer resolution time:', error);
+        logError('Error fetching developer resolution time:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }
 

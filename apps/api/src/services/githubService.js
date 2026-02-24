@@ -318,7 +318,7 @@ export async function fetchGitHubCommits(accessToken, owner, repo, options = {})
         Authorization: `Bearer ${accessToken}`,
         'Accept': 'application/vnd.github.v3+json',
       },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -354,7 +354,7 @@ export async function fetchGitHubPullRequests(accessToken, owner, repo, options 
         Authorization: `Bearer ${accessToken}`,
         'Accept': 'application/vnd.github.v3+json',
       },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -394,7 +394,7 @@ export async function createGitHubWebhook(accessToken, owner, repo, webhookUrl, 
           insecure_ssl: '0',
         },
       }),
-    }
+    },
   );
 
   if (!response.ok) {

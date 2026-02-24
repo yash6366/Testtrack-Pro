@@ -15,7 +15,7 @@ export function useBug(bugId) {
         setError('');
         const response = await apiClient.patch(`/api/bugs/${bugId}/status`, {
           newStatus,
-          reason
+          reason,
         });
         return response;
       } catch (err) {
@@ -26,7 +26,7 @@ export function useBug(bugId) {
         setSaving(false);
       }
     },
-    [bugId]
+    [bugId],
   );
 
   const assignBug = useCallback(
@@ -36,7 +36,7 @@ export function useBug(bugId) {
         setError('');
         const response = await apiClient.patch(`/api/bugs/${bugId}/assign`, {
           assigneeId,
-          reason
+          reason,
         });
         return response;
       } catch (err) {
@@ -47,7 +47,7 @@ export function useBug(bugId) {
         setSaving(false);
       }
     },
-    [bugId]
+    [bugId],
   );
 
   const addComment = useCallback(
@@ -57,7 +57,7 @@ export function useBug(bugId) {
         setError('');
         const response = await apiClient.post(`/api/bugs/${bugId}/comments`, {
           body,
-          isInternal
+          isInternal,
         });
         return response;
       } catch (err) {
@@ -68,7 +68,7 @@ export function useBug(bugId) {
         setSaving(false);
       }
     },
-    [bugId]
+    [bugId],
   );
 
   const linkCommit = useCallback(
@@ -79,7 +79,7 @@ export function useBug(bugId) {
         const response = await apiClient.patch(`/api/bugs/${bugId}/link-commit`, {
           commitHash,
           branchName,
-          codeReviewUrl
+          codeReviewUrl,
         });
         return response;
       } catch (err) {
@@ -90,7 +90,7 @@ export function useBug(bugId) {
         setSaving(false);
       }
     },
-    [bugId]
+    [bugId],
   );
 
   const requestRetest = useCallback(
@@ -112,7 +112,7 @@ export function useBug(bugId) {
         setSaving(false);
       }
     },
-    [bugId]
+    [bugId],
   );
 
   const completeRetest = useCallback(
@@ -125,8 +125,8 @@ export function useBug(bugId) {
           {
             passed,
             retestExecutionId,
-            notes
-          }
+            notes,
+          },
         );
         return response;
       } catch (err) {
@@ -137,7 +137,7 @@ export function useBug(bugId) {
         setSaving(false);
       }
     },
-    [bugId]
+    [bugId],
   );
 
   return {
@@ -148,6 +148,6 @@ export function useBug(bugId) {
     addComment,
     linkCommit,
     requestRetest,
-    completeRetest
+    completeRetest,
   };
 }

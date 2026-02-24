@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { apiClient } from '../lib/apiClient';
+import { logError } from '../lib/errorLogger';
 
 /**
  * NotificationCenter Component
@@ -23,7 +24,7 @@ export default function NotificationCenter() {
       setNotifications(response.notifications || []);
       setUnreadCount(response.unreadCount || 0);
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      logError(error, 'Failed to fetch notifications');
     } finally {
       setLoading(false);
     }
@@ -48,14 +49,14 @@ export default function NotificationCenter() {
       await apiClient.patch(
         `/api/notifications/${notificationId}/read`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setNotifications(prev =>
-        prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
+        prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n),
       );
       setUnreadCount(Math.max(0, unreadCount - 1));
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+      logError(error, 'Failed to mark notification as read');
     }
   };
 
@@ -64,12 +65,12 @@ export default function NotificationCenter() {
       await apiClient.patch(
         '/api/notifications/mark-all-read',
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
-      console.error('Failed to mark all as read:', error);
+      logError(error, 'Failed to mark all as read');
     }
   };
 
@@ -77,12 +78,12 @@ export default function NotificationCenter() {
     try {
       await apiClient.delete(
         `/api/notifications/${notificationId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
       setUnreadCount(Math.max(0, unreadCount - 1));
     } catch (error) {
-      console.error('Failed to delete notification:', error);
+      logError(error, 'Failed to delete notification');
     }
   };
 

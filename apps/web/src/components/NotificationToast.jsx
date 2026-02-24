@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { apiClient } from '../lib/apiClient';
 import { useSocket } from '../hooks/useSocket';
+import { logError } from '../lib/errorLogger';
 
 /**
  * NotificationToast Component
@@ -51,10 +52,10 @@ export default function NotificationToast() {
         await apiClient.patch(
           `/notifications/${notification.id}/read`,
           {},
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
       } catch (error) {
-        console.error('Failed to mark notification as read:', error);
+        logError(error, 'Failed to mark notification as read');
       }
     }
   };

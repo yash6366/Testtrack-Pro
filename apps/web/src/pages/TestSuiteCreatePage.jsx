@@ -55,7 +55,7 @@ export default function TestSuiteCreatePage() {
 
       const response = await apiClient.post(
         `/api/projects/${projectId}/test-suites`,
-        payload
+        payload,
       );
 
       navigate(`/test-suites/${response.id}`);

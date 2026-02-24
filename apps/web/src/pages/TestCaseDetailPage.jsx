@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
+import { logError } from '../lib/errorLogger';
 import DashboardLayout from '../components/DashboardLayout';
 import { useProject } from '@/hooks';
 import BackButton from '@/components/ui/BackButton';
@@ -41,7 +42,7 @@ export default function TestCaseDetailPage() {
       });
     } catch (err) {
       setError(err.message || 'Failed to load test case');
-      console.error(err);
+      logError(err, 'TestCaseDetailPage.loadTestCaseDetails');
     } finally {
       setLoading(false);
     }

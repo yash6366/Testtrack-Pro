@@ -3,11 +3,12 @@
  * Assign test cases to milestones with search and multi-select
  */
 
-/* eslint-disable react/jsx-uses-react */
+ 
 import { useState, useEffect } from 'react';
 import { X, Search, Check } from 'lucide-react';
 import Button from './common/Button';
 import axios from 'axios';
+import { logError } from '../lib/errorLogger';
 
 export default function TestCaseAssignmentModal({
   projectId,
@@ -45,8 +46,7 @@ export default function TestCaseAssignmentModal({
         setAvailableTestCases(available);
       } catch (err) {
         setError('Failed to load test cases');
-        // eslint-disable-next-line no-console
-        console.error('Error fetching test cases:', err);
+        logError(err, 'Error fetching test cases');
       } finally {
         setLoading(false);
       }

@@ -3,11 +3,12 @@
  * Assign defects/bugs to milestones with search and multi-select
  */
 
-/* eslint-disable react/jsx-uses-react */
+ 
 import { useState, useEffect } from 'react';
 import { X, Search, Check, AlertCircle } from 'lucide-react';
 import Button from './common/Button';
 import axios from 'axios';
+import { logError } from '../lib/errorLogger';
 
 export default function DefectAssignmentModal({
   projectId,
@@ -45,8 +46,7 @@ export default function DefectAssignmentModal({
         setAvailableDefects(available);
       } catch (err) {
         setError('Failed to load defects');
-        // eslint-disable-next-line no-console
-        console.error('Error fetching defects:', err);
+        logError(err, 'Error fetching defects');
       } finally {
         setLoading(false);
       }

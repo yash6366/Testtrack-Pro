@@ -52,7 +52,7 @@ export async function uploadExecutionEvidence({
       fileName: file.name,
       fileType: file.type,
       fileSize: file.size,
-    }
+    },
   );
 
   const uploadResult = await uploadToCloudinary({
@@ -75,7 +75,7 @@ export async function uploadExecutionEvidence({
       bytes: uploadResult.bytes,
       format: uploadResult.format,
       originalFilename: uploadResult.original_filename,
-    }
+    },
   );
 
   return {

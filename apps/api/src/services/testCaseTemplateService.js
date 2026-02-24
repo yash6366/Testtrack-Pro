@@ -193,8 +193,8 @@ export async function updateTestCaseTemplate(templateId, updates, userId, auditC
             expectedResult: step.expectedResult,
             notes: step.notes || null,
           },
-        })
-      )
+        }),
+      ),
     );
   }
 

@@ -19,7 +19,7 @@ export const VirtualizedTable = React.forwardRef(
       emptyMessage = 'No data available',
       className = '',
     },
-    ref
+    ref,
   ) => {
     if (loading) {
       return (
@@ -93,7 +93,7 @@ export const VirtualizedTable = React.forwardRef(
         </List>
       </div>
     );
-  }
+  },
 );
 
 VirtualizedTable.displayName = 'VirtualizedTable';

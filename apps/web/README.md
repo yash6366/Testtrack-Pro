@@ -295,23 +295,24 @@ function TestCaseList() {
 ### Making API Calls
 
 ```javascript
-// src/lib/api.js provides configured axios instance
-import api from '@/lib/api';
+// src/lib/apiClient.js provides configured API client
+import api from '@/lib/apiClient';
 
 // GET request
-const testCases = await api.get('/api/tests');
+const projectId = 123;
+const testCases = await api.get(`/api/projects/${projectId}/test-cases`);
 
 // POST request
-const newTestCase = await api.post('/api/tests', {
+const newTestCase = await api.post(`/api/projects/${projectId}/test-cases`, {
   name: 'Test Login',
   description: 'Verify login functionality'
 });
 
 // PUT request
-await api.put(`/api/tests/${id}`, updatedData);
+await api.put(`/api/projects/${projectId}/test-cases/${id}`, updatedData);
 
 // DELETE request
-await api.delete(`/api/tests/${id}`);
+await api.delete(`/api/projects/${projectId}/test-cases/${id}`);
 ```
 
 API calls automatically include:

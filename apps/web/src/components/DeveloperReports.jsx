@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks';
 import { apiClient } from '@/lib/apiClient';
+import { logError } from '@/lib/errorLogger';
 import {
   BarChart3,
   Download,
@@ -42,7 +43,7 @@ export default function DeveloperReports() {
       setPerformanceReport(perfData);
       setBugAnalytics(analyticsData);
     } catch (error) {
-      console.error('Error loading reports:', error);
+      logError(error, 'Error loading reports');
     } finally {
       setLoading(false);
     }
@@ -67,7 +68,7 @@ export default function DeveloperReports() {
         window.URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Error exporting bugs:', error);
+      logError(error, 'Error exporting bugs');
     } finally {
       setExporting(false);
     }
@@ -79,7 +80,7 @@ export default function DeveloperReports() {
       const weeks = Math.ceil(Number(dateRange) / 7);
       const res = await fetch(
         `/api/developer/reports/performance/export?weeks=${weeks}`,
-        { headers: authHeaders }
+        { headers: authHeaders },
       );
 
       if (res.ok) {
@@ -94,7 +95,7 @@ export default function DeveloperReports() {
         window.URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Error exporting performance:', error);
+      logError(error, 'Error exporting performance');
     } finally {
       setExporting(false);
     }
@@ -108,7 +109,7 @@ export default function DeveloperReports() {
 
       const res = await fetch(
         `/api/developer/reports/bug-analytics/export?startDate=${startDate.toISOString()}`,
-        { headers: authHeaders }
+        { headers: authHeaders },
       );
 
       if (res.ok) {
@@ -123,7 +124,7 @@ export default function DeveloperReports() {
         window.URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Error exporting analytics:', error);
+      logError(error, 'Error exporting analytics');
     } finally {
       setExporting(false);
     }
@@ -252,7 +253,7 @@ export default function DeveloperReports() {
                       ></div>
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
           </div>
@@ -268,7 +269,7 @@ export default function DeveloperReports() {
                       {count}
                     </span>
                   </div>
-                )
+                ),
               )}
             </div>
           </div>
@@ -320,7 +321,7 @@ export default function DeveloperReports() {
                       ></div>
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
           </div>

@@ -6,6 +6,7 @@ import MetricsGrid from '@/components/MetricsGrid';
 import ProjectManagement from '@/components/ProjectManagement';
 import ChatAdminControls from '@/components/ChatAdminControls';
 import { apiClient } from '@/lib/apiClient';
+import { logError } from '@/lib/errorLogger';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -69,12 +70,12 @@ export default function AdminDashboard() {
       { key: 'backups', label: 'Backup & Data', enabled: access.backups },
       { key: 'reports', label: 'Reporting & Analytics', enabled: access.reports },
     ],
-    [access]
+    [access],
   );
 
   const enabledTabs = useMemo(
     () => tabConfig.filter((tab) => tab.enabled),
-    [tabConfig]
+    [tabConfig],
   );
   const fallbackTab = enabledTabs[0]?.key || 'overview';
 
@@ -101,7 +102,7 @@ export default function AdminDashboard() {
           setMetrics(response.stats);
         }
       } catch (error) {
-        console.error('Failed to load metrics:', error);
+        logError(error, 'Failed to load metrics in AdminDashboard');
       } finally {
         if (isMounted) {
           setMetricsLoading(false);
@@ -131,7 +132,7 @@ export default function AdminDashboard() {
 
         const skip = (usersPage - 1) * usersTake;
         const response = await apiClient.get(
-          `/api/admin/users?skip=${skip}&take=${usersTake}`
+          `/api/admin/users?skip=${skip}&take=${usersTake}`,
         );
 
         if (isMounted) {
@@ -171,7 +172,7 @@ export default function AdminDashboard() {
 
         const skip = (auditPage - 1) * auditTake;
         const response = await apiClient.get(
-          `/api/admin/audit-logs?skip=${skip}&take=${auditTake}`
+          `/api/admin/audit-logs?skip=${skip}&take=${auditTake}`,
         );
 
         if (isMounted) {
@@ -225,7 +226,7 @@ export default function AdminDashboard() {
       // Reload users
       const skip = (usersPage - 1) * usersTake;
       const response = await apiClient.get(
-        `/api/admin/users?skip=${skip}&take=${usersTake}`
+        `/api/admin/users?skip=${skip}&take=${usersTake}`,
       );
       setUsers(response.users || []);
       setUsersTotal(response.pagination?.total || 0);
@@ -255,21 +256,21 @@ export default function AdminDashboard() {
       count: metrics.roleDistribution?.developers || 0, 
       percentage: metrics.totalUsers > 0 
         ? `${Math.round((metrics.roleDistribution?.developers || 0) / metrics.totalUsers * 100)}%` 
-        : '0%'
+        : '0%',
     },
     { 
       role: 'Tester', 
       count: metrics.roleDistribution?.testers || 0, 
       percentage: metrics.totalUsers > 0 
         ? `${Math.round((metrics.roleDistribution?.testers || 0) / metrics.totalUsers * 100)}%` 
-        : '0%'
+        : '0%',
     },
     { 
       role: 'Admin', 
       count: metrics.roleDistribution?.admins || 0, 
       percentage: metrics.totalUsers > 0 
         ? `${Math.round((metrics.roleDistribution?.admins || 0) / metrics.totalUsers * 100)}%` 
-        : '0%'
+        : '0%',
     },
   ] : [];
 

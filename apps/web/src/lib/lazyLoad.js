@@ -5,6 +5,7 @@
  */
 
 import { lazy, Suspense } from 'react';
+import { logError, logWarning } from './errorLogger';
 
 /**
  * Lazy load a component with a fallback UI
@@ -49,7 +50,7 @@ export async function dynamicImport(module) {
     const imported = await import(module);
     return imported;
   } catch (error) {
-    console.error(`Failed to dynamically import ${module}:`, error);
+    logError(error, `Failed to dynamically import ${module}`);
     return null;
   }
 }
@@ -61,7 +62,7 @@ export async function dynamicImport(module) {
  */
 export function preloadComponent(importFunc) {
   importFunc().catch((err) => {
-    console.warn('Failed to preload component:', err);
+    logWarning('Failed to preload component', { error: err });
   });
 }
 

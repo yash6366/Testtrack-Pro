@@ -55,7 +55,7 @@ async function githubRoutes(fastify) {
         const authUrl = generateAuthorizationUrl(
           GITHUB_CLIENT_ID,
           redirectUrl || `${WEBHOOK_BASE_URL}/api/github/oauth/callback`,
-          state
+          state,
         );
 
         reply.send({
@@ -66,7 +66,7 @@ async function githubRoutes(fastify) {
         logError('Error generating OAuth URL', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -96,7 +96,7 @@ async function githubRoutes(fastify) {
           code,
           GITHUB_CLIENT_ID,
           GITHUB_CLIENT_SECRET,
-          redirectUrl || `${WEBHOOK_BASE_URL}/api/github/oauth/callback`
+          redirectUrl || `${WEBHOOK_BASE_URL}/api/github/oauth/callback`,
         );
 
         // Get GitHub user info
@@ -116,7 +116,7 @@ async function githubRoutes(fastify) {
             accessToken: tokenResponse.accessToken,
             refreshToken: tokenResponse.refreshToken,
             tokenExpiresAt: new Date(Date.now() + tokenResponse.expiresIn * 1000),
-          }
+          },
         );
 
         reply.code(201).send({
@@ -127,7 +127,7 @@ async function githubRoutes(fastify) {
         logError('Error in OAuth callback', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -161,7 +161,7 @@ async function githubRoutes(fastify) {
             accessToken,
             refreshToken,
             tokenExpiresAt,
-          }
+          },
         );
 
         // Create webhook in GitHub
@@ -174,14 +174,14 @@ async function githubRoutes(fastify) {
             repoOwner,
             repoName,
             webhookUrl,
-            webhookSecret
+            webhookSecret,
           );
 
           // Store webhook info
           await updateGitHubIntegration(
             integration.id,
             { webhookSecret, webhookUrl },
-            request.user.id
+            request.user.id,
           );
         } catch (webhookError) {
           logError('Warning: Could not create webhook automatically', webhookError);
@@ -200,7 +200,7 @@ async function githubRoutes(fastify) {
         logError('Error creating GitHub integration', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -227,7 +227,7 @@ async function githubRoutes(fastify) {
         logError('Error getting GitHub integration', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -247,7 +247,7 @@ async function githubRoutes(fastify) {
         const updated = await updateGitHubIntegration(
           integration.id,
           request.body,
-          request.user.id
+          request.user.id,
         );
 
         const { accessToken, refreshToken, webhookSecret, ...safe } = updated;
@@ -256,7 +256,7 @@ async function githubRoutes(fastify) {
         logError('Error updating GitHub integration', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -278,7 +278,7 @@ async function githubRoutes(fastify) {
         logError('Error deleting GitHub integration', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -302,7 +302,7 @@ async function githubRoutes(fastify) {
         logError('Error fetching commits', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -332,7 +332,7 @@ async function githubRoutes(fastify) {
           verifyGitHubWebhookSignature(
             body,
             signature,
-            integration.webhookSecret
+            integration.webhookSecret,
           );
         } catch (error) {
           logError('Invalid webhook signature', error);
@@ -361,7 +361,7 @@ async function githubRoutes(fastify) {
         logError('Error handling webhook', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -391,7 +391,7 @@ async function githubRoutes(fastify) {
         logError('Error syncing GitHub data', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -414,7 +414,7 @@ async function githubRoutes(fastify) {
         logError('Error deactivating integration', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }
 

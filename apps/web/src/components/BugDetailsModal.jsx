@@ -4,6 +4,7 @@ import FixDocumentationView from './FixDocumentationView';
 import CommentInput from './CommentInput';
 import CommentThread from './CommentThread';
 import TestCaseDetailsView from './TestCaseDetailsView';
+import { logError } from '../lib/errorLogger';
 
 export default function BugDetailsModal({ bugId, onClose, onStatusUpdate, onRequestRetest }) {
   const [bug, setBug] = useState(null);
@@ -43,7 +44,7 @@ export default function BugDetailsModal({ bugId, onClose, onStatusUpdate, onRequ
 
   const fetchTeamMembers = async () => {
     try {
-      const response = await fetch(`/api/users?role=DEVELOPER,TESTER`, {
+      const response = await fetch('/api/users?role=DEVELOPER,TESTER', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
@@ -53,13 +54,13 @@ export default function BugDetailsModal({ bugId, onClose, onStatusUpdate, onRequ
         setTeamMembers(Array.isArray(data) ? data : data.users || []);
       }
     } catch (err) {
-      console.error('Failed to fetch team members:', err);
+      logError(err, 'Failed to fetch team members');
     }
   };
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await fetch(`/api/auth/me`, {
+      const response = await fetch('/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
@@ -69,7 +70,7 @@ export default function BugDetailsModal({ bugId, onClose, onStatusUpdate, onRequ
         setCurrentUser(data);
       }
     } catch (err) {
-      console.error('Failed to fetch current user:', err);
+      logError(err, 'Failed to fetch current user');
     }
   };
 
@@ -369,7 +370,7 @@ export default function BugDetailsModal({ bugId, onClose, onStatusUpdate, onRequ
                   onCommentAdded={(comment) => {
                     setBug(prev => ({
                       ...prev,
-                      comments: [comment, ...prev.comments]
+                      comments: [comment, ...prev.comments],
                     }));
                   }}
                 />
@@ -385,13 +386,13 @@ export default function BugDetailsModal({ bugId, onClose, onStatusUpdate, onRequ
                   onCommentDeleted={(commentId) => {
                     setBug(prev => ({
                       ...prev,
-                      comments: prev.comments.filter(c => c.id !== commentId)
+                      comments: prev.comments.filter(c => c.id !== commentId),
                     }));
                   }}
                   onCommentUpdated={(updated) => {
                     setBug(prev => ({
                       ...prev,
-                      comments: prev.comments.map(c => c.id === updated.id ? updated : c)
+                      comments: prev.comments.map(c => c.id === updated.id ? updated : c),
                     }));
                   }}
                 />

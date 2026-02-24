@@ -7,6 +7,7 @@ import EmptyState from '@/components/common/EmptyState';
 import LoadingState from '@/components/common/LoadingState';
 import { FolderKanban } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
+import { logError } from '@/lib/errorLogger';
 
 export default function BugsPage() {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export default function BugsPage() {
         ...(priority && { priority }),
         ...(search && { search }),
         page,
-        limit: 20
+        limit: 20,
       });
 
       const response = await apiClient.get(`/api/bugs?${query}`);
@@ -60,7 +61,7 @@ export default function BugsPage() {
       setTotal(response.pagination?.totalCount || response.total || 0);
     } catch (err) {
       setError(err.message || 'Failed to load bugs');
-      console.error(err);
+      logError(err, 'Failed to load bugs in BugsPage');
     } finally {
       setLoading(false);
     }
@@ -76,7 +77,7 @@ export default function BugsPage() {
     P1: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
     P2: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
     P3: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    P4: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+    P4: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
   };
 
   const statusColor = {
@@ -87,14 +88,14 @@ export default function BugsPage() {
     AWAITING_VERIFICATION: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
     VERIFIED_FIXED: 'bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100',
     REOPENED: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    CLOSED: 'bg-gray-200 text-gray-900 dark:bg-gray-600 dark:text-gray-100'
+    CLOSED: 'bg-gray-200 text-gray-900 dark:bg-gray-600 dark:text-gray-100',
   };
 
   const severityColor = {
     CRITICAL: 'text-red-600 dark:text-red-400',
     MAJOR: 'text-orange-600 dark:text-orange-400',
     MINOR: 'text-blue-600 dark:text-blue-400',
-    TRIVIAL: 'text-gray-600 dark:text-gray-400'
+    TRIVIAL: 'text-gray-600 dark:text-gray-400',
   };
 
   if (projectLoading) {

@@ -44,7 +44,7 @@ export function ThemeProvider({ children }) {
       setTheme,
       toggleTheme,
     }),
-    [theme, toggleTheme]
+    [theme, toggleTheme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

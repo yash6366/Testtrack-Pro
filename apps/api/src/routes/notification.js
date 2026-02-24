@@ -5,6 +5,7 @@
 
 import { createAuthGuards } from '../lib/rbac.js';
 import { getPrismaClient } from '../lib/prisma.js';
+import { logError } from '../lib/logger.js';
 import {
   getUserNotifications,
   getNotification,
@@ -57,10 +58,10 @@ export async function notificationRoutes(fastify) {
         const result = await getUserNotifications(userId, filters);
         reply.send(result);
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        logError('Error fetching notifications:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -80,10 +81,10 @@ export async function notificationRoutes(fastify) {
 
         reply.send(notification);
       } catch (error) {
-        console.error('Error fetching notification:', error);
+        logError('Error fetching notification:', error);
         reply.code(404).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -104,10 +105,10 @@ export async function notificationRoutes(fastify) {
         const updated = await markNotificationAsRead(request.params.id);
         reply.send(updated);
       } catch (error) {
-        console.error('Error marking notification as read:', error);
+        logError('Error marking notification as read:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -121,10 +122,10 @@ export async function notificationRoutes(fastify) {
         const result = await markAllNotificationsAsRead(request.user.id);
         reply.send({ success: true, updated: result.count });
       } catch (error) {
-        console.error('Error marking all as read:', error);
+        logError('Error marking all as read:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -145,10 +146,10 @@ export async function notificationRoutes(fastify) {
         await deleteNotification(request.params.id);
         reply.code(204).send();
       } catch (error) {
-        console.error('Error deleting notification:', error);
+        logError('Error deleting notification:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -166,10 +167,10 @@ export async function notificationRoutes(fastify) {
         const prefs = await getNotificationPreferences(request.user.id);
         reply.send(prefs);
       } catch (error) {
-        console.error('Error fetching preferences:', error);
+        logError('Error fetching preferences:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -218,10 +219,10 @@ export async function notificationRoutes(fastify) {
         const updated = await updateNotificationPreferences(request.user.id, sanitized);
         reply.send(updated);
       } catch (error) {
-        console.error('Error updating preferences:', error);
+        logError('Error updating preferences:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -240,10 +241,10 @@ export async function notificationRoutes(fastify) {
         const filters = await getSavedFilters(request.user.id, resourceType);
         reply.send(filters);
       } catch (error) {
-        console.error('Error fetching filters:', error);
+        logError('Error fetching filters:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -263,10 +264,10 @@ export async function notificationRoutes(fastify) {
 
         reply.send(filter);
       } catch (error) {
-        console.error('Error fetching filter:', error);
+        logError('Error fetching filter:', error);
         reply.code(404).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -281,7 +282,7 @@ export async function notificationRoutes(fastify) {
 
         if (!name || !resourceType || !filterConfig) {
           return reply.code(400).send({ 
-            error: 'name, resourceType, and filterConfig are required' 
+            error: 'name, resourceType, and filterConfig are required', 
           });
         }
 
@@ -297,10 +298,10 @@ export async function notificationRoutes(fastify) {
 
         reply.code(201).send(filter);
       } catch (error) {
-        console.error('Error creating filter:', error);
+        logError('Error creating filter:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -321,10 +322,10 @@ export async function notificationRoutes(fastify) {
         const updated = await updateSavedFilter(request.params.id, request.body);
         reply.send(updated);
       } catch (error) {
-        console.error('Error updating filter:', error);
+        logError('Error updating filter:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -345,10 +346,10 @@ export async function notificationRoutes(fastify) {
         await deleteSavedFilter(request.params.id);
         reply.code(204).send();
       } catch (error) {
-        console.error('Error deleting filter:', error);
+        logError('Error deleting filter:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -374,10 +375,10 @@ export async function notificationRoutes(fastify) {
           appliedAt: new Date().toISOString(),
         });
       } catch (error) {
-        console.error('Error applying filter:', error);
+        logError('Error applying filter:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // ============================================
@@ -402,10 +403,10 @@ export async function notificationRoutes(fastify) {
 
         reply.send(schedule);
       } catch (error) {
-        console.error('Error fetching digest schedule:', error);
+        logError('Error fetching digest schedule:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -419,10 +420,10 @@ export async function notificationRoutes(fastify) {
         const schedule = await updateDigestSchedule(request.user.id, request.body);
         reply.send(schedule);
       } catch (error) {
-        console.error('Error updating digest schedule:', error);
+        logError('Error updating digest schedule:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -437,10 +438,10 @@ export async function notificationRoutes(fastify) {
         const digest = await compileDigest(request.user.id, frequency);
         reply.send(digest);
       } catch (error) {
-        console.error('Error compiling digest:', error);
+        logError('Error compiling digest:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -476,9 +477,9 @@ export async function notificationRoutes(fastify) {
           notificationCount: digest.notifications.length,
         });
       } catch (error) {
-        console.error('Error sending digest:', error);
+        logError('Error sending digest:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }

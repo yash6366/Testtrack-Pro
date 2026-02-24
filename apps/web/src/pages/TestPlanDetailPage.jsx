@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { apiClient } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
+import { logError } from '../lib/errorLogger';
 import DashboardLayout from '../components/DashboardLayout';
 import BackButton from '@/components/ui/BackButton';
 import Breadcrumb from '@/components/ui/Breadcrumb';
@@ -39,16 +40,19 @@ export default function TestPlanDetailPage() {
   const loadTestPlanDetails = async () => {
     try {
       setLoading(true);
-          <BackButton
-            label="Back to Test Plans"
-            fallback={`/test-plans?projectId=${projectId}`}
-          />
-        name: response.name || response.data?.name || '',
-        description: response.description || response.data?.description || '',
+      const response = await apiClient.get(
+        `/api/projects/${projectId}/test-plans/${planId}`,
+      );
+      const plan = response.data || response || {};
+
+      setTestPlan(plan);
+      setFormData({
+        name: plan.name || '',
+        description: plan.description || '',
       });
     } catch (err) {
       setError(err.message || 'Failed to load test plan');
-      console.error(err);
+      logError(err, 'TestPlanDetailPage.loadTestPlanDetails');
     } finally {
       setLoading(false);
     }
@@ -57,11 +61,11 @@ export default function TestPlanDetailPage() {
   const loadTestCases = async () => {
     try {
       const response = await apiClient.get(
-        `/api/projects/${projectId}/test-plans/${planId}/test-cases`
+        `/api/projects/${projectId}/test-plans/${planId}/test-cases`,
       );
       setTestCases(response.data || response || []);
     } catch (err) {
-      console.error('Failed to load test cases:', err);
+      logError(err, 'Failed to load test cases');
     }
   };
 
@@ -77,7 +81,7 @@ export default function TestPlanDetailPage() {
       
       setAvailableTestCases(available);
     } catch (err) {
-      console.error('Failed to load available test cases:', err);
+      logError(err, 'Failed to load available test cases');
     }
   };
 
@@ -102,7 +106,7 @@ export default function TestPlanDetailPage() {
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       setError(err.message || 'Failed to update test plan');
-      console.error(err);
+      logError(err, 'TestPlanDetailPage.handleSaveChanges');
     } finally {
       setActionLoading(false);
     }
@@ -114,7 +118,7 @@ export default function TestPlanDetailPage() {
       setError('');
       await apiClient.post(
         `/api/projects/${projectId}/test-plans/${planId}/test-cases`,
-        { testCaseId }
+        { testCaseId },
       );
       setSuccessMessage('Test case added to plan');
       await loadTestCases();
@@ -122,7 +126,7 @@ export default function TestPlanDetailPage() {
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       setError(err.message || 'Failed to add test case');
-      console.error(err);
+      logError(err, 'TestPlanDetailPage.handleAddTestCase');
     } finally {
       setActionLoading(false);
     }
@@ -135,14 +139,14 @@ export default function TestPlanDetailPage() {
       setActionLoading(true);
       setError('');
       await apiClient.delete(
-        `/api/projects/${projectId}/test-plans/${planId}/test-cases/${testCaseId}`
+        `/api/projects/${projectId}/test-plans/${planId}/test-cases/${testCaseId}`,
       );
       setSuccessMessage('Test case removed from plan');
       await loadTestCases();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       setError(err.message || 'Failed to remove test case');
-      console.error(err);
+      logError(err, 'TestPlanDetailPage.handleRemoveTestCase');
     } finally {
       setActionLoading(false);
     }
@@ -161,7 +165,7 @@ export default function TestPlanDetailPage() {
       setTimeout(() => navigate('/test-plans?projectId=' + projectId), 1500);
     } catch (err) {
       setError(err.message || 'Failed to delete test plan');
-      console.error(err);
+      logError(err, 'TestPlanDetailPage.handleDeletePlan');
     } finally {
       setActionLoading(false);
     }
@@ -169,7 +173,7 @@ export default function TestPlanDetailPage() {
 
   const filteredAvailableTestCases = availableTestCases.filter((tc) =>
     tc.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    tc.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    tc.name?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (!projectId) {

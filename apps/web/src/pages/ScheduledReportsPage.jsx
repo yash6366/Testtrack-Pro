@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { apiClient } from '../lib/apiClient';
+import { logError } from '../lib/errorLogger';
 import DashboardLayout from '../components/DashboardLayout';
 import VirtualizedTable from '../components/VirtualizedTable';
 import BackButton from '@/components/ui/BackButton';
@@ -53,12 +54,12 @@ export default function ScheduledReportsPage() {
       }
 
       const response = await apiClient.get(
-        `/api/projects/${activeProjectId}/scheduled-reports?skip=${(page - 1) * 20}&take=20`
+        `/api/projects/${activeProjectId}/scheduled-reports?skip=${(page - 1) * 20}&take=20`,
       );
 
       setReports(response.data || []);
     } catch (err) {
-      console.error('Error loading reports:', err);
+      logError(err, 'Error loading reports');
       setError(err.message || 'Failed to load scheduled reports');
     } finally {
       setLoading(false);
@@ -93,7 +94,7 @@ export default function ScheduledReportsPage() {
 
       const response = await apiClient.post(
         `/api/projects/${activeProjectId}/scheduled-reports`,
-        payload
+        payload,
       );
 
       setSuccess('Scheduled report created successfully');
@@ -115,7 +116,7 @@ export default function ScheduledReportsPage() {
       setIsCreating(false);
       await loadReports();
     } catch (err) {
-      console.error('Error creating report:', err);
+      logError(err, 'Error creating report');
       setError(err.message || 'Failed to create scheduled report');
     } finally {
       setLoading(false);
@@ -145,14 +146,14 @@ export default function ScheduledReportsPage() {
 
       await apiClient.patch(
         `/api/projects/${activeProjectId}/scheduled-reports/${selectedReport.id}`,
-        payload
+        payload,
       );
 
       setSuccess('Scheduled report updated successfully');
       setSelectedReport(null);
       await loadReports();
     } catch (err) {
-      console.error('Error updating report:', err);
+      logError(err, 'Error updating report');
       setError(err.message || 'Failed to update scheduled report');
     } finally {
       setLoading(false);
@@ -170,14 +171,14 @@ export default function ScheduledReportsPage() {
       setSuccess('');
 
       await apiClient.delete(
-        `/api/projects/${activeProjectId}/scheduled-reports/${reportId}`
+        `/api/projects/${activeProjectId}/scheduled-reports/${reportId}`,
       );
 
       setSuccess('Scheduled report deleted successfully');
       setSelectedReport(null);
       await loadReports();
     } catch (err) {
-      console.error('Error deleting report:', err);
+      logError(err, 'Error deleting report');
       setError(err.message || 'Failed to delete scheduled report');
     } finally {
       setLoading(false);

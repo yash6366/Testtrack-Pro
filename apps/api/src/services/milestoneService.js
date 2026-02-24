@@ -145,7 +145,7 @@ export async function getProjectMilestones(projectId, filters = {}, pagination =
 
   // Calculate progress for each milestone
   const milestonesWithProgress = await Promise.all(
-    milestones.map(m => calculateMilestoneProgress(m.id))
+    milestones.map(m => calculateMilestoneProgress(m.id)),
   );
 
   return {
@@ -479,7 +479,7 @@ export async function calculateMilestoneProgress(milestoneId, milestoneData = nu
   // Calculate defect resolution percentage
   if (milestone.defects.length > 0) {
     const resolvedDefects = milestone.defects.filter(d =>
-      ['VERIFIED', 'CLOSED'].includes(d.status)
+      ['VERIFIED', 'CLOSED'].includes(d.status),
     ).length;
     defectProgress = (resolvedDefects / milestone.defects.length) * 100;
   }
@@ -507,11 +507,11 @@ export async function calculateMilestoneProgress(milestoneId, milestoneData = nu
       defects: parseFloat(defectProgress.toFixed(2)),
       totalTestCases: milestone.testCases.length,
       completedTestCases: milestone.testCases.filter(tc =>
-        tc.executions.length > 0 && tc.executions.some(e => e.status === 'PASSED')
+        tc.executions.length > 0 && tc.executions.some(e => e.status === 'PASSED'),
       ).length,
       totalDefects: milestone.defects.length,
       resolvedDefects: milestone.defects.filter(d =>
-        ['VERIFIED', 'CLOSED'].includes(d.status)
+        ['VERIFIED', 'CLOSED'].includes(d.status),
       ).length,
     },
   };
@@ -582,7 +582,7 @@ export async function getProjectMilestonesSummary(projectId) {
     totalDefects,
     milestonesWithDueDate: milestones.filter(m => m.targetEndDate).length,
     overdueCount: milestones.filter(m =>
-      m.targetEndDate && new Date(m.targetEndDate) < new Date() && m.status !== 'COMPLETED'
+      m.targetEndDate && new Date(m.targetEndDate) < new Date() && m.status !== 'COMPLETED',
     ).length,
   };
 }

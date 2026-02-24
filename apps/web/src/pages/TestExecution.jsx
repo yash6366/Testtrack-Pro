@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks';
+import { logError } from '@/lib/errorLogger';
 import useTestExecution from '@/hooks/useTestExecution';
 import useExecutionTimer from '@/hooks/useExecutionTimer';
 import StepNavigator from '@/components/StepNavigator';
@@ -130,7 +131,7 @@ export default function TestExecution() {
         currentStep.stepId,
         selectedStatus,
         actualResult,
-        notes
+        notes,
       );
 
       // Move to next step or complete
@@ -142,7 +143,7 @@ export default function TestExecution() {
       } else {
         // Last step - offer to complete
         const shouldComplete = window.confirm(
-          'You have marked the last step. Would you like to complete the execution?'
+          'You have marked the last step. Would you like to complete the execution?',
         );
 
         if (shouldComplete) {
@@ -169,7 +170,7 @@ export default function TestExecution() {
 
   const handleCompleteExecution = async () => {
     const shouldComplete = window.confirm(
-      'Are you sure you want to complete this execution? Make sure all steps are marked.'
+      'Are you sure you want to complete this execution? Make sure all steps are marked.',
     );
 
     if (!shouldComplete) return;
@@ -274,7 +275,7 @@ export default function TestExecution() {
       try {
         await linkDefect(bug.id);
       } catch (err) {
-        console.error('Failed to link bug to execution:', err);
+        logError(err, 'Failed to link bug to execution');
       }
     }
     setShowBugModal(false);
@@ -321,12 +322,12 @@ export default function TestExecution() {
   const progressPercent =
     execution.steps.length > 0
       ? Math.round(
-          ((currentStepIndex + 1) / execution.steps.length) * 100
+          ((currentStepIndex + 1) / execution.steps.length) * 100,
         )
       : 0;
   const completedSteps =
     execution.steps?.filter((s) =>
-      ['PASSED', 'FAILED', 'BLOCKED', 'SKIPPED'].includes(s.status)
+      ['PASSED', 'FAILED', 'BLOCKED', 'SKIPPED'].includes(s.status),
     ).length || 0;
 
   return (

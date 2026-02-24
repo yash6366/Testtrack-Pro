@@ -59,7 +59,7 @@ async function testPlanRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get all test plans
@@ -76,7 +76,7 @@ async function testPlanRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get test plan by ID
@@ -93,7 +93,7 @@ async function testPlanRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Update test plan
@@ -109,7 +109,7 @@ async function testPlanRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Delete test plan
@@ -125,7 +125,7 @@ async function testPlanRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Execute test plan (create test run)
@@ -141,7 +141,7 @@ async function testPlanRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Clone test plan
@@ -157,7 +157,7 @@ async function testPlanRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get test plan runs
@@ -174,7 +174,7 @@ async function testPlanRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }
 

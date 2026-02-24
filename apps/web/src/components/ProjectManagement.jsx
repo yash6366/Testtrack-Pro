@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChevronDown, Trash2, Plus, Edit2, Users, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks';
 import { apiClient } from '@/lib/apiClient';
+import { logError } from '@/lib/errorLogger';
 
 export default function ProjectManagement() {
   const { user } = useAuth();
@@ -86,7 +87,7 @@ export default function ProjectManagement() {
       const data = await apiClient.get('/api/admin/projects?take=100');
       setProjects(data.projects || []);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      logError(error, 'Error fetching projects');
     } finally {
       setLoading(false);
     }
@@ -97,7 +98,7 @@ export default function ProjectManagement() {
       const data = await apiClient.get('/api/admin/users?take=500');
       setAllUsers(data.users || []);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      logError(error, 'Error fetching users');
     }
   }
 
@@ -114,7 +115,7 @@ export default function ProjectManagement() {
       setShowCreateModal(false);
       alert('Project created successfully');
     } catch (error) {
-      console.error('Error creating project:', error);
+      logError(error, 'Error creating project');
       alert(error.message || 'Failed to create project');
     }
   }
@@ -131,7 +132,7 @@ export default function ProjectManagement() {
       await loadProjectDetails(projectId);
       alert('Environment added successfully');
     } catch (error) {
-      console.error('Error adding environment:', error);
+      logError(error, 'Error adding environment');
       alert(error.message || 'Failed to add environment');
     }
   }
@@ -155,7 +156,7 @@ export default function ProjectManagement() {
       await loadProjectDetails(projectId);
       alert('Custom field added successfully');
     } catch (error) {
-      console.error('Error adding custom field:', error);
+      logError(error, 'Error adding custom field');
       alert(error.message || 'Failed to add custom field');
     }
   }
@@ -175,7 +176,7 @@ export default function ProjectManagement() {
       const userName = result?.user?.name || 'User';
       alert(`${userName} has been allocated to the project successfully`);
     } catch (error) {
-      console.error('Error allocating user:', error);
+      logError(error, 'Error allocating user');
       const errorMessage = error.response?.data?.error || error.message || 'Failed to allocate user';
       alert(`Error: ${errorMessage}`);
     }
@@ -196,7 +197,7 @@ export default function ProjectManagement() {
         return {
           ...prev,
           projectUserAllocations: prev.projectUserAllocations?.filter(
-            a => a.user.id !== userId
+            a => a.user.id !== userId,
           ) || [],
         };
       });
@@ -205,7 +206,7 @@ export default function ProjectManagement() {
       await loadProjectDetails(projectId);
       alert('User removed successfully');
     } catch (error) {
-      console.error('Error deallocating user:', error);
+      logError(error, 'Error deallocating user');
       
       // Refresh on error to show correct state
       await loadProjectDetails(projectId);
@@ -230,7 +231,7 @@ export default function ProjectManagement() {
       await loadProjectDetails(projectId);
       alert('Environment deleted');
     } catch (error) {
-      console.error('Error deleting environment:', error);
+      logError(error, 'Error deleting environment');
       alert(error.message || 'Failed to delete environment');
     }
   }
@@ -243,7 +244,7 @@ export default function ProjectManagement() {
       await loadProjectDetails(projectId);
       alert('Custom field deleted');
     } catch (error) {
-      console.error('Error deleting custom field:', error);
+      logError(error, 'Error deleting custom field');
       alert(error.message || 'Failed to delete custom field');
     }
   }
@@ -256,7 +257,7 @@ export default function ProjectManagement() {
         prevProjects.map(p => (p.id === projectId ? updatedProject : p))
       ));
     } catch (error) {
-      console.error('Error loading project details:', error);
+      logError(error, 'Error loading project details');
     }
   }
 

@@ -11,7 +11,7 @@ export default function BugCreationModal({
   testTitle = '',
   initialDescription = '',
   onClose = () => {},
-  onSuccess = () => {}
+  onSuccess = () => {},
 }) {
   const [formData, setFormData] = useState({
     title: testTitle || '',
@@ -20,7 +20,7 @@ export default function BugCreationModal({
     priority: 'P2',
     environment: 'PRODUCTION',
     reproducibility: 'ALWAYS',
-    affectedVersion: ''
+    affectedVersion: '',
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -33,7 +33,7 @@ export default function BugCreationModal({
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -66,7 +66,7 @@ export default function BugCreationModal({
           affectedVersion: formData.affectedVersion || 'Unknown',
           executionId: executionId,
           testCaseId: testCaseId,
-        }
+        },
       );
 
       setSuccess(true);
@@ -90,7 +90,7 @@ export default function BugCreationModal({
         priority: 'P2',
           environment: 'PRODUCTION',
         reproducibility: 'ALWAYS',
-        affectedVersion: ''
+        affectedVersion: '',
       });
       setError('');
       setSuccess(false);
@@ -269,7 +269,7 @@ export default function BugCreationModal({
               {(executionId || testCaseId) && (
                 <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 p-3 rounded-lg text-xs">
                   <p className="text-blue-800 dark:text-blue-200">
-                    ℹ️ This bug will be linked to this test execution {testCaseId && `and test case`}
+                    ℹ️ This bug will be linked to this test execution {testCaseId && 'and test case'}
                   </p>
                 </div>
               )}

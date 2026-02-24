@@ -325,7 +325,7 @@ export async function getBugAgeReport(projectId) {
   };
 
   const slaBreaches = bugsWithAge.filter(
-    (b) => b.priority === 'P0' && b.ageDays > 5
+    (b) => b.priority === 'P0' && b.ageDays > 5,
   ).length;
 
   return {

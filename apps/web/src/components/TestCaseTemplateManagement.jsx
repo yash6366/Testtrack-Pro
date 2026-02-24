@@ -50,7 +50,7 @@ export default function TestCaseTemplateManagement() {
     setError('');
     try {
       const data = await apiClient.get(
-        `/api/tester/projects/${projectId}/templates?isActive=true`
+        `/api/tester/projects/${projectId}/templates?isActive=true`,
       );
       setTemplates(data.templates || []);
     } catch (err) {
@@ -73,7 +73,7 @@ export default function TestCaseTemplateManagement() {
 
       await apiClient.post(
         `/api/tester/projects/${projectId}/templates`,
-        templateData
+        templateData,
       );
 
       setSuccess('Template created successfully');
@@ -98,7 +98,7 @@ export default function TestCaseTemplateManagement() {
 
       await apiClient.patch(
         `/api/tester/templates/${editingTemplate.id}`,
-        templateData
+        templateData,
       );
 
       setSuccess('Template updated successfully');
@@ -134,7 +134,7 @@ export default function TestCaseTemplateManagement() {
         {
           projectId: Number(projectId),
           testCaseName: useFormData.testCaseName,
-        }
+        },
       );
 
       setSuccess('Test case created from template successfully');
@@ -200,7 +200,7 @@ export default function TestCaseTemplateManagement() {
     return steps
       .map(
         s =>
-          `${s.action}\n${s.expectedResult}${s.notes ? '\n' + s.notes : ''}`
+          `${s.action}\n${s.expectedResult}${s.notes ? '\n' + s.notes : ''}`,
       )
       .join('\n\n');
   };
@@ -217,7 +217,7 @@ export default function TestCaseTemplateManagement() {
             <button
               onClick={() =>
                 navigate(
-                  `/projects/${projectId}/test-cases`
+                  `/projects/${projectId}/test-cases`,
                 )
               }
               className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"

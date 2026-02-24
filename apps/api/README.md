@@ -189,11 +189,11 @@ See [docs/API-REFERENCE.md](../../docs/API-REFERENCE.md) for complete endpoint d
 - `POST /api/auth/logout` - Logout
 
 #### Test Management
-- `GET /api/tests` - List test cases
-- `POST /api/tests` - Create test case
-- `GET /api/tests/:id` - Get test case
-- `PUT /api/tests/:id` - Update test case
-- `DELETE /api/tests/:id` - Delete test case
+- `GET /api/projects/:projectId/test-cases` - List test cases
+- `POST /api/projects/:projectId/test-cases` - Create test case
+- `GET /api/projects/:projectId/test-cases/:testCaseId` - Get test case
+- `PUT /api/projects/:projectId/test-cases/:testCaseId` - Update test case
+- `DELETE /api/projects/:projectId/test-cases/:testCaseId` - Delete test case
 
 #### Test Execution
 - `POST /api/executions` - Create test execution
@@ -243,11 +243,15 @@ Routes handle HTTP requests and call services:
 // Example: apps/api/src/routes/tests.js
 
 export default async function testRoutes(fastify) {
-  fastify.post('/api/tests', {
+  fastify.post('/api/projects/:projectId/test-cases', {
     schema: createTestCaseSchema,
-    onRequest: [fastify.authenticate, fastify.requirePermission('test:create')]
+    preHandler: [requirePermission('testCase:create')],
   }, async (request, reply) => {
-    const testCase = await createTestCase(request.body, request.user.id);
+    const { projectId } = request.params;
+    const testCase = await createTestCase(
+      { ...request.body, projectId: Number(projectId) },
+      request.user.id,
+    );
     return reply.status(201).send(testCase);
   });
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
+import { logError } from '../lib/errorLogger';
 import DashboardLayout from '../components/DashboardLayout';
 import BackButton from '@/components/ui/BackButton';
 
@@ -34,7 +35,7 @@ export default function SearchResultsPage() {
       setLoading(true);
       setError('');
       const response = await apiClient.get(
-        `/api/search?projectId=${projectId}&q=${encodeURIComponent(query)}`
+        `/api/search?projectId=${projectId}&q=${encodeURIComponent(query)}`,
       );
       setResults({
         testCases: response.testCases || [],
@@ -44,7 +45,7 @@ export default function SearchResultsPage() {
       });
     } catch (err) {
       setError(err.message || 'Failed to search');
-      console.error(err);
+      logError(err, 'SearchResultsPage.searchContent');
     } finally {
       setLoading(false);
     }

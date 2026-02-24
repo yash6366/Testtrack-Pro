@@ -117,7 +117,7 @@ export async function updateScheduledReport(reportId, projectId, data) {
         data.frequency || existing.frequency,
         0,
         0,
-        '09:00'
+        '09:00',
       );
     }
 
@@ -214,7 +214,7 @@ async function processAndSendReport(report) {
       report.frequency,
       0,
       0,
-      '09:00'
+      '09:00',
     );
 
     await prisma.scheduledReport.update({

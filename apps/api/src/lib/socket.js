@@ -1,10 +1,11 @@
-import { Server } from "socket.io";
-import { createAdapter } from "@socket.io/redis-adapter";
-import { Redis as UpstashRedis } from "@upstash/redis";
-import Redis from "ioredis";
-import { getPrismaClient } from "./prisma.js";
-import { verifyTokenAndLoadUser } from "./rbac.js";
-import { createNotification, getNotificationPreferences, isWithinQuietHours } from "../services/notificationService.js";
+import { Server } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { Redis as UpstashRedis } from '@upstash/redis';
+import Redis from 'ioredis';
+import { getPrismaClient } from './prisma.js';
+import { verifyTokenAndLoadUser } from './rbac.js';
+import { createNotification, getNotificationPreferences, isWithinQuietHours } from '../services/notificationService.js';
+import { logWarn } from './logger.js';
 
 let redisClient = null;
 let redisAdapter = null; // For Socket.IO scaling
@@ -109,11 +110,11 @@ export function setupSocket(fastifyServer) {
     cors: {
       origin: [
         process.env.FRONTEND_URL,
-        "http://localhost:5173",
+        'http://localhost:5173',
       ],
       credentials: true,
     },
-    transports: ["websocket", "polling"],
+    transports: ['websocket', 'polling'],
   });
 
   /**
@@ -146,32 +147,32 @@ export function setupSocket(fastifyServer) {
   const prisma = getPrismaClient();
 
   function normalizeRole(role) {
-    return typeof role === "string" ? role.trim().toUpperCase() : "";
+    return typeof role === 'string' ? role.trim().toUpperCase() : '';
   }
 
   function parseRoom(room) {
-    if (!room || typeof room !== "string") {
-      return { type: "invalid" };
+    if (!room || typeof room !== 'string') {
+      return { type: 'invalid' };
     }
 
     const channelMatch = /^channel-(\d+)$/.exec(room);
     if (channelMatch) {
-      return { type: "channel", channelId: Number(channelMatch[1]), room };
+      return { type: 'channel', channelId: Number(channelMatch[1]), room };
     }
 
     const roleMatch = /^role:(.+)$/.exec(room);
     if (roleMatch) {
       const role = normalizeRole(roleMatch[1]);
-      return { type: "role", role, room: `role:${role}` };
+      return { type: 'role', role, room: `role:${role}` };
     }
 
     const userMatch = /^user:(\d+)$/.exec(room);
     if (userMatch) {
       const userId = Number(userMatch[1]);
-      return { type: "user", userId, room: `user:${userId}` };
+      return { type: 'user', userId, room: `user:${userId}` };
     }
 
-    return { type: "other", room };
+    return { type: 'other', room };
   }
 
   function getOnlineUserIds(room) {
@@ -239,12 +240,12 @@ export function setupSocket(fastifyServer) {
   async function resolveUser(socket) {
     const token = socket.handshake.auth?.token;
     if (!token) {
-      throw new Error("Missing auth token");
+      throw new Error('Missing auth token');
     }
 
     const user = await verifyTokenAndLoadUser(fastifyServer, token);
     if (!user) {
-      throw new Error("Invalid auth token");
+      throw new Error('Invalid auth token');
     }
 
     return { id: user.id, role: user.role };
@@ -261,7 +262,7 @@ export function setupSocket(fastifyServer) {
     });
 
     if (!member) {
-      const error = new Error("Access denied");
+      const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;
     }
@@ -274,7 +275,7 @@ export function setupSocket(fastifyServer) {
     });
 
     if (!user) {
-      const error = new Error("User not found");
+      const error = new Error('User not found');
       error.statusCode = 404;
       throw error;
     }
@@ -286,7 +287,7 @@ export function setupSocket(fastifyServer) {
           data: { isMuted: false, mutedUntil: null, muteReason: null, mutedBy: null },
         });
       } else {
-        const error = new Error("User is muted");
+        const error = new Error('User is muted');
         error.statusCode = 403;
         throw error;
       }
@@ -300,21 +301,21 @@ export function setupSocket(fastifyServer) {
     });
 
     if (!channel) {
-      const error = new Error("Channel not found");
+      const error = new Error('Channel not found');
       error.statusCode = 404;
       throw error;
     }
 
-    if (channel.isDisabled && normalizedRole !== "ADMIN") {
-      const error = new Error("CHAT_DISABLED");
+    if (channel.isDisabled && normalizedRole !== 'ADMIN') {
+      const error = new Error('CHAT_DISABLED');
       error.code = 'CHAT_DISABLED';
       error.channelId = channelId;
       error.statusCode = 403;
       throw error;
     }
 
-    if (channel.isLocked && normalizedRole !== "ADMIN") {
-      const error = new Error("CHANNEL_LOCKED");
+    if (channel.isLocked && normalizedRole !== 'ADMIN') {
+      const error = new Error('CHANNEL_LOCKED');
       error.code = 'CHANNEL_LOCKED';
       error.channelId = channelId;
       error.statusCode = 403;
@@ -322,7 +323,7 @@ export function setupSocket(fastifyServer) {
     }
   }
 
-  io.on("connection", async (socket) => {
+  io.on('connection', async (socket) => {
     let user;
     try {
       user = await resolveUser(socket);
@@ -359,13 +360,13 @@ export function setupSocket(fastifyServer) {
     }
 
     // Handle room joins for bug discussion, test execution, etc
-    socket.on("joinRoom", async (room) => {
+    socket.on('joinRoom', async (room) => {
       const parsed = parseRoom(room);
-      if (parsed.type === "invalid") {
+      if (parsed.type === 'invalid') {
         return;
       }
 
-      if (parsed.type === "channel") {
+      if (parsed.type === 'channel') {
         const channelId = parsed.channelId;
         if (Number.isNaN(channelId)) {
           return;
@@ -373,16 +374,16 @@ export function setupSocket(fastifyServer) {
         try {
           await ensureMember(userId, channelId);
         } catch (error) {
-          console.warn(`⚠ Join denied for user ${userId} in ${room}`);
+          logWarn(`⚠ Join denied for user ${userId} in ${room}`);
           return;
         }
-      } else if (parsed.type === "role") {
+      } else if (parsed.type === 'role') {
         if (!parsed.role || parsed.role !== normalizedRole) {
-          console.warn(`⚠ Role room join denied for user ${userId} in ${room}`);
+          logWarn(`⚠ Role room join denied for user ${userId} in ${room}`);
           return;
         }
         room = parsed.room;
-      } else if (parsed.type === "user") {
+      } else if (parsed.type === 'user') {
         if (parsed.userId !== userId) {
           logger.warn({ userId, room }, 'User room join denied');
           return;
@@ -400,14 +401,14 @@ export function setupSocket(fastifyServer) {
       }
 
       socket.join(room);
-      io.to(room).emit("userJoined", {
+      io.to(room).emit('userJoined', {
         userId,
         userRole,
         room,
         timestamp: new Date().toISOString(),
       });
       // Emit standardized presence event for UI consumers
-      io.to(room).emit("user_online", {
+      io.to(room).emit('user_online', {
         userId,
         userRole,
         room,
@@ -418,15 +419,15 @@ export function setupSocket(fastifyServer) {
     });
 
     // Handle room exits
-    socket.on("leaveRoom", (room) => {
-      if (room && typeof room === "string") {
+    socket.on('leaveRoom', (room) => {
+      if (room && typeof room === 'string') {
         socket.leave(room);
-        io.to(room).emit("userLeft", {
+        io.to(room).emit('userLeft', {
           userId,
           room,
           timestamp: new Date().toISOString(),
         });
-        io.to(room).emit("user_offline", {
+        io.to(room).emit('user_offline', {
           userId,
           room,
           onlineUsers: getOnlineUserIds(room),
@@ -437,17 +438,17 @@ export function setupSocket(fastifyServer) {
     });
 
     // Handle messages with role context
-    socket.on("message", async (data) => {
-      if (!data?.room || typeof data.room !== "string") {
+    socket.on('message', async (data) => {
+      if (!data?.room || typeof data.room !== 'string') {
         logger.warn({ data }, 'Message received without room');
         return;
       }
 
       const parsed = parseRoom(data.room);
-      const body = typeof data.body === "string" ? data.body : data.text;
+      const body = typeof data.body === 'string' ? data.body : data.text;
 
-      if (parsed.type === "channel") {
-        if (!body || typeof body !== "string") {
+      if (parsed.type === 'channel') {
+        if (!body || typeof body !== 'string') {
           return;
         }
 
@@ -546,26 +547,26 @@ export function setupSocket(fastifyServer) {
           room: data.room,
         };
 
-        io.to(data.room).emit("message", messagePayload);
+        io.to(data.room).emit('message', messagePayload);
         logger.debug({ userId, room: data.room }, 'Message sent to room');
         return;
       }
 
-      if (parsed.type === "role") {
+      if (parsed.type === 'role') {
         if (!parsed.role || parsed.role !== normalizedRole) {
           logger.warn({ userId, room: data.room }, 'Role room message denied');
           return;
         }
       }
 
-      if (parsed.type === "user") {
+      if (parsed.type === 'user') {
         if (parsed.userId !== userId) {
           logger.warn({ userId, room: data.room }, 'User room message denied');
           return;
         }
       }
 
-      if (!body || typeof body !== "string") {
+      if (!body || typeof body !== 'string') {
         return;
       }
 
@@ -581,9 +582,9 @@ export function setupSocket(fastifyServer) {
         return;
       }
 
-      const targetRoom = parsed.type === "other" ? parsed.room : parsed.room;
+      const targetRoom = parsed.type === 'other' ? parsed.room : parsed.room;
 
-      if (parsed.type === "other") {
+      if (parsed.type === 'other') {
         try {
           await authorizeBugOrExecutionRoom(targetRoom, userId);
         } catch (error) {
@@ -598,37 +599,37 @@ export function setupSocket(fastifyServer) {
         userRole,
         room: targetRoom,
         text: trimmed,
-        type: data.type || "GENERAL", // GENERAL, BUG_DISCUSSION, TEST_EXECUTION, ANNOUNCEMENT
+        type: data.type || 'GENERAL', // GENERAL, BUG_DISCUSSION, TEST_EXECUTION, ANNOUNCEMENT
         timestamp: new Date().toISOString(),
         metadata: data.metadata || {}, // For additional context (bugId, testId, etc)
       };
 
-      io.to(targetRoom).emit("message", messagePayload);
+      io.to(targetRoom).emit('message', messagePayload);
 
-      if (normalizedRole === "ADMIN" && data.type === "ANNOUNCEMENT") {
-        io.to("role:ADMIN").emit("announcement", messagePayload);
+      if (normalizedRole === 'ADMIN' && data.type === 'ANNOUNCEMENT') {
+        io.to('role:ADMIN').emit('announcement', messagePayload);
       }
 
       logger.debug({ userId, room: targetRoom }, 'Message sent');
     });
 
     // Handle direct notifications (e.g., re-test requests)
-    socket.on("notification", (data) => {
+    socket.on('notification', (data) => {
       const targetUserId = Number(data?.targetUserId);
       if (Number.isNaN(targetUserId)) {
         return;
       }
 
-      const message = typeof data?.message === "string" ? data.message.trim() : "";
+      const message = typeof data?.message === 'string' ? data.message.trim() : '';
       if (!message || message.length > MAX_NOTIFICATION_LENGTH) {
         return;
       }
 
-      io.to(`user:${targetUserId}`).emit("notification:new", {
+      io.to(`user:${targetUserId}`).emit('notification:new', {
         id: `${Date.now()}-${Math.random()}`,
         fromUserId: userId,
         fromUserRole: userRole,
-        type: data.type || "GENERAL", // RE_TEST_REQUEST, BUG_UPDATE, STATUS_CHANGE
+        type: data.type || 'GENERAL', // RE_TEST_REQUEST, BUG_UPDATE, STATUS_CHANGE
         message,
         metadata: data.metadata || {},
         timestamp: new Date().toISOString(),
@@ -637,13 +638,13 @@ export function setupSocket(fastifyServer) {
     });
 
     // Handle typing indicators
-    socket.on("typing", async (data) => {
-      if (!data?.room || typeof data.room !== "string") {
+    socket.on('typing', async (data) => {
+      if (!data?.room || typeof data.room !== 'string') {
         return;
       }
 
       const parsed = parseRoom(data.room);
-      if (parsed.type === "channel") {
+      if (parsed.type === 'channel') {
         if (Number.isNaN(parsed.channelId)) {
           return;
         }
@@ -652,15 +653,15 @@ export function setupSocket(fastifyServer) {
         } catch (error) {
           return;
         }
-      } else if (parsed.type === "role") {
+      } else if (parsed.type === 'role') {
         if (!parsed.role || parsed.role !== normalizedRole) {
           return;
         }
-      } else if (parsed.type === "user") {
+      } else if (parsed.type === 'user') {
         if (parsed.userId !== userId) {
           return;
         }
-      } else if (parsed.type === "other") {
+      } else if (parsed.type === 'other') {
         try {
           await authorizeBugOrExecutionRoom(parsed.room, userId);
         } catch (error) {
@@ -668,20 +669,20 @@ export function setupSocket(fastifyServer) {
         }
       }
 
-      socket.to(parsed.room).emit("userTyping", {
+      socket.to(parsed.room).emit('userTyping', {
         userId,
         room: parsed.room,
         timestamp: new Date().toISOString(),
       });
     });
 
-    socket.on("stopTyping", async (data) => {
-      if (!data?.room || typeof data.room !== "string") {
+    socket.on('stopTyping', async (data) => {
+      if (!data?.room || typeof data.room !== 'string') {
         return;
       }
 
       const parsed = parseRoom(data.room);
-      if (parsed.type === "channel") {
+      if (parsed.type === 'channel') {
         if (Number.isNaN(parsed.channelId)) {
           return;
         }
@@ -690,15 +691,15 @@ export function setupSocket(fastifyServer) {
         } catch (error) {
           return;
         }
-      } else if (parsed.type === "role") {
+      } else if (parsed.type === 'role') {
         if (!parsed.role || parsed.role !== normalizedRole) {
           return;
         }
-      } else if (parsed.type === "user") {
+      } else if (parsed.type === 'user') {
         if (parsed.userId !== userId) {
           return;
         }
-      } else if (parsed.type === "other") {
+      } else if (parsed.type === 'other') {
         try {
           await authorizeBugOrExecutionRoom(parsed.room, userId);
         } catch (error) {
@@ -706,14 +707,14 @@ export function setupSocket(fastifyServer) {
         }
       }
 
-      socket.to(parsed.room).emit("stopTyping", {
+      socket.to(parsed.room).emit('stopTyping', {
         userId,
         room: parsed.room,
       });
     });
 
     // Handle direct message events
-    socket.on("dm_message", async (data) => {
+    socket.on('dm_message', async (data) => {
       const recipientId = Number(data?.recipientId);
       const replyToId = data?.replyToId ? Number(data.replyToId) : null;
       if (Number.isNaN(recipientId) || !data?.message || typeof data.message !== 'string') {
@@ -882,7 +883,7 @@ export function setupSocket(fastifyServer) {
     });
 
     // Handle disconnection
-    socket.on("disconnect", () => {
+    socket.on('disconnect', () => {
       logger.info({ userId, socketId: socket.id }, 'User disconnected from Socket.IO');
 
       onlineUserIds.delete(userId);
@@ -896,12 +897,12 @@ export function setupSocket(fastifyServer) {
       // Emit leave event to all joined rooms
       Array.from(socket.rooms).forEach((room) => {
         if (room !== socket.id) {
-          io.to(room).emit("userLeft", {
+          io.to(room).emit('userLeft', {
             userId,
             room,
             timestamp: new Date().toISOString(),
           });
-          io.to(room).emit("user_offline", {
+          io.to(room).emit('user_offline', {
             userId,
             room,
             onlineUsers: getOnlineUserIds(room),
@@ -912,7 +913,7 @@ export function setupSocket(fastifyServer) {
     });
 
     // Error handling
-    socket.on("error", (error) => {
+    socket.on('error', (error) => {
       logger.error({ err: error, userId }, 'Socket error');
     });
   });

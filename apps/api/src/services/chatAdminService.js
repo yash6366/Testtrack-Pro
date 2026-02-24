@@ -1,4 +1,5 @@
 import { getPrismaClient } from '../lib/prisma.js';
+import { logError } from '../lib/logger.js';
 
 const prisma = getPrismaClient();
 
@@ -20,7 +21,7 @@ export async function createAuditLog(
   targetId,
   targetName,
   targetType,
-  reason = null
+  reason = null,
 ) {
   return await prisma.chatAuditLog.create({
     data: {
@@ -63,7 +64,7 @@ export async function deleteMessage(messageId, adminId, adminName, reason = null
     messageId,
     `Message from ${message.sender.name}: "${message.message.substring(0, 50)}"`,
     'MESSAGE',
-    reason
+    reason,
   );
 
   // Soft delete: mark as deleted
@@ -137,7 +138,7 @@ export async function muteUser(userId, adminId, adminName, mutedUntil, reason = 
     userId,
     user.name,
     'USER',
-    reason || `Muted until ${until.toLocaleString()}`
+    reason || `Muted until ${until.toLocaleString()}`,
   );
 
   // Apply mute
@@ -178,7 +179,7 @@ export async function unmuteUser(userId, adminId, adminName) {
     userId,
     user.name,
     'USER',
-    null
+    null,
   );
 
   // Remove mute
@@ -220,7 +221,7 @@ export async function lockChannel(channelId, adminId, adminName, reason = null) 
     channelId,
     channel.name,
     'CHANNEL',
-    reason
+    reason,
   );
 
   // Lock channel
@@ -260,7 +261,7 @@ export async function unlockChannel(channelId, adminId, adminName) {
     channelId,
     channel.name,
     'CHANNEL',
-    null
+    null,
   );
 
   // Unlock channel
@@ -301,7 +302,7 @@ export async function disableChat(channelId, adminId, adminName, reason = null) 
     channelId,
     channel.name,
     'CHANNEL',
-    reason
+    reason,
   );
 
   // Disable chat
@@ -341,7 +342,7 @@ export async function enableChat(channelId, adminId, adminName) {
     channelId,
     channel.name,
     'CHANNEL',
-    null
+    null,
   );
 
   // Enable chat
@@ -579,7 +580,7 @@ export async function autoUnmuteExpiredMutes() {
       await unmuteUser(user.id, null, 'System');
       count++;
     } catch (error) {
-      console.error(`Failed to auto-unmute user ${user.id}:`, error);
+      logError(`Failed to auto-unmute user ${user.id}`, error);
     }
   }
 

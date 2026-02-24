@@ -98,7 +98,7 @@ async function testCreateTestPlanWithAllFields() {
   assertEqual(testPlan.plannerNotes, testPlanData.plannerNotes, 'Planner notes');
   assert(
     Array.isArray(testPlan.testCaseIds) && testPlan.testCaseIds.length === 3,
-    'TestCaseIds array'
+    'TestCaseIds array',
   );
 
   return testPlan.id;
@@ -119,7 +119,7 @@ async function testCreateTestPlanWithoutOptionalFields() {
   assertEqual(testPlan.plannerNotes, null, 'Planner notes should be null when not provided');
   assert(
     Array.isArray(testPlan.testCaseIds) && testPlan.testCaseIds.length === 0,
-    'TestCaseIds should default to empty array'
+    'TestCaseIds should default to empty array',
   );
 
   return testPlan.id;
@@ -138,7 +138,7 @@ async function testUpdateTestPlanFields(testPlanId) {
     updateData,
     USER_ID,
     PROJECT_ID,
-    createMockPermissionContext('testPlan:edit')
+    createMockPermissionContext('testPlan:edit'),
   );
 
   assertEqual(updated.scope, updateData.scope, 'Updated scope');
@@ -146,7 +146,7 @@ async function testUpdateTestPlanFields(testPlanId) {
   assertEqual(updated.plannerNotes, updateData.plannerNotes, 'Updated notes');
   assert(
     Array.isArray(updated.testCaseIds) && updated.testCaseIds.length === 4,
-    'Updated test case IDs'
+    'Updated test case IDs',
   );
 }
 
@@ -173,7 +173,7 @@ async function testExecuteTestPlanWithTestCases(testPlanId) {
     executionData,
     USER_ID,
     PROJECT_ID,
-    createMockPermissionContext('testPlan:execute')
+    createMockPermissionContext('testPlan:execute'),
   );
 
   assertExists(result.testRun, 'Test run created');
@@ -186,7 +186,7 @@ async function testCloneTestPlanWithFields(testPlanId) {
     testPlanId,
     USER_ID,
     PROJECT_ID,
-    createMockPermissionContext('testPlan:clone')
+    createMockPermissionContext('testPlan:clone'),
   );
 
   assertExists(cloned.id, 'Cloned TestPlan ID');
@@ -272,7 +272,7 @@ async function runAllTests() {
         },
         USER_ID,
         PROJECT_ID,
-        createMockPermissionContext('testPlan:edit')
+        createMockPermissionContext('testPlan:edit'),
       );
     });
 

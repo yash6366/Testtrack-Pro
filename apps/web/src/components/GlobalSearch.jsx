@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../lib/apiClient';
+import { logError } from '../lib/errorLogger';
 
 /**
  * GlobalSearch Component
@@ -28,12 +29,12 @@ export default function GlobalSearch({ projectId, placeholder = 'Search tests, b
     try {
       const response = await apiClient.get(
         `/search/suggestions?projectId=${projectId}&q=${encodeURIComponent(searchQuery)}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setSuggestions(response.data.suggestions || []);
       setSelectedIndex(-1);
     } catch (error) {
-      console.error('Failed to fetch suggestions:', error);
+      logError(error, 'Failed to fetch suggestions');
       setSuggestions([]);
     } finally {
       setLoading(false);
@@ -78,7 +79,7 @@ export default function GlobalSearch({ projectId, placeholder = 'Search tests, b
       case 'ArrowDown':
         e.preventDefault();
         setSelectedIndex(prev =>
-          prev < suggestions.length - 1 ? prev + 1 : prev
+          prev < suggestions.length - 1 ? prev + 1 : prev,
         );
         break;
       case 'ArrowUp':

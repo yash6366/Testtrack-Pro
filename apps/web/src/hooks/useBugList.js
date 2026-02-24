@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '../lib/apiClient';
+import { logError } from '../lib/errorLogger';
 
 /**
  * Custom hook for bug list management
@@ -11,7 +12,7 @@ export function useBugList(projectId, initialFilters = {}) {
   const [pagination, setPagination] = useState({
     currentPage: 1,
     pageSize: 10,
-    totalCount: 0
+    totalCount: 0,
   });
   const [filters, setFilters] = useState({
     searchQuery: '',
@@ -19,7 +20,7 @@ export function useBugList(projectId, initialFilters = {}) {
     priority: '',
     severity: '',
     assignee: '',
-    ...initialFilters
+    ...initialFilters,
   });
 
   const fetchBugs = useCallback(async () => {
@@ -36,7 +37,7 @@ export function useBugList(projectId, initialFilters = {}) {
       const params = new URLSearchParams({
         projectId: String(projectId),
         page: String(Math.max(1, pagination.currentPage)),
-        limit: String(Math.max(1, Math.min(100, pagination.pageSize)))
+        limit: String(Math.max(1, Math.min(100, pagination.pageSize))),
       });
 
       // Add active filters (sanitize inputs)
@@ -58,14 +59,14 @@ export function useBugList(projectId, initialFilters = {}) {
       if (response.pagination) {
         setPagination(prev => ({
           ...prev,
-          totalCount: Number(response.pagination.totalCount) || 0
+          totalCount: Number(response.pagination.totalCount) || 0,
         }));
       }
     } catch (err) {
       const errorMessage = err.message || 'Failed to fetch bugs';
       setError(errorMessage);
       setBugs([]);
-      console.error('Failed to fetch bugs:', err);
+      logError(err, 'Failed to fetch bugs');
     } finally {
       setLoading(false);
     }
@@ -79,12 +80,12 @@ export function useBugList(projectId, initialFilters = {}) {
   const updateFilter = useCallback((filterName, value) => {
     setFilters(prev => ({
       ...prev,
-      [filterName]: value
+      [filterName]: value,
     }));
     // Reset to page 1 when filter changes
     setPagination(prev => ({
       ...prev,
-      currentPage: 1
+      currentPage: 1,
     }));
   }, []);
 
@@ -94,11 +95,11 @@ export function useBugList(projectId, initialFilters = {}) {
       status: '',
       priority: '',
       severity: '',
-      assignee: ''
+      assignee: '',
     });
     setPagination(prev => ({
       ...prev,
-      currentPage: 1
+      currentPage: 1,
     }));
   }, []);
 
@@ -106,7 +107,7 @@ export function useBugList(projectId, initialFilters = {}) {
     const validPageNumber = Math.max(1, Number(pageNumber) || 1);
     setPagination(prev => ({
       ...prev,
-      currentPage: validPageNumber
+      currentPage: validPageNumber,
     }));
   }, []);
 
@@ -127,7 +128,7 @@ export function useBugList(projectId, initialFilters = {}) {
     error,
     pagination: {
       ...pagination,
-      pageCount
+      pageCount,
     },
     filters,
     updateFilter,
@@ -135,6 +136,6 @@ export function useBugList(projectId, initialFilters = {}) {
     goToPage,
     nextPage,
     prevPage,
-    refetch: fetchBugs
+    refetch: fetchBugs,
   };
 }

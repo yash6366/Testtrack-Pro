@@ -7,6 +7,7 @@
 
 import crypto from 'crypto';
 import { getRedisClient } from '../lib/socket.js';
+import { logError } from '../lib/logger.js';
 
 /**
  * CSRF token store (in-memory fallback)
@@ -47,10 +48,10 @@ async function createToken(sessionId) {
       await redisClient.set(
         `${REDIS_PREFIX}${token}`,
         JSON.stringify(tokenData),
-        { ex: TOKEN_EXPIRY_SECONDS }
+        { ex: TOKEN_EXPIRY_SECONDS },
       );
     } catch (error) {
-      console.error('Redis CSRF token creation failed, using in-memory fallback:', error);
+      logError('Redis CSRF token creation failed, using in-memory fallback:', error);
       // Fall back to in-memory storage
       tokenStore.set(token, tokenData);
     }
@@ -89,7 +90,7 @@ async function verifyToken(token, sessionId) {
         tokenData = JSON.parse(data);
       }
     } catch (error) {
-      console.error('Redis CSRF token verification failed, checking in-memory fallback:', error);
+      logError('Redis CSRF token verification failed, checking in-memory fallback:', error);
       // Fall back to in-memory storage
       tokenData = tokenStore.get(token);
     }
@@ -109,7 +110,7 @@ async function verifyToken(token, sessionId) {
       try {
         await redisClient.del(`${REDIS_PREFIX}${token}`);
       } catch (error) {
-        console.error('Redis CSRF token deletion failed:', error);
+        logError('Redis CSRF token deletion failed:', error);
       }
     }
     tokenStore.delete(token);
@@ -126,7 +127,7 @@ async function verifyToken(token, sessionId) {
     try {
       await redisClient.del(`${REDIS_PREFIX}${token}`);
     } catch (error) {
-      console.error('Redis CSRF token deletion failed:', error);
+      logError('Redis CSRF token deletion failed:', error);
     }
   }
   tokenStore.delete(token);
@@ -168,7 +169,7 @@ async function getToken(sessionId) {
         }
       }
     } catch (error) {
-      console.error('Redis CSRF token retrieval failed:', error);
+      logError('Redis CSRF token retrieval failed:', error);
       // Fall through to in-memory check or create new token
     }
   }

@@ -4,6 +4,7 @@
  */
 
 import * as Sentry from '@sentry/node';
+import { logWarn, logInfo } from './logger.js';
 
 /**
  * Initialize Sentry
@@ -15,7 +16,7 @@ export function initializeSentry(app) {
   
   // Only initialize if DSN is provided
   if (!sentryDsn) {
-    console.warn('⚠️  Sentry DSN not configured. Error tracking disabled.');
+    logWarn('⚠️  Sentry DSN not configured. Error tracking disabled.');
     return;
   }
 
@@ -68,7 +69,7 @@ export function initializeSentry(app) {
     },
   });
 
-  console.log('✅ Sentry initialized for error tracking and performance monitoring');
+  logInfo('✅ Sentry initialized for error tracking and performance monitoring');
 }
 
 /**
@@ -171,7 +172,7 @@ export function sentryErrorHandler(error, request, reply) {
  */
 export async function closeSentry() {
   await Sentry.close(2000);
-  console.log('Sentry connection closed');
+  logInfo('Sentry connection closed');
 }
 
 export default {

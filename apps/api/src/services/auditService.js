@@ -4,6 +4,7 @@
  */
 
 import { getPrismaClient } from '../lib/prisma.js';
+import { logError } from '../lib/logger.js';
 
 const prisma = getPrismaClient();
 
@@ -52,7 +53,7 @@ export async function logAuditAction(performedByUserId, action, options = {}) {
 
     return auditLog;
   } catch (error) {
-    console.error('Failed to log audit action:', error);
+    logError('Failed to log audit action', error);
     // Don't throw - audit failures should not break operations
     // But log to stderr for debugging
     process.stderr.write(`Audit log error: ${error.message}\n`);

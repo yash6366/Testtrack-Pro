@@ -2,6 +2,7 @@ import { getPrismaClient } from '../lib/prisma.js';
 import { createAuthGuards } from '../lib/rbac.js';
 import { requireNotAdmin } from '../lib/adminConstraints.js';
 import { errorResponse, bearerAuth, paginationParams } from '../schemas/common.js';
+import { logError } from '../lib/logger.js';
 
 const prisma = getPrismaClient();
 
@@ -249,7 +250,7 @@ export async function testRunRoutes(fastify) {
           executionCount: testCaseIds.length,
         });
       } catch (error) {
-        console.error('Error creating test run:', error);
+        logError('Error creating test run:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -280,7 +281,7 @@ export async function testRunRoutes(fastify) {
 
         reply.send({ testRuns });
       } catch (error) {
-        console.error('Error fetching test runs:', error);
+        logError('Error fetching test runs:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -325,7 +326,7 @@ export async function testRunRoutes(fastify) {
 
         reply.send(testRun);
       } catch (error) {
-        console.error('Error fetching test run:', error);
+        logError('Error fetching test run:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -366,7 +367,7 @@ export async function testRunRoutes(fastify) {
 
         reply.send(updatedTestRun);
       } catch (error) {
-        console.error('Error updating test run:', error);
+        logError('Error updating test run:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -397,7 +398,7 @@ export async function testRunRoutes(fastify) {
 
         reply.code(204).send();
       } catch (error) {
-        console.error('Error deleting test run:', error);
+        logError('Error deleting test run:', error);
         reply.code(500).send({ error: error.message });
       }
     },

@@ -335,7 +335,7 @@ export async function searchIndex(projectId, query, resourceTypes = ['TEST_CASE'
           resourceType: item.resourceType,
           url: getResourceUrl(item.resourceType, item.resourceId),
         };
-      })
+      }),
     );
 
     return enriched;

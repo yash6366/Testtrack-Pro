@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../lib/apiClient';
+import { logError } from '../lib/errorLogger';
 
 /**
  * CommitSelector Component
@@ -26,7 +27,7 @@ export default function CommitSelector({ projectId, bugId, onCommitSelected, onC
 
       // Fetch commits
       const commitsResponse = await apiClient.get(
-        `/api/projects/${projectId}/github-integration/commits?limit=100`
+        `/api/projects/${projectId}/github-integration/commits?limit=100`,
       );
       setCommits(commitsResponse || []);
 
@@ -35,7 +36,7 @@ export default function CommitSelector({ projectId, bugId, onCommitSelected, onC
       setPullRequests([]);
     } catch (err) {
       setError(err.message || 'Failed to load commits');
-      console.error(err);
+      logError(err, 'Failed to load commits');
     } finally {
       setLoading(false);
     }
@@ -44,7 +45,7 @@ export default function CommitSelector({ projectId, bugId, onCommitSelected, onC
   const handleSelectItem = (itemId, type = 'commit') => {
     const key = `${type}-${itemId}`;
     setSelectedItems((prev) =>
-      prev.includes(key) ? prev.filter((id) => id !== key) : [...prev, key]
+      prev.includes(key) ? prev.filter((id) => id !== key) : [...prev, key],
     );
   };
 
@@ -80,7 +81,7 @@ export default function CommitSelector({ projectId, bugId, onCommitSelected, onC
       }
     } catch (err) {
       setError(err.message || 'Failed to link commits');
-      console.error(err);
+      logError(err, 'Failed to link commits');
     }
   };
 

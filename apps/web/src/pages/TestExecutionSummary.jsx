@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks';
 import { apiClient } from '@/lib/apiClient';
+import { logError } from '@/lib/errorLogger';
 import BackButton from '@/components/ui/BackButton';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 
@@ -30,7 +31,7 @@ export default function TestExecutionSummary() {
         setError('');
 
         const response = await apiClient.get(
-          `/api/test-executions/${executionId}`
+          `/api/test-executions/${executionId}`,
         );
 
         if (response.testExecution) {
@@ -38,7 +39,7 @@ export default function TestExecutionSummary() {
           setTestRun(response.testExecution.testRun);
         }
       } catch (err) {
-        console.error('Error loading execution:', err);
+        logError(err, 'Error loading execution');
         setError('Failed to load test execution summary');
       } finally {
         setLoading(false);
@@ -58,7 +59,7 @@ export default function TestExecutionSummary() {
       setReexecuteError('');
       const response = await apiClient.post(
         `/api/test-executions/${executionId}/re-execute`,
-        {}
+        {},
       );
 
       if (response?.executionId) {
@@ -190,7 +191,7 @@ export default function TestExecutionSummary() {
           <div className="flex items-center gap-2 flex-wrap">
             <span
               className={`px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(
-                execution.status
+                execution.status,
               )}`}
             >
               {execution.status}
@@ -275,7 +276,7 @@ export default function TestExecutionSummary() {
                     {/* Status Icon */}
                     <div
                       className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${getStatusColor(
-                        step.status
+                        step.status,
                       )}`}
                     >
                       {getStatusIcon(step.status)}
@@ -289,7 +290,7 @@ export default function TestExecutionSummary() {
                         </span>
                         <span
                           className={`text-xs font-semibold px-2 py-1 rounded ${getStatusColor(
-                            step.status
+                            step.status,
                           )}`}
                         >
                           {step.status}

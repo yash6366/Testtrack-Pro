@@ -48,7 +48,7 @@ export default function TestRunCreation() {
         // This endpoint should be created in your test routes
         // For now, using a placeholder - you'll need to implement this
         const response = await apiClient.get(
-          `/api/projects/${projectId}/test-cases`
+          `/api/projects/${projectId}/test-cases`,
         );
 
         const cases = response?.data || response?.testCases || [];
@@ -70,7 +70,7 @@ export default function TestRunCreation() {
     setSelectedCases((prev) =>
       prev.includes(caseId)
         ? prev.filter((id) => id !== caseId)
-        : [...prev, caseId]
+        : [...prev, caseId],
     );
   };
 
@@ -120,18 +120,18 @@ export default function TestRunCreation() {
           environment: formData.environment || null,
           buildVersion: formData.buildVersion.trim() || null,
           testCaseIds: selectedCases,
-        }
+        },
       );
 
       // Navigate to first execution
       if (response.testRun && response.testRun.executions?.length > 0) {
         navigate(
-          `/test-execution/${response.testRun.executions[0].id}`
+          `/test-execution/${response.testRun.executions[0].id}`,
         );
       } else {
         // Fallback to test run details
         navigate(
-          `/test-run/${response.testRun.id}`
+          `/test-run/${response.testRun.id}`,
         );
       }
     } catch (err) {

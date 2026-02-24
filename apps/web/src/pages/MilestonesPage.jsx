@@ -269,14 +269,14 @@ export default function MilestonesPage() {
               <div className="flex gap-2 mb-4">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                    milestone.status
+                    milestone.status,
                   )}`}
                 >
                   {milestone.status.replace('_', ' ')}
                 </span>
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium bg-gray-100 ${getPriorityColor(
-                    milestone.priority
+                    milestone.priority,
                   )}`}
                 >
                   {milestone.priority}
@@ -342,7 +342,7 @@ export default function MilestonesPage() {
               onClick={() =>
                 handlePageChange(
                   Math.max(0, pagination.skip - pagination.take),
-                  pagination.take
+                  pagination.take,
                 )
               }
               disabled={pagination.skip === 0}
@@ -354,7 +354,7 @@ export default function MilestonesPage() {
               onClick={() =>
                 handlePageChange(
                   pagination.skip + pagination.take,
-                  pagination.take
+                  pagination.take,
                 )
               }
               disabled={pagination.skip + pagination.take >= pagination.total}

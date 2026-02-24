@@ -229,7 +229,7 @@ export default function MilestoneDetailsModal({
                     </label>
                     <span
                       className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                        milestone.status
+                        milestone.status,
                       )}`}
                     >
                       {milestone.status.replace('_', ' ')}
@@ -444,9 +444,8 @@ export default function MilestoneDetailsModal({
             <div className="space-y-4">
               <div className="flex justify-end">
                 <Button
-                  onClick={() => {
-                    // TODO: Implement defect assignment modal
-                  }}setShowDefectModal(true)lassName="flex items-center gap-2"
+                  onClick={() => setShowDefectModal(true)}
+                  className="flex items-center gap-2"
                 >
                   <Plus size={18} />
                   Add Defects
@@ -486,8 +485,6 @@ export default function MilestoneDetailsModal({
             </div>
           )}
         </div>
-      </div>
-    </div>
 
         {/* Assignment Modals */}
         {showTestCaseModal && (
@@ -517,5 +514,7 @@ export default function MilestoneDetailsModal({
             }}
           />
         )}
+      </div>
+    </div>
   );
 }

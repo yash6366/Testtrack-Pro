@@ -6,6 +6,7 @@
 import { createAuthGuards } from '../lib/rbac.js';
 import { requirePermission } from '../lib/policy.js';
 import { getPrismaClient } from '../lib/prisma.js';
+import { logError } from '../lib/logger.js';
 import {
   createBugFromExecution,
   updateBug,
@@ -385,7 +386,7 @@ export async function bugRoutes(fastify) {
 
         reply.code(201).send(bug);
       } catch (error) {
-        console.error('Error creating bug:', error);
+        logError('Error creating bug:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -420,7 +421,7 @@ export async function bugRoutes(fastify) {
           take: result.take,
         });
       } catch (error) {
-        console.error('Error fetching bugs:', error);
+        logError('Error fetching bugs:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -438,7 +439,7 @@ export async function bugRoutes(fastify) {
         const bug = await getBugDetails(Number(bugId), projectId);
         reply.send(bug);
       } catch (error) {
-        console.error('Error fetching bug:', error);
+        logError('Error fetching bug:', error);
         reply.code(404).send({ error: error.message });
       }
     },
@@ -458,7 +459,7 @@ export async function bugRoutes(fastify) {
         const updated = await updateBug(Number(bugId), request.body, userId, projectId, request.permissionContext);
         reply.send(updated);
       } catch (error) {
-        console.error('Error updating bug:', error);
+        logError('Error updating bug:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -497,7 +498,7 @@ export async function bugRoutes(fastify) {
 
         reply.send(updated);
       } catch (error) {
-        console.error('Error changing bug status:', error);
+        logError('Error changing bug status:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -529,7 +530,7 @@ export async function bugRoutes(fastify) {
 
         reply.send(updated);
       } catch (error) {
-        console.error('Error assigning bug:', error);
+        logError('Error assigning bug:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -569,7 +570,7 @@ export async function bugRoutes(fastify) {
 
         reply.send(updated);
       } catch (error) {
-        console.error('Error verifying bug:', error);
+        logError('Error verifying bug:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -604,7 +605,7 @@ export async function bugRoutes(fastify) {
 
         reply.send(updated);
       } catch (error) {
-        console.error('Error reopening bug:', error);
+        logError('Error reopening bug:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -638,7 +639,7 @@ export async function bugRoutes(fastify) {
 
         reply.code(201).send(comment);
       } catch (error) {
-        console.error('Error adding comment:', error);
+        logError('Error adding comment:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -667,7 +668,7 @@ export async function bugRoutes(fastify) {
 
         reply.send(comment);
       } catch (error) {
-        console.error('Error updating comment:', error);
+        logError('Error updating comment:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -701,7 +702,7 @@ export async function bugRoutes(fastify) {
 
         reply.code(201).send(retestRequest);
       } catch (error) {
-        console.error('Error requesting retest:', error);
+        logError('Error requesting retest:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -732,7 +733,7 @@ export async function bugRoutes(fastify) {
           },
         });
       } catch (error) {
-        console.error('Error fetching reported bugs:', error);
+        logError('Error fetching reported bugs:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -763,7 +764,7 @@ export async function bugRoutes(fastify) {
           },
         });
       } catch (error) {
-        console.error('Error fetching assigned bugs:', error);
+        logError('Error fetching assigned bugs:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -809,7 +810,7 @@ export async function bugRoutes(fastify) {
           },
         });
       } catch (error) {
-        console.error('Error fetching bugs:', error);
+        logError('Error fetching bugs:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -833,7 +834,7 @@ export async function bugRoutes(fastify) {
         const bug = await getBugDetails(Number(bugId), projectId);
         reply.send(bug);
       } catch (error) {
-        console.error('Error fetching bug:', error);
+        logError('Error fetching bug:', error);
         reply.code(404).send({ error: error.message });
       }
     },
@@ -886,7 +887,7 @@ export async function bugRoutes(fastify) {
 
         reply.send(updated);
       } catch (error) {
-        console.error('Error changing bug status:', error);
+        logError('Error changing bug status:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -921,7 +922,7 @@ export async function bugRoutes(fastify) {
 
         reply.code(201).send(comment);
       } catch (error) {
-        console.error('Error adding comment:', error);
+        logError('Error adding comment:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -955,7 +956,7 @@ export async function bugRoutes(fastify) {
 
         reply.send(comment);
       } catch (error) {
-        console.error('Error updating comment:', error);
+        logError('Error updating comment:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -1002,7 +1003,7 @@ export async function bugRoutes(fastify) {
 
         reply.code(201).send(retestRequest);
       } catch (error) {
-        console.error('Error requesting retest:', error);
+        logError('Error requesting retest:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -1077,7 +1078,7 @@ export async function bugRoutes(fastify) {
 
         reply.send(updated);
       } catch (error) {
-        console.error('Error linking commit:', error);
+        logError('Error linking commit:', error);
         reply.code(500).send({ error: error.message });
       }
     },
@@ -1126,7 +1127,7 @@ export async function bugRoutes(fastify) {
 
         reply.send(updated);
       } catch (error) {
-        console.error('Error assigning bug:', error);
+        logError('Error assigning bug:', error);
         reply.code(500).send({ error: error.message });
       }
     },

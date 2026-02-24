@@ -290,7 +290,7 @@ export async function updateTestSuite(suiteId, data, userId) {
       // Check if parent is a descendant (would create circular reference)
       const isDescendant = await checkIfDescendant(
         Number(suiteId),
-        Number(parentSuiteId)
+        Number(parentSuiteId),
       );
       if (isDescendant) {
         throw new Error('Cannot move suite under its own descendant');
@@ -375,7 +375,7 @@ export async function deleteTestSuite(suiteId, userId) {
   // Check if suite has children
   if (suite.childSuites.length > 0) {
     throw new Error(
-      'Cannot delete suite with child suites. Delete or move child suites first.'
+      'Cannot delete suite with child suites. Delete or move child suites first.',
     );
   }
 
@@ -562,7 +562,7 @@ export async function cloneTestSuite(suiteId, newName, userId, options = {}) {
         childSuite.id,
         `${childSuite.name} (Cloned)`,
         userId,
-        { includeTestCases, includeChildSuites: true }
+        { includeTestCases, includeChildSuites: true },
       );
     }
   }
@@ -724,7 +724,7 @@ export async function reorderTestCasesInSuite(suiteId, orderMap) {
       data: {
         order: Number(executionOrder),
       },
-    })
+    }),
   );
 
   await prisma.$transaction(updates);

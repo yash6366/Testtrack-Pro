@@ -30,7 +30,7 @@ async function apiKeyRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get all API keys for project
@@ -45,13 +45,13 @@ async function apiKeyRoutes(fastify) {
         const result = await getProjectApiKeys(
           projectId,
           { isActive: isActive !== undefined ? isActive === 'true' : true, search },
-          { skip: Number(skip), take: Number(take) }
+          { skip: Number(skip), take: Number(take) },
         );
         reply.send(result);
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get single API key
@@ -70,7 +70,7 @@ async function apiKeyRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Update API key
@@ -87,7 +87,7 @@ async function apiKeyRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Revoke API key
@@ -104,7 +104,7 @@ async function apiKeyRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Delete API key
@@ -120,7 +120,7 @@ async function apiKeyRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Regenerate API key
@@ -136,7 +136,7 @@ async function apiKeyRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get API key stats
@@ -153,7 +153,7 @@ async function apiKeyRoutes(fastify) {
       } catch (error) {
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }
 

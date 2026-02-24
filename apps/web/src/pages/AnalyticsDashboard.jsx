@@ -8,6 +8,7 @@ import MetricsGrid from '@/components/MetricsGrid';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingState from '@/components/common/LoadingState';
 import BackButton from '@/components/ui/BackButton';
+import { logError } from '@/lib/errorLogger';
 import {
   ExecutionTrendChart,
   BugTrendChart,
@@ -105,7 +106,7 @@ export default function AnalyticsDashboard() {
         ]);
       }
     } catch (err) {
-      console.error('Error loading analytics:', err);
+      logError(err, 'Error loading analytics in AnalyticsDashboard');
       setError(err instanceof Error ? err.message : 'Failed to load analytics');
     } finally {
       setLoading(false);

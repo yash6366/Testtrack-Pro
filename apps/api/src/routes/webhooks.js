@@ -65,7 +65,7 @@ export async function webhookRoutes(fastify) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get all webhooks for a project

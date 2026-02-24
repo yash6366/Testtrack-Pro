@@ -4,6 +4,7 @@ import { apiClient } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import DashboardLayout from '../components/DashboardLayout';
 import BackButton from '@/components/ui/BackButton';
+import { logError } from '@/lib/errorLogger';
 
 export default function EvidenceGalleryPage() {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ export default function EvidenceGalleryPage() {
       setEvidence(response.evidence || response.data || response || []);
     } catch (err) {
       setError(err.message || 'Failed to load evidence');
-      console.error(err);
+      logError(err, 'Failed to load evidence in EvidenceGalleryPage');
     } finally {
       setLoading(false);
     }
@@ -58,7 +59,7 @@ export default function EvidenceGalleryPage() {
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       setError(err.message || 'Failed to delete evidence');
-      console.error(err);
+      logError(err, 'Failed to delete evidence in EvidenceGalleryPage');
     } finally {
       setActionLoading(false);
     }

@@ -5,6 +5,7 @@
 
 import { createAuthGuards } from '../lib/rbac.js';
 import { requirePermission } from '../lib/policy.js';
+import { logError } from '../lib/logger.js';
 import {
   globalSearch,
   getSearchSuggestions,
@@ -48,10 +49,10 @@ export async function searchRoutes(fastify) {
 
         reply.send(results);
       } catch (error) {
-        console.error('Error performing search:', error);
+        logError('Error performing search:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -72,15 +73,15 @@ export async function searchRoutes(fastify) {
         const suggestions = await getSearchSuggestions(
           Number(projectId),
           q || '',
-          resourceTypes
+          resourceTypes,
         );
 
         reply.send({ suggestions });
       } catch (error) {
-        console.error('Error fetching suggestions:', error);
+        logError('Error fetching suggestions:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   /**
@@ -95,9 +96,9 @@ export async function searchRoutes(fastify) {
         const result = await rebuildSearchIndex(Number(projectId));
         reply.send({ success: true, ...result });
       } catch (error) {
-        console.error('Error rebuilding search index:', error);
+        logError('Error rebuilding search index:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }

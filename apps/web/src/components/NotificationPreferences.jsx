@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { apiClient } from '../lib/apiClient';
+import { logError } from '../lib/errorLogger';
 
 /**
  * NotificationPreferences Component
@@ -23,11 +24,11 @@ export default function NotificationPreferences() {
     try {
       const response = await apiClient.get(
         '/api/notifications/preferences',
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setPrefs(response.data);
     } catch (error) {
-      console.error('Failed to fetch preferences:', error);
+      logError(error, 'Failed to fetch preferences');
       setMessage({ type: 'error', text: 'Failed to load preferences' });
     } finally {
       setLoading(false);
@@ -49,11 +50,11 @@ export default function NotificationPreferences() {
       await apiClient.patch(
         '/api/notifications/preferences',
         prefs,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setMessage({ type: 'success', text: 'Preferences saved successfully!' });
     } catch (error) {
-      console.error('Failed to save preferences:', error);
+      logError(error, 'Failed to save preferences');
       setMessage({ type: 'error', text: 'Failed to save preferences' });
     } finally {
       setSaving(false);

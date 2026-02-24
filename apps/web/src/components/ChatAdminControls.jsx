@@ -65,7 +65,7 @@ export default function ChatAdminControls() {
 
         const skip = (messagesPage - 1) * messagesTake;
         const response = await apiClient.get(
-          `/api/admin/chat/messages?skip=${skip}&take=${messagesTake}`
+          `/api/admin/chat/messages?skip=${skip}&take=${messagesTake}`,
         );
 
         if (isMounted) {
@@ -103,7 +103,7 @@ export default function ChatAdminControls() {
 
         const skip = (usersPage - 1) * usersTake;
         const response = await apiClient.get(
-          `/api/admin/chat/users?skip=${skip}&take=${usersTake}`
+          `/api/admin/chat/users?skip=${skip}&take=${usersTake}`,
         );
 
         if (isMounted) {
@@ -141,7 +141,7 @@ export default function ChatAdminControls() {
 
         const skip = (channelsPage - 1) * channelsTake;
         const response = await apiClient.get(
-          `/api/admin/chat/channels?skip=${skip}&take=${channelsTake}`
+          `/api/admin/chat/channels?skip=${skip}&take=${channelsTake}`,
         );
 
         if (isMounted) {
@@ -190,7 +190,7 @@ export default function ChatAdminControls() {
         if (auditTargetQuery) params.append('targetQuery', auditTargetQuery);
 
         const response = await apiClient.get(
-          `/api/admin/chat/audit-logs?${params.toString()}`
+          `/api/admin/chat/audit-logs?${params.toString()}`,
         );
 
         if (isMounted) {
@@ -227,7 +227,7 @@ export default function ChatAdminControls() {
       // Reload messages
       const skip = (messagesPage - 1) * messagesTake;
       const response = await apiClient.get(
-        `/api/admin/chat/messages?skip=${skip}&take=${messagesTake}`
+        `/api/admin/chat/messages?skip=${skip}&take=${messagesTake}`,
       );
       setMessages(response.messages || []);
       setMessagesTotal(response.pagination?.total || 0);
@@ -249,7 +249,7 @@ export default function ChatAdminControls() {
       // Reload users
       const skip = (usersPage - 1) * usersTake;
       const response = await apiClient.get(
-        `/api/admin/chat/users?skip=${skip}&take=${usersTake}`
+        `/api/admin/chat/users?skip=${skip}&take=${usersTake}`,
       );
       setUsers(response.users || []);
       setUsersTotal(response.pagination?.total || 0);
@@ -270,7 +270,7 @@ export default function ChatAdminControls() {
       // Reload users
       const skip = (usersPage - 1) * usersTake;
       const response = await apiClient.get(
-        `/api/admin/chat/users?skip=${skip}&take=${usersTake}`
+        `/api/admin/chat/users?skip=${skip}&take=${usersTake}`,
       );
       setUsers(response.users || []);
       setUsersTotal(response.pagination?.total || 0);
@@ -296,7 +296,7 @@ export default function ChatAdminControls() {
       // Reload channels
       const skip = (channelsPage - 1) * channelsTake;
       const response = await apiClient.get(
-        `/api/admin/chat/channels?skip=${skip}&take=${channelsTake}`
+        `/api/admin/chat/channels?skip=${skip}&take=${channelsTake}`,
       );
       setChannels(response.channels || []);
       setChannelsTotal(response.pagination?.total || 0);
@@ -323,7 +323,7 @@ export default function ChatAdminControls() {
       // Reload channels
       const skip = (channelsPage - 1) * channelsTake;
       const response = await apiClient.get(
-        `/api/admin/chat/channels?skip=${skip}&take=${channelsTake}`
+        `/api/admin/chat/channels?skip=${skip}&take=${channelsTake}`,
       );
       setChannels(response.channels || []);
       setChannelsTotal(response.pagination?.total || 0);
@@ -336,7 +336,7 @@ export default function ChatAdminControls() {
   const handleExportAuditLogs = async () => {
     try {
       const response = await apiClient.get(
-        '/api/admin/chat/audit-logs?take=10000'
+        '/api/admin/chat/audit-logs?take=10000',
       );
 
       const logs = response.logs || [];
@@ -350,7 +350,7 @@ export default function ChatAdminControls() {
             log.targetType,
             log.targetName,
             log.reason || '',
-          ].map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(',')
+          ].map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(','),
         ),
       ].join('\n');
 
@@ -375,7 +375,7 @@ export default function ChatAdminControls() {
     ? messages.filter((msg) =>
         String(msg?.message || '')
           .toLowerCase()
-          .includes(messageSearch.trim().toLowerCase())
+          .includes(messageSearch.trim().toLowerCase()),
       )
     : messages;
 

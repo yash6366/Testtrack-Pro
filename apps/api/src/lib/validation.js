@@ -90,7 +90,7 @@ export function parseIdArray(values, fieldName = 'IDs') {
   }
 
   return values.map((value, index) => 
-    parseId(value, `${fieldName}[${index}]`, false)
+    parseId(value, `${fieldName}[${index}]`, false),
   );
 }
 
@@ -189,7 +189,7 @@ export function validateEnum(value, allowedValues, fieldName = 'Value', allowNul
 
   if (!allowedValues.includes(value)) {
     throw new Error(
-      `${fieldName} must be one of: ${allowedValues.join(', ')}. Got: ${value}`
+      `${fieldName} must be one of: ${allowedValues.join(', ')}. Got: ${value}`,
     );
   }
 

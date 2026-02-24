@@ -45,7 +45,7 @@ export default function OAuthCallback() {
               code,
               redirectUrl: window.location.href,
             }),
-          }
+          },
         );
 
         if (!response.ok) {

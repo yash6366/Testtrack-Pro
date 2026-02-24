@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiClient } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
+import { logError } from '../lib/errorLogger';
 import { useProject } from '../hooks/useProject';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingState from '@/components/common/LoadingState';
@@ -71,7 +72,7 @@ export default function IntegrationsPage() {
         // Load recent commits
         try {
           const commitsResponse = await apiClient.get(
-            `/api/projects/${projectId}/github-integration/commits?limit=10`
+            `/api/projects/${projectId}/github-integration/commits?limit=10`,
           );
           setCommits(commitsResponse || []);
         } catch (err) {
@@ -86,7 +87,7 @@ export default function IntegrationsPage() {
       }
     } catch (err) {
       setError(err.message || 'Failed to load integration');
-      console.error(err);
+      logError(err, 'IntegrationsPage.loadIntegration');
     } finally {
       setLoading(false);
     }
@@ -112,7 +113,7 @@ export default function IntegrationsPage() {
       const response = await apiClient.post('/api/github/oauth/callback', {
         code,
         projectId,
-        redirectUrl
+        redirectUrl,
       });
 
       setIntegration(response.integration);
@@ -131,7 +132,7 @@ export default function IntegrationsPage() {
       }, 1000);
     } catch (err) {
       setError(err.message || 'Failed to complete GitHub authorization');
-      console.error('GitHub callback error:', err);
+      logError(err, 'GitHub callback error');
       
       // Clear code from URL even on error
       navigate(`/integrations?projectId=${projectId}`, { replace: true });
@@ -167,7 +168,7 @@ export default function IntegrationsPage() {
       }, 1000);
     } catch (err) {
       setError(err.message || 'Failed to configure repository');
-      console.error(err);
+      logError(err, 'IntegrationsPage.handleConfigureRepo');
     } finally {
       setConfigLoading(false);
     }
@@ -178,7 +179,7 @@ export default function IntegrationsPage() {
       setSyncProgress(10);
       
       const response = await apiClient.post(
-        `/api/projects/${projectId}/github-integration/sync`
+        `/api/projects/${projectId}/github-integration/sync`,
       );
 
       setSyncProgress(100);
@@ -193,7 +194,7 @@ export default function IntegrationsPage() {
       }, 500);
     } catch (err) {
       setError(err.message || 'Failed to sync data');
-      console.error(err);
+      logError(err, 'IntegrationsPage.handleSyncData');
     }
   };
 
@@ -208,7 +209,7 @@ export default function IntegrationsPage() {
       setCommits([]);
     } catch (err) {
       setError(err.message || 'Failed to deactivate integration');
-      console.error(err);
+      logError(err, 'IntegrationsPage.handleDeactivate');
     }
   };
 
@@ -223,7 +224,7 @@ export default function IntegrationsPage() {
       setCommits([]);
     } catch (err) {
       setError(err.message || 'Failed to delete integration');
-      console.error(err);
+      logError(err, 'IntegrationsPage.handleDeleteIntegration');
     }
   };
 

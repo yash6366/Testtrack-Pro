@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, useRef } from "react";
+import { useEffect, useCallback, useState, useRef } from 'react';
 import {
   connectSocket,
   getSocket,
@@ -43,7 +43,7 @@ import {
   onChatEnabled,
   onChannelCreated,
   onChannelArchived,
-} from "../lib/socketClient.js";
+} from '../lib/socketClient.js';
 
 /**
  * Hook for Socket.IO communication
@@ -72,8 +72,8 @@ export function useSocket(userId, userRole, token) {
       setConnected(false);
     };
 
-    socket.on("connect", handleConnect);
-    socket.on("disconnect", handleDisconnect);
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
 
     // Check if already connected
     if (socket.connected) {
@@ -81,8 +81,8 @@ export function useSocket(userId, userRole, token) {
     }
 
     return () => {
-      socket.off("connect", handleConnect);
-      socket.off("disconnect", handleDisconnect);
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
     };
   }, [userId, token, userRole]);
 
@@ -172,11 +172,11 @@ export function useSocket(userId, userRole, token) {
         unsubStopTyping();
       };
     },
-    []
+    [],
   );
 
   // Send message utility
-  const sendMsg = useCallback((room, text, type = "GENERAL", metadata = {}) => {
+  const sendMsg = useCallback((room, text, type = 'GENERAL', metadata = {}) => {
     sendMessage(room, text, type, metadata);
   }, []);
 

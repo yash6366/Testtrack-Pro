@@ -72,7 +72,7 @@ export async function createNotification(userId, data, sendRealtime = true) {
  */
 export async function createBulkNotifications(userIds, data) {
   const notifications = await Promise.all(
-    userIds.map(userId => createNotification(userId, data))
+    userIds.map(userId => createNotification(userId, data)),
   );
   return notifications;
 }

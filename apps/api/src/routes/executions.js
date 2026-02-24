@@ -2,6 +2,7 @@ import { getPrismaClient } from '../lib/prisma.js';
 import { createAuthGuards, requireProjectAccess } from '../lib/rbac.js';
 import { isForbidden } from '../lib/permissions.js';
 import { requireNotAdmin, requireTestResultModifier, requireNotAdminForEvidence } from '../lib/adminConstraints.js';
+import { logError } from '../lib/logger.js';
 
 const prisma = getPrismaClient();
 
@@ -55,10 +56,10 @@ export async function executionRoutes(fastify) {
 
         reply.send(execution);
       } catch (error) {
-        console.error('Error fetching execution:', error);
+        logError('Error fetching execution:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Re-execute a previously executed test case
@@ -137,8 +138,8 @@ export async function executionRoutes(fastify) {
                   stepId: step.id,
                   status: 'SKIPPED',
                 },
-              })
-            )
+              }),
+            ),
           );
         }
 
@@ -147,10 +148,10 @@ export async function executionRoutes(fastify) {
           executionId: newExecution.id,
         });
       } catch (error) {
-        console.error('Error re-executing test case:', error);
+        logError('Error re-executing test case:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get all executions for a test run (read-only, all roles)
@@ -200,10 +201,10 @@ export async function executionRoutes(fastify) {
 
         reply.send({ executions });
       } catch (error) {
-        console.error('Error fetching executions:', error);
+        logError('Error fetching executions:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Update step status - CRITICAL: Only TESTER can update (not ADMIN or DEVELOPER)
@@ -278,7 +279,7 @@ export async function executionRoutes(fastify) {
 
         // Check if all steps are completed
         const allCompleted = allSteps.every((s) =>
-          ['PASSED', 'FAILED', 'SKIPPED', 'BLOCKED'].includes(s.status)
+          ['PASSED', 'FAILED', 'SKIPPED', 'BLOCKED'].includes(s.status),
         );
 
         // Calculate execution status based on step results
@@ -342,7 +343,7 @@ export async function executionRoutes(fastify) {
               else if (exe.status === 'SKIPPED') acc.skipped++;
               return acc;
             },
-            { passed: 0, failed: 0, blocked: 0, skipped: 0 }
+            { passed: 0, failed: 0, blocked: 0, skipped: 0 },
           );
 
           await prisma.testRun.update({
@@ -361,14 +362,14 @@ export async function executionRoutes(fastify) {
           execution: updatedExecution,
           allCompleted,
           completionPercentage: Math.round((allSteps.filter(s => 
-            ['PASSED', 'FAILED', 'SKIPPED', 'BLOCKED'].includes(s.status)
+            ['PASSED', 'FAILED', 'SKIPPED', 'BLOCKED'].includes(s.status),
           ).length / allSteps.length) * 100),
         });
       } catch (error) {
-        console.error('Error updating step:', error);
+        logError('Error updating step:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get all steps for an execution
@@ -390,10 +391,10 @@ export async function executionRoutes(fastify) {
 
         reply.send({ steps });
       } catch (error) {
-        console.error('Error fetching steps:', error);
+        logError('Error fetching steps:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Complete execution (final status)
@@ -425,7 +426,7 @@ export async function executionRoutes(fastify) {
         }
 
         const allCompleted = allSteps.every((s) =>
-          ['PASSED', 'FAILED', 'SKIPPED', 'BLOCKED'].includes(s.status)
+          ['PASSED', 'FAILED', 'SKIPPED', 'BLOCKED'].includes(s.status),
         );
 
         if (!allCompleted) {
@@ -447,7 +448,7 @@ export async function executionRoutes(fastify) {
             comments: comments || null,
             completedAt: new Date(),
             durationSeconds: Math.floor(
-              (new Date() - new Date(execution.startedAt)) / 1000
+              (new Date() - new Date(execution.startedAt)) / 1000,
             ),
           },
           include: {
@@ -458,10 +459,10 @@ export async function executionRoutes(fastify) {
 
         reply.send(completedExecution);
       } catch (error) {
-        console.error('Error completing execution:', error);
+        logError('Error completing execution:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Auto-save progress (touch timestamp)
@@ -485,10 +486,10 @@ export async function executionRoutes(fastify) {
           lastSaved: execution.updatedAt,
         });
       } catch (error) {
-        console.error('Error auto-saving progress:', error);
+        logError('Error auto-saving progress:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Link a defect to an execution
@@ -520,10 +521,10 @@ export async function executionRoutes(fastify) {
 
         reply.send(execution);
       } catch (error) {
-        console.error('Error linking defect:', error);
+        logError('Error linking defect:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get execution history for a test case
@@ -551,10 +552,10 @@ export async function executionRoutes(fastify) {
 
         reply.send({ history });
       } catch (error) {
-        console.error('Error fetching execution history:', error);
+        logError('Error fetching execution history:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Compare two executions
@@ -618,10 +619,10 @@ export async function executionRoutes(fastify) {
 
         reply.send(comparison);
       } catch (error) {
-        console.error('Error comparing executions:', error);
+        logError('Error comparing executions:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get execution trend/history for a test case
@@ -690,10 +691,10 @@ export async function executionRoutes(fastify) {
           },
         });
       } catch (error) {
-        console.error('Error fetching execution trend:', error);
+        logError('Error fetching execution trend:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Compare multiple executions side-by-side
@@ -728,8 +729,8 @@ export async function executionRoutes(fastify) {
                 },
                 evidence: true,
               },
-            })
-          )
+            }),
+          ),
         );
 
         // Check if all executions were found
@@ -763,10 +764,10 @@ export async function executionRoutes(fastify) {
 
         reply.send(comparison);
       } catch (error) {
-        console.error('Error comparing multiple executions:', error);
+        logError('Error comparing multiple executions:', error);
         reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 }
 

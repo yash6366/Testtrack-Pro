@@ -3,6 +3,7 @@ import { useAuth, useSocket } from '@/hooks';
 import { apiClient } from '@/lib/apiClient';
 import MuteBanner from '@/components/MuteBanner';
 import ChannelStatusOverlay from '@/components/ChannelStatusOverlay';
+import { logError } from '@/lib/errorLogger';
 
 const THEMES = {
   blue: {
@@ -124,13 +125,13 @@ export default function RealtimeDiscussionModal({
     if (!Number.isNaN(resolvedChannelId)) {
       getChannelMembers(resolvedChannelId).then((data) => {
         setChannelMembers(data.members || []);
-      }).catch((err) => console.error('Failed to load members:', err));
+      }).catch((err) => logError(err, 'Failed to load members'));
 
       // Load pinned messages
       if (showPinnedMessages) {
         getPinnedMessages(resolvedChannelId).then((data) => {
           setPinnedMessages(data.pinnedMessages || []);
-        }).catch((err) => console.error('Failed to load pinned messages:', err));
+        }).catch((err) => logError(err, 'Failed to load pinned messages'));
       }
     }
 
@@ -180,7 +181,7 @@ export default function RealtimeDiscussionModal({
         setPinnedMessages((prev) => [data.pinnedMessage, ...prev]);
       } else if (data.type === 'unpinned') {
         setPinnedMessages((prev) =>
-          prev.filter((pm) => pm.messageId !== data.messageId)
+          prev.filter((pm) => pm.messageId !== data.messageId),
         );
       }
     });
@@ -220,7 +221,7 @@ export default function RealtimeDiscussionModal({
           });
         }
       } catch (error) {
-        console.error('Failed to load channel status:', error);
+        logError(error, 'Failed to load channel status');
       }
     };
 
@@ -248,8 +249,8 @@ export default function RealtimeDiscussionModal({
                 text: 'This message was deleted by an Admin.',
                 message: 'This message was deleted by an Admin.',
               }
-            : msg
-        )
+            : msg,
+        ),
       );
       setPinnedMessages((prev) => prev.filter((pm) => pm.messageId !== data.messageId));
       setReactions((prev) => {
@@ -334,7 +335,7 @@ export default function RealtimeDiscussionModal({
     } else {
       // Filter by name
       const filtered = channelMembers.filter(
-        (m) => m.name.toLowerCase().includes(afterAt.toLowerCase()) && onlineUsers.has(m.id)
+        (m) => m.name.toLowerCase().includes(afterAt.toLowerCase()) && onlineUsers.has(m.id),
       );
       setSuggestedMentions(filtered);
     }
@@ -369,7 +370,7 @@ export default function RealtimeDiscussionModal({
         setReplyingTo(null);
         setAttachmentState(null);
       } catch (error) {
-        console.error('Failed to send reply:', error);
+        logError(error, 'Failed to send reply');
       }
     } else {
       // Send normal message
@@ -437,7 +438,7 @@ export default function RealtimeDiscussionModal({
       await sendReaction(messageId, emoji, 'add');
       setShowReactionPicker(null);
     } catch (error) {
-      console.error('Failed to add reaction:', error);
+      logError(error, 'Failed to add reaction');
     }
   };
 
@@ -445,7 +446,7 @@ export default function RealtimeDiscussionModal({
     try {
       await sendReaction(messageId, emoji, 'remove');
     } catch (error) {
-      console.error('Failed to remove reaction:', error);
+      logError(error, 'Failed to remove reaction');
     }
   };
 
@@ -488,7 +489,7 @@ export default function RealtimeDiscussionModal({
     try {
       await pinMessage(messageId);
     } catch (error) {
-      console.error('Failed to pin message:', error);
+      logError(error, 'Failed to pin message');
     }
   };
 
@@ -496,7 +497,7 @@ export default function RealtimeDiscussionModal({
     try {
       await unpinMessage(messageId);
     } catch (error) {
-      console.error('Failed to unpin message:', error);
+      logError(error, 'Failed to unpin message');
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAdminControls } from '@/hooks/useAdminControls';
+import { logError } from '@/lib/errorLogger';
 
 /**
  * AuditLogViewer - Admin page showing audit log of all admin actions
@@ -45,7 +46,7 @@ export default function AuditLogViewer() {
       setPagination(data.pagination);
     } catch (err) {
       setError(err.message);
-      console.error('Failed to fetch audit log:', err);
+      logError(err, 'Failed to fetch audit log');
     } finally {
       setLoading(false);
     }
@@ -245,7 +246,7 @@ export default function AuditLogViewer() {
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold ${getActionBadgeColor(
-                        entry.action
+                        entry.action,
                       )}`}
                     >
                       <span>{getActionIcon(entry.action)}</span>

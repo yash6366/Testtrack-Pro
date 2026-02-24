@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSocket } from '@/hooks';
 import { useAuth } from '@/hooks';
+import { logError } from '@/lib/errorLogger';
 
 /**
  * OnlineUsersPanel - displays online/offline users in the chat
@@ -27,7 +28,7 @@ export default function OnlineUsersPanel({ roomId, roomPrefix }) {
         const { members } = await getChannelMembers(channelId);
         setAllMembers(members || []);
       } catch (error) {
-        console.error('Failed to load channel members:', error);
+        logError(error, 'Failed to load channel members');
       } finally {
         setLoading(false);
       }

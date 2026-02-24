@@ -199,14 +199,14 @@ export async function registerScheduledReportsRoutes(fastify) {
         const report = await scheduledReportService.createScheduledReport(
           projectIdNum,
           request.body,
-          request.user.id
+          request.user.id,
         );
         return reply.code(201).send(report);
       } catch (error) {
         fastify.log.error(error);
         return reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get all scheduled reports
@@ -231,7 +231,7 @@ export async function registerScheduledReportsRoutes(fastify) {
         fastify.log.error(error);
         return reply.code(500).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Get specific scheduled report
@@ -252,7 +252,7 @@ export async function registerScheduledReportsRoutes(fastify) {
         fastify.log.error(error);
         return reply.code(error.message.includes('not found') ? 404 : 400).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Update scheduled report
@@ -270,14 +270,14 @@ export async function registerScheduledReportsRoutes(fastify) {
         const report = await scheduledReportService.updateScheduledReport(
           reportIdNum,
           projectIdNum,
-          request.body
+          request.body,
         );
         return reply.send(report);
       } catch (error) {
         fastify.log.error(error);
         return reply.code(error.message.includes('not found') ? 404 : 400).send({ error: error.message });
       }
-    }
+    },
   );
 
   // Delete scheduled report
@@ -298,7 +298,7 @@ export async function registerScheduledReportsRoutes(fastify) {
         fastify.log.error(error);
         return reply.code(error.message.includes('not found') ? 404 : 400).send({ error: error.message });
       }
-    }
+    },
   );
 }
 

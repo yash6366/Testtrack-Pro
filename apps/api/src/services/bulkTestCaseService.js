@@ -79,10 +79,10 @@ export async function bulkUpdateTestCases(data, userId, userRole, auditContext =
     ...(updates.severity && { severity: updates.severity }),
     ...(updates.type && { type: updates.type }),
     ...(updates.assignedToId !== undefined && { 
-      assignedToId: updates.assignedToId ? Number(updates.assignedToId) : null 
+      assignedToId: updates.assignedToId ? Number(updates.assignedToId) : null, 
     }),
     ...(updates.ownedById !== undefined && { 
-      ownedById: updates.ownedById ? Number(updates.ownedById) : null 
+      ownedById: updates.ownedById ? Number(updates.ownedById) : null, 
     }),
     ...(updates.moduleArea !== undefined && { moduleArea: updates.moduleArea }),
     ...(updates.tags && { tags: updates.tags }),
@@ -223,7 +223,7 @@ export async function bulkDeleteTestCases(testCaseIds, userId, userRole, auditCo
 export async function bulkExportTestCases(data) {
   const { projectId, testCaseIds, filters = {} } = data;
 
-  let where = {
+  const where = {
     isDeleted: false,
   };
 
@@ -287,7 +287,7 @@ export async function bulkExportTestCases(data) {
     const steps = tc.steps
       .map(
         (s, idx) =>
-          `Step ${s.stepNumber}: ${s.action} | Expected: ${s.expectedResult}`
+          `Step ${s.stepNumber}: ${s.action} | Expected: ${s.expectedResult}`,
       )
       .join('; ');
 

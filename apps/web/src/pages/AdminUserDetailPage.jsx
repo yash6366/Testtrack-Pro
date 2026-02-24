@@ -4,6 +4,7 @@ import { apiClient } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import DashboardLayout from '../components/DashboardLayout';
 import BackButton from '@/components/ui/BackButton';
+import { logError } from '@/lib/errorLogger';
 
 export default function AdminUserDetailPage() {
   const { userId } = useParams();
@@ -35,7 +36,7 @@ export default function AdminUserDetailPage() {
       });
     } catch (err) {
       setError(err.message || 'Failed to load user details');
-      console.error(err);
+      logError(err, 'Failed to load user details in AdminUserDetailPage');
     } finally {
       setLoading(false);
     }

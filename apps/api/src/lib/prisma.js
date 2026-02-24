@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { logError } from './logger.js';
 
 let prisma;
 let connectionAttempt = null;
@@ -17,7 +18,7 @@ export function getPrismaClient() {
     prisma = createPrismaClient();
     if (!connectionAttempt) {
       connectionAttempt = prisma.$connect().catch((err) => {
-        console.error('Prisma connection failed:', err);
+        logError('Prisma connection failed:', err);
         throw err;
       });
     }
