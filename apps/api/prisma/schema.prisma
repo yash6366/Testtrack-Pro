@@ -49,9 +49,10 @@ model User {
   modifiedTestCases  TestCase[]              @relation("LastModifiedBy")
   deletedTestCases   TestCase[]              @relation("DeletedBy")
 
-  testRuns        TestRun[]       @relation("ExecutedBy")
-  createdTestRuns TestRun[]       @relation("CreatedBy")
-  testExecutions  TestExecution[]
+  testRuns          TestRun[]       @relation("ExecutedBy")
+  createdTestRuns   TestRun[]       @relation("CreatedBy")
+  testExecutions    TestExecution[]
+  executedSuiteRuns TestSuiteRun[]  @relation("TestSuiteRunExecutor")
 
   reportedBugs Bug[] @relation("ReportedBy")
   assignedBugs Bug[] @relation("AssignedTo")
@@ -468,6 +469,7 @@ model TestRun {
   creator  User    @relation("CreatedBy", fields: [createdBy], references: [id])
 
   executions TestExecution[]
+  suiteRuns  TestSuiteRun[]
 
   @@index([projectId])
   @@index([status])
@@ -477,6 +479,7 @@ model TestExecution {
   id                    Int     @id @default(autoincrement())
   testRunId             Int
   testCaseId            Int
+  suiteRunId            Int?    // Link to suite run if part of suite execution
   status                String  @default("BLOCKED") // BLOCKED, READY, PASSED, FAILED, SKIPPED, NOT_RUN
   actualResult          String?
   actualDurationSeconds Int?
@@ -487,9 +490,10 @@ model TestExecution {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  testRun  TestRun  @relation(fields: [testRunId], references: [id], onDelete: Cascade)
-  testCase TestCase @relation("TestCaseToExecution", fields: [testCaseId], references: [id], onDelete: Cascade)
-  executor User     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  testRun  TestRun       @relation(fields: [testRunId], references: [id], onDelete: Cascade)
+  testCase TestCase      @relation("TestCaseToExecution", fields: [testCaseId], references: [id], onDelete: Cascade)
+  executor User          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  suiteRun TestSuiteRun? @relation(fields: [suiteRunId], references: [id], onDelete: SetNull)
 
   steps    TestExecutionStep[]
   evidence TestExecutionEvidence[]
@@ -497,6 +501,7 @@ model TestExecution {
 
   @@index([testRunId])
   @@index([testCaseId])
+  @@index([suiteRunId])
   @@index([status])
 }
 
@@ -561,24 +566,40 @@ model TestPlan {
 }
 
 model TestSuiteRun {
-  id             Int     @id @default(autoincrement())
-  suiteId        Int
-  projectId      Int
-  name           String
-  environment    String?
-  buildVersion   String?
-  status         String  @default("PLANNED")
-  totalTestCases Int     @default(0)
-  passedCount    Int     @default(0)
-  failedCount    Int     @default(0)
+  id                 Int      @id @default(autoincrement())
+  suiteId            Int
+  projectId          Int
+  testRunId          Int?     // Link to the parent test run
+  name               String
+  description        String?
+  environment        String?
+  buildVersion       String?
+  status             String   @default("PLANNED") // PLANNED, IN_PROGRESS, PASSED, FAILED, COMPLETED, CANCELLED
+  totalTestCases     Int      @default(0)
+  executedCount      Int      @default(0)
+  passedCount        Int      @default(0)
+  failedCount        Int      @default(0)
+  blockedCount       Int      @default(0)
+  skippedCount       Int      @default(0)
+  stopOnFailure      Boolean  @default(false)
+  executeChildSuites Boolean  @default(true)
+  executedBy         Int
+  actualStartDate    DateTime?
+  actualEndDate      DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  suite TestSuite @relation(fields: [suiteId], references: [id], onDelete: Cascade)
+  suite      TestSuite       @relation(fields: [suiteId], references: [id], onDelete: Cascade)
+  testRun    TestRun?        @relation(fields: [testRunId], references: [id], onDelete: SetNull)
+  executor   User            @relation("TestSuiteRunExecutor", fields: [executedBy], references: [id])
+  executions TestExecution[]
 
   @@index([suiteId])
   @@index([projectId])
+  @@index([testRunId])
+  @@index([executedBy])
+  @@index([status])
 }
 
 // ============================================

@@ -72,6 +72,7 @@ export async function executeSuite(suiteId, options, userId) {
   const suiteRun = await prisma.testSuiteRun.create({
     data: {
       suiteId: suite.id,
+      projectId: suite.projectId,
       testRunId: testRun.id,
       name: name || `Execution of ${suite.name}`,
       description,
@@ -97,7 +98,7 @@ export async function executeSuite(suiteId, options, userId) {
           testCaseId: tc.testCase?.id || tc.id,
           suiteRunId: suiteRun.id,
           status: 'BLOCKED',
-          executedBy: userId,
+          userId: userId,
         },
         select: {
           id: true,
