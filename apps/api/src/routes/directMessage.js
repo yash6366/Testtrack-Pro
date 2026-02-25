@@ -361,6 +361,142 @@ export async function directMessageRoutes(fastify) {
     return { message: replyMessage, replyToId };
   });
 
+  // Edit DM
+  fastify.patch('/api/dm/:messageId', { preHandler: [requireAuth, allowAllRoles] }, async (request, reply) => {
+    const userId = request.user.id;
+    const messageId = Number(request.params.messageId);
+    const { message } = request.body || {};
+
+    if (Number.isNaN(messageId)) {
+      return reply.code(400).send({ error: 'Invalid message id' });
+    }
+
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return reply.code(400).send({ error: 'Message is required' });
+    }
+
+    if (message.trim().length > MAX_MESSAGE_LENGTH) {
+      return reply.code(400).send({ error: 'Message is too long' });
+    }
+
+    // Get the original message
+    const existingMessage = await prisma.directMessage.findUnique({
+      where: { id: messageId },
+      select: { 
+        id: true, 
+        senderId: true, 
+        recipientId: true, 
+        message: true, 
+        createdAt: true,
+        isDeleted: true,
+      },
+    });
+
+    if (!existingMessage) {
+      return reply.code(404).send({ error: 'Message not found' });
+    }
+
+    if (existingMessage.isDeleted) {
+      return reply.code(400).send({ error: 'Cannot edit deleted message' });
+    }
+
+    // Only sender can edit their own message
+    if (existingMessage.senderId !== userId) {
+      return reply.code(403).send({ error: 'You can only edit your own messages' });
+    }
+
+    // Check edit time window (15 minutes)
+    const EDIT_WINDOW_MINUTES = 15;
+    const now = new Date();
+    const timeSinceCreation = now.getTime() - existingMessage.createdAt.getTime();
+    const windowMs = EDIT_WINDOW_MINUTES * 60 * 1000;
+
+    if (timeSinceCreation > windowMs) {
+      return reply.code(403).send({ error: 'Edit window has expired (15 minutes)' });
+    }
+
+    // Update the message
+    const updatedMessage = await prisma.directMessage.update({
+      where: { id: messageId },
+      data: {
+        message: message.trim(),
+        editedAt: now,
+      },
+      include: {
+        sender: {
+          select: { id: true, name: true, email: true, picture: true, role: true },
+        },
+        recipient: {
+          select: { id: true, name: true, email: true, picture: true, role: true },
+        },
+        reactions: {
+          include: {
+            user: { select: { id: true, name: true, picture: true } },
+          },
+        },
+      },
+    });
+
+    return { message: updatedMessage };
+  });
+
+  // Delete DM
+  fastify.delete('/api/dm/:messageId', { preHandler: [requireAuth, allowAllRoles] }, async (request, reply) => {
+    const userId = request.user.id;
+    const messageId = Number(request.params.messageId);
+
+    if (Number.isNaN(messageId)) {
+      return reply.code(400).send({ error: 'Invalid message id' });
+    }
+
+    // Get the message
+    const existingMessage = await prisma.directMessage.findUnique({
+      where: { id: messageId },
+      select: { 
+        id: true, 
+        senderId: true, 
+        recipientId: true, 
+        createdAt: true,
+        isDeleted: true,
+      },
+    });
+
+    if (!existingMessage) {
+      return reply.code(404).send({ error: 'Message not found' });
+    }
+
+    if (existingMessage.isDeleted) {
+      return reply.code(400).send({ error: 'Message already deleted' });
+    }
+
+    // Only sender can delete their own message
+    if (existingMessage.senderId !== userId) {
+      return reply.code(403).send({ error: 'You can only delete your own messages' });
+    }
+
+    // Check delete time window (15 minutes)
+    const DELETE_WINDOW_MINUTES = 15;
+    const now = new Date();
+    const timeSinceCreation = now.getTime() - existingMessage.createdAt.getTime();
+    const windowMs = DELETE_WINDOW_MINUTES * 60 * 1000;
+
+    if (timeSinceCreation > windowMs) {
+      return reply.code(403).send({ error: 'Delete window has expired (15 minutes)' });
+    }
+
+    // Soft delete the message
+    await prisma.directMessage.update({
+      where: { id: messageId },
+      data: {
+        isDeleted: true,
+        deletedAt: now,
+        message: '[Message deleted]',
+      },
+    });
+
+    return { success: true, message: 'Message deleted successfully' };
+  });
+
   // Mark DM as read
   fastify.post('/api/dm/:userId/read', { preHandler: [requireAuth, allowAllRoles] }, async (request) => {
     const currentUserId = request.user.id;

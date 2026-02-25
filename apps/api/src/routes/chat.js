@@ -408,6 +408,164 @@ export async function chatRoutes(fastify) {
     }
   });
 
+  // Edit channel message (own messages only, within time window)
+  fastify.patch('/api/chat/messages/:messageId', { preHandler: [requireAuth, allowAllRoles] }, async (request, reply) => {
+    try {
+      const userId = request.user.id;
+      const messageId = Number(request.params.messageId);
+      const { body } = request.body || {};
+
+      if (Number.isNaN(messageId)) {
+        return reply.code(400).send({ error: 'Invalid message id' });
+      }
+
+      if (!body || typeof body !== 'string' || body.trim().length === 0) {
+        return reply.code(400).send({ error: 'Message body is required' });
+      }
+
+      if (body.trim().length > MAX_MESSAGE_LENGTH) {
+        return reply.code(400).send({ error: 'Message body is too long' });
+      }
+
+      // Get the existing message
+      const existingMessage = await prisma.channelMessage.findUnique({
+        where: { id: messageId },
+        select: {
+          id: true,
+          userId: true,
+          channelId: true,
+          message: true,
+          createdAt: true,
+          isDeleted: true,
+        },
+      });
+
+      if (!existingMessage) {
+        return reply.code(404).send({ error: 'Message not found' });
+      }
+
+      if (existingMessage.isDeleted) {
+        return reply.code(400).send({ error: 'Cannot edit deleted message' });
+      }
+
+      // Only sender can edit their own message
+      if (existingMessage.userId !== userId) {
+        return reply.code(403).send({ error: 'You can only edit your own messages' });
+      }
+
+      // Verify user is still a member of the channel
+      await ensureMember(userId, existingMessage.channelId);
+
+      // Check edit time window (15 minutes)
+      const EDIT_WINDOW_MINUTES = 15;
+      const now = new Date();
+      const timeSinceCreation = now.getTime() - existingMessage.createdAt.getTime();
+      const windowMs = EDIT_WINDOW_MINUTES * 60 * 1000;
+
+      if (timeSinceCreation > windowMs) {
+        return reply.code(403).send({ error: 'Edit window has expired (15 minutes)' });
+      }
+
+      // Update the message
+      const updatedMessage = await prisma.channelMessage.update({
+        where: { id: messageId },
+        data: {
+          message: body.trim(),
+          editedAt: now,
+        },
+        include: {
+          sender: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      });
+
+      // Broadcast update to channel
+      broadcast(existingMessage.channelId, {
+        type: 'message_edited',
+        message: updatedMessage,
+      });
+
+      return { message: updatedMessage };
+    } catch (error) {
+      const status = error.statusCode || 500;
+      return reply.code(status).send({ error: error.message || 'Failed to edit message' });
+    }
+  });
+
+  // Delete channel message (own messages only, within time window)
+  fastify.delete('/api/chat/messages/:messageId', { preHandler: [requireAuth, allowAllRoles] }, async (request, reply) => {
+    try {
+      const userId = request.user.id;
+      const messageId = Number(request.params.messageId);
+
+      if (Number.isNaN(messageId)) {
+        return reply.code(400).send({ error: 'Invalid message id' });
+      }
+
+      // Get the existing message
+      const existingMessage = await prisma.channelMessage.findUnique({
+        where: { id: messageId },
+        select: {
+          id: true,
+          userId: true,
+          channelId: true,
+          createdAt: true,
+          isDeleted: true,
+        },
+      });
+
+      if (!existingMessage) {
+        return reply.code(404).send({ error: 'Message not found' });
+      }
+
+      if (existingMessage.isDeleted) {
+        return reply.code(400).send({ error: 'Message already deleted' });
+      }
+
+      // Only sender can delete their own message
+      if (existingMessage.userId !== userId) {
+        return reply.code(403).send({ error: 'You can only delete your own messages' });
+      }
+
+      // Verify user is still a member of the channel
+      await ensureMember(userId, existingMessage.channelId);
+
+      // Check delete time window (15 minutes)
+      const DELETE_WINDOW_MINUTES = 15;
+      const now = new Date();
+      const timeSinceCreation = now.getTime() - existingMessage.createdAt.getTime();
+      const windowMs = DELETE_WINDOW_MINUTES * 60 * 1000;
+
+      if (timeSinceCreation > windowMs) {
+        return reply.code(403).send({ error: 'Delete window has expired (15 minutes)' });
+      }
+
+      // Soft delete the message
+      await prisma.channelMessage.update({
+        where: { id: messageId },
+        data: {
+          isDeleted: true,
+          deletedAt: now,
+          deletedByUserId: userId,
+          message: '[Message deleted]',
+        },
+      });
+
+      // Broadcast deletion to channel
+      broadcast(existingMessage.channelId, {
+        type: 'message_deleted',
+        messageId,
+        channelId: existingMessage.channelId,
+      });
+
+      return { success: true, message: 'Message deleted successfully' };
+    } catch (error) {
+      const status = error.statusCode || 500;
+      return reply.code(status).send({ error: error.message || 'Failed to delete message' });
+    }
+  });
+
   // Get channel members with online status
   fastify.get('/api/chat/channels/:id/members', { preHandler: [requireAuth, allowAllRoles] }, async (request, reply) => {
     const userId = request.user.id;

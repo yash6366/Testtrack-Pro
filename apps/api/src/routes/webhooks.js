@@ -7,6 +7,7 @@ import {
   deleteWebhook,
   getWebhookDeliveries,
   sendTestWebhook,
+  retryWebhookDelivery,
 } from '../services/webhookService.js';
 
 export async function webhookRoutes(fastify) {
@@ -163,17 +164,39 @@ export async function webhookRoutes(fastify) {
     async (request, reply) => {
       try {
         const { webhookId } = request.params;
-        const { skip, take } = request.query;
+        const { skip, take, status, event } = request.query;
 
         const result = await getWebhookDeliveries(Number(webhookId), {
           skip: skip ? Number(skip) : 0,
           take: take ? Number(take) : 50,
+          status: status || undefined,
+          event: event || undefined,
         });
 
         reply.send(result);
       } catch (error) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  // Retry failed webhook delivery
+  fastify.post(
+    '/api/projects/:projectId/webhooks/:webhookId/deliveries/:deliveryId/retry',
+    { preHandler: [requireAuth, adminOrDeveloper] },
+    async (request, reply) => {
+      try {
+        const { projectId, deliveryId } = request.params;
+
+        const result = await retryWebhookDelivery(Number(deliveryId), Number(projectId));
+
+        reply.send(result);
+      } catch (error) {
+        fastify.log.error(error);
+        const statusCode = error.message.includes('not found') ? 404 : 
+                          error.message.includes('Cannot retry') ? 400 : 500;
+        reply.code(statusCode).send({ error: error.message });
       }
     },
   );

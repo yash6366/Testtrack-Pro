@@ -795,6 +795,64 @@ export async function updateBugComment(bugId, commentId, body, userId, projectId
 }
 
 /**
+ * Delete a bug comment
+ * @param {number} bugId - Bug ID
+ * @param {number} commentId - Comment ID
+ * @param {number} userId - User ID
+ * @param {number} projectId - Project ID
+ * @param {Object} permissionContext - Permission context
+ * @param {boolean} isAdmin - Whether user is admin (can delete any comment)
+ * @returns {Promise<void>}
+ */
+export async function deleteBugComment(bugId, commentId, userId, projectId, permissionContext = null, isAdmin = false) {
+  if (!permissionContext) {
+    throw new Error('Missing permission context: direct service invocation not allowed');
+  }
+  assertPermissionContext(permissionContext, 'bug:comment', { projectId });
+
+  const comment = await prisma.bugComment.findUnique({
+    where: { id: Number(commentId) },
+    include: {
+      bug: { select: { id: true, projectId: true, bugNumber: true } },
+      user: { select: { id: true, name: true, email: true } },
+    },
+  });
+
+  if (!comment || comment.bugId !== Number(bugId) || comment.bug.projectId !== Number(projectId)) {
+    throw new Error('Comment not found');
+  }
+
+  // Check if user can delete the comment
+  if (!isAdmin && comment.userId !== userId) {
+    throw new Error('You can only delete your own comments');
+  }
+
+  // Check edit window for non-admin users
+  if (!isAdmin) {
+    const now = new Date();
+    const windowMs = COMMENT_EDIT_WINDOW_MINUTES * 60 * 1000;
+    if (now.getTime() - comment.createdAt.getTime() > windowMs) {
+      throw new Error('Comment deletion window has expired');
+    }
+  }
+
+  // Delete the comment
+  await prisma.bugComment.delete({
+    where: { id: comment.id },
+  });
+
+  // Log audit action
+  await logAuditAction(userId, 'BUG_COMMENT_DELETE', {
+    description: `Deleted comment on bug #${comment.bug.bugNumber}`,
+    resourceType: 'BUG',
+    resourceId: bugId.toString(),
+    projectId: projectId.toString(),
+  });
+
+  return { message: 'Comment deleted successfully' };
+}
+
+/**
  * Get bug details with all related data
  * @param {number} bugId - Bug ID
  * @returns {Promise<Object>} Bug with relations

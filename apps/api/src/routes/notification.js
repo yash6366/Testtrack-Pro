@@ -152,6 +152,58 @@ export async function notificationRoutes(fastify) {
     },
   );
 
+  /**
+   * Get notification delivery status
+   */
+  fastify.get(
+    '/api/notifications/:id/deliveries',
+    { preHandler: [requireAuth] },
+    async (request, reply) => {
+      try {
+        const notificationId = Number(request.params.id);
+        
+        if (Number.isNaN(notificationId)) {
+          return reply.code(400).send({ error: 'Invalid notification ID' });
+        }
+
+        // Get notification and verify ownership
+        const notification = await getNotification(notificationId);
+        
+        if (notification.userId !== request.user.id) {
+          return reply.code(403).send({ error: 'Not authorized to view delivery status for this notification' });
+        }
+
+        // Get delivery records
+        const deliveries = await prisma.notificationDelivery.findMany({
+          where: { notificationId },
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            channel: true,
+            status: true,
+            failureReason: true,
+            retryCount: true,
+            nextRetryAt: true,
+            deliveredAt: true,
+            openedAt: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
+
+        reply.send({ 
+          notificationId, 
+          deliveries,
+          total: deliveries.length 
+        });
+      } catch (error) {
+        logError('Error fetching notification deliveries:', error);
+        const statusCode = error.message === 'Notification not found' ? 404 : 500;
+        reply.code(statusCode).send({ error: error.message });
+      }
+    },
+  );
+
   // ============================================
   // NOTIFICATION PREFERENCES ENDPOINTS
   // ============================================

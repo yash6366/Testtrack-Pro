@@ -326,19 +326,74 @@ export async function retryFailedDeliveries() {
 /**
  * Get webhook deliveries for a webhook
  */
-export async function getWebhookDeliveries(webhookId, { skip = 0, take = 50 } = {}) {
+export async function getWebhookDeliveries(webhookId, { skip = 0, take = 50, status, event } = {}) {
+  const where = { webhookId };
+  
+  // Add optional filters
+  if (status) {
+    where.status = status;
+  }
+  if (event) {
+    where.event = event;
+  }
+
   const deliveries = await prisma.webhookDelivery.findMany({
-    where: { webhookId },
+    where,
     orderBy: { createdAt: 'desc' },
     skip,
     take,
   });
 
   const total = await prisma.webhookDelivery.count({
-    where: { webhookId },
+    where,
   });
 
   return { deliveries, total };
+}
+
+/**
+ * Retry a specific failed webhook delivery
+ */
+export async function retryWebhookDelivery(deliveryId, projectId) {
+  const delivery = await prisma.webhookDelivery.findUnique({
+    where: { id: deliveryId },
+    include: {
+      webhook: {
+        select: { id: true, projectId: true, isActive: true },
+      },
+    },
+  });
+
+  if (!delivery) {
+    throw new Error('Webhook delivery not found');
+  }
+
+  if (delivery.webhook.projectId !== projectId) {
+    throw new Error('Webhook delivery not found in this project');
+  }
+
+  if (!delivery.webhook.isActive) {
+    throw new Error('Cannot retry delivery for inactive webhook');
+  }
+
+  if (delivery.status === 'SUCCESS') {
+    throw new Error('Cannot retry successful delivery');
+  }
+
+  // Reset delivery status for retry
+  await prisma.webhookDelivery.update({
+    where: { id: deliveryId },
+    data: {
+      status: 'PENDING',
+      nextRetryAt: new Date(),
+      errorMessage: null,
+    },
+  });
+
+  // Trigger delivery
+  await deliverWebhook(deliveryId);
+
+  return { message: 'Webhook delivery retry initiated' };
 }
 
 /**

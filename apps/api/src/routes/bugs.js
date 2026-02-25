@@ -14,6 +14,7 @@ import {
   assignBug,
   addBugComment,
   updateBugComment,
+  deleteBugComment,
   getBugDetails,
   getProjectBugs,
   requestBugRetest,
@@ -670,6 +671,38 @@ export async function bugRoutes(fastify) {
       } catch (error) {
         logError('Error updating comment:', error);
         reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Delete a bug comment
+   */
+  fastify.delete(
+    '/api/projects/:projectId/bugs/:bugId/comments/:commentId',
+    { preHandler: [requirePermission('bug:comment')] },
+    async (request, reply) => {
+      try {
+        const { bugId, projectId, commentId } = request.params;
+        const userId = request.user.id;
+        const isAdmin = request.user.role === 'ADMIN';
+
+        const result = await deleteBugComment(
+          Number(bugId),
+          Number(commentId),
+          userId,
+          Number(projectId),
+          request.permissionContext,
+          isAdmin,
+        );
+
+        reply.send(result);
+      } catch (error) {
+        logError('Error deleting comment:', error);
+        const statusCode = error.message.includes('not found') ? 404 : 
+                          error.message.includes('window has expired') ? 403 :
+                          error.message.includes('only delete your own') ? 403 : 500;
+        reply.code(statusCode).send({ error: error.message });
       }
     },
   );
