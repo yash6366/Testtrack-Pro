@@ -153,13 +153,13 @@ export async function generateTesterPerformanceCSV(userId, weeks = 4) {
     const [user, executions, bugs] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId }, select: { name: true, email: true } }),
       prisma.testExecution.findMany({
-        where: { executedBy: userId, createdAt: { gte: startDate } },
+        where: { userId: userId, createdAt: { gte: startDate } },
         include: {
           testCase: { select: { type: true } },
         },
       }),
       prisma.bug.findMany({
-        where: { reporterId: userId, createdAt: { gte: startDate } },
+        where: { reportedBy: userId, createdAt: { gte: startDate } },
         select: { bugNumber: true, priority: true, severity: true },
       }),
     ]);
@@ -320,97 +320,111 @@ export async function generateAnalyticsDashboardCSV(projectId) {
  * Generate test execution report as PDF
  */
 export async function generateExecutionPDF(testRunId) {
-  const report = await prisma.testRun.findUnique({
-    where: { id: testRunId },
-    include: {
-      project: { select: { name: true } },
-      executor: { select: { name: true } },
-      executions: {
-        include: {
-          testCase: {
-            select: { id: true, name: true, type: true, priority: true, severity: true },
+  try {
+    console.log(`[PDF Service] Generating PDF for test run ${testRunId}...`);
+    
+    const report = await prisma.testRun.findUnique({
+      where: { id: testRunId },
+      include: {
+        project: { select: { name: true } },
+        executor: { select: { name: true } },
+        executions: {
+          include: {
+            testCase: {
+              select: { id: true, name: true, type: true, priority: true, severity: true },
+            },
           },
         },
       },
-    },
-  });
+    });
 
-  if (!report) {
-    throw new Error('Test run not found');
-  }
+    if (!report) {
+      throw new Error('Test run not found');
+    }
+    
+    console.log(`[PDF Service] Found test run: ${report.name}, executions: ${report.executions.length}`);
 
-  const passed = report.executions.filter((e) => e.status === 'PASSED').length;
-  const failed = report.executions.filter((e) => e.status === 'FAILED').length;
-  const blocked = report.executions.filter((e) => e.status === 'BLOCKED').length;
-  const skipped = report.executions.filter((e) => e.status === 'SKIPPED').length;
-  const total = report.executions.length;
-  const passRate = total > 0 ? ((passed / total) * 100).toFixed(2) : 0;
+    const passed = report.executions.filter((e) => e.status === 'PASSED').length;
+    const failed = report.executions.filter((e) => e.status === 'FAILED').length;
+    const blocked = report.executions.filter((e) => e.status === 'BLOCKED').length;
+    const skipped = report.executions.filter((e) => e.status === 'SKIPPED').length;
+    const total = report.executions.length;
+    const passRate = total > 0 ? ((passed / total) * 100).toFixed(2) : 0;
 
-  const doc = new jsPDF();
-  let yPos = 20;
+    console.log(`[PDF Service] Creating jsPDF document...`);
+    const doc = new jsPDF();
+    let yPos = 20;
 
-  // Title
-  doc.setFontSize(20);
-  doc.text('Test Execution Report', 20, yPos);
-  yPos += 15;
+    // Title
+    doc.setFontSize(20);
+    doc.text('Test Execution Report', 20, yPos);
+    yPos += 15;
 
-  // Test Run Info
-  doc.setFontSize(12);
-  doc.text(`Test Run: ${report.name}`, 20, yPos);
-  yPos += 7;
-  doc.text(`Project: ${report.project.name}`, 20, yPos);
-  yPos += 7;
-  doc.text(`Executor: ${report.executor.name}`, 20, yPos);
-  yPos += 7;
-  doc.text(`Environment: ${report.environment || 'N/A'}`, 20, yPos);
-  yPos += 7;
-  doc.text(`Build Version: ${report.buildVersion || 'N/A'}`, 20, yPos);
-  yPos += 10;
+    // Test Run Info
+    doc.setFontSize(12);
+    doc.text(`Test Run: ${report.name}`, 20, yPos);
+    yPos += 7;
+    doc.text(`Project: ${report.project.name}`, 20, yPos);
+    yPos += 7;
+    doc.text(`Executor: ${report.executor.name}`, 20, yPos);
+    yPos += 7;
+    doc.text(`Environment: ${report.environment || 'N/A'}`, 20, yPos);
+    yPos += 7;
+    doc.text(`Build Version: ${report.buildVersion || 'N/A'}`, 20, yPos);
+    yPos += 10;
 
-  // Summary Box
-  doc.setFontSize(14);
-  doc.text('Execution Summary', 20, yPos);
-  yPos += 8;
-  doc.setFontSize(11);
-  doc.text(`Total Test Cases: ${total}`, 25, yPos);
-  yPos += 6;
-  doc.setTextColor(40, 167, 69);
-  doc.text(`Passed: ${passed}`, 25, yPos);
-  yPos += 6;
-  doc.setTextColor(220, 53, 69);
-  doc.text(`Failed: ${failed}`, 25, yPos);
-  yPos += 6;
-  doc.setTextColor(255, 193, 7);
-  doc.text(`Blocked: ${blocked}`, 25, yPos);
-  yPos += 6;
-  doc.setTextColor(108, 117, 125);
-  doc.text(`Skipped: ${skipped}`, 25, yPos);
-  yPos += 6;
-  doc.setTextColor(0, 123, 255);
-  doc.text(`Pass Rate: ${passRate}%`, 25, yPos);
-  yPos += 12;
-
-  // Failed Tests
-  if (failed > 0) {
-    doc.setTextColor(0, 0, 0);
+    // Summary Box
     doc.setFontSize(14);
-    doc.text('Failed Test Cases', 20, yPos);
+    doc.text('Execution Summary', 20, yPos);
     yPos += 8;
-    doc.setFontSize(9);
+    doc.setFontSize(11);
+    doc.text(`Total Test Cases: ${total}`, 25, yPos);
+    yPos += 6;
+    doc.setTextColor(40, 167, 69);
+    doc.text(`Passed: ${passed}`, 25, yPos);
+    yPos += 6;
+    doc.setTextColor(220, 53, 69);
+    doc.text(`Failed: ${failed}`, 25, yPos);
+    yPos += 6;
+    doc.setTextColor(255, 193, 7);
+    doc.text(`Blocked: ${blocked}`, 25, yPos);
+    yPos += 6;
+    doc.setTextColor(108, 117, 125);
+    doc.text(`Skipped: ${skipped}`, 25, yPos);
+    yPos += 6;
+    doc.setTextColor(0, 123, 255);
+    doc.text(`Pass Rate: ${passRate}%`, 25, yPos);
+    yPos += 12;
 
-    report.executions
-      .filter((e) => e.status === 'FAILED')
-      .forEach((exec, idx) => {
-        if (yPos > 270) {
-          doc.addPage();
-          yPos = 20;
-        }
-        doc.text(`${idx + 1}. ${exec.testCase.name} (${exec.testCase.priority})`, 25, yPos);
-        yPos += 5;
-      });
+    // Failed Tests
+    if (failed > 0) {
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(14);
+      doc.text('Failed Test Cases', 20, yPos);
+      yPos += 8;
+      doc.setFontSize(9);
+
+      report.executions
+        .filter((e) => e.status === 'FAILED')
+        .forEach((exec, idx) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.text(`${idx + 1}. ${exec.testCase.name} (${exec.testCase.priority})`, 25, yPos);
+          yPos += 5;
+        });
+    }
+
+    console.log(`[PDF Service] Generating ArrayBuffer output...`);
+    const arrayBuffer = doc.output('arraybuffer');
+    console.log(`[PDF Service] PDF generated successfully, size: ${arrayBuffer.byteLength} bytes`);
+    
+    return arrayBuffer;
+  } catch (error) {
+    console.error('[PDF Service] Error generating execution PDF:', error);
+    throw error;
   }
-
-  return doc.output('arraybuffer');
 }
 
 /**
@@ -545,69 +559,87 @@ export async function generateExecutionExcel(testRunId) {
  * Generate tester performance report as PDF
  */
 export async function generateTesterPerformancePDF(userId, weeks = 4) {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - (weeks * 7));
+  try {
+    console.log(`[PDF Service] Generating performance PDF for user ${userId}, weeks: ${weeks}...`);
+    
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - (weeks * 7));
 
-  const [user, executions, bugs] = await Promise.all([
-    prisma.user.findUnique({ where: { id: userId }, select: { name: true, email: true } }),
-    prisma.testExecution.findMany({
-      where: { executedBy: userId, createdAt: { gte: startDate } },
-      include: {
-        testCase: { select: { type: true } },
-      },
-    }),
-    prisma.bug.findMany({
-      where: { reporterId: userId, createdAt: { gte: startDate } },
-      select: { bugNumber: true, priority: true, severity: true },
-    }),
-  ]);
+    const [user, executions, bugs] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId }, select: { name: true, email: true } }),
+      prisma.testExecution.findMany({
+        where: { userId: userId, createdAt: { gte: startDate } },
+        include: {
+          testCase: { select: { type: true } },
+        },
+      }),
+      prisma.bug.findMany({
+        where: { reportedBy: userId, createdAt: { gte: startDate } },
+        select: { bugNumber: true, priority: true, severity: true },
+      }),
+    ]);
 
-  const passed = executions.filter((e) => e.status === 'PASSED').length;
-  const failed = executions.filter((e) => e.status === 'FAILED').length;
-  const passRate = executions.length > 0 ? ((passed / executions.length) * 100).toFixed(2) : 0;
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    console.log(`[PDF Service] Found user: ${user.name}, executions: ${executions.length}, bugs: ${bugs.length}`);
 
-  const doc = new jsPDF();
-  let yPos = 20;
+    const passed = executions.filter((e) => e.status === 'PASSED').length;
+    const failed = executions.filter((e) => e.status === 'FAILED').length;
+    const passRate = executions.length > 0 ? ((passed / executions.length) * 100).toFixed(2) : 0;
 
-  // Title
-  doc.setFontSize(20);
-  doc.text('Tester Performance Report', 20, yPos);
-  yPos += 15;
+    console.log(`[PDF Service] Creating jsPDF document...`);
+    const doc = new jsPDF();
+    let yPos = 20;
 
-  // Tester Info
-  doc.setFontSize(12);
-  doc.text(`Tester: ${user?.name || 'Unknown'}`, 20, yPos);
-  yPos += 7;
-  doc.text(`Email: ${user?.email || 'N/A'}`, 20, yPos);
-  yPos += 7;
-  doc.text(`Period: Last ${weeks} weeks`, 20, yPos);
-  yPos += 7;
-  doc.text(`Report Generated: ${new Date().toLocaleDateString()}`, 20, yPos);
-  yPos += 12;
+    // Title
+    doc.setFontSize(20);
+    doc.text('Tester Performance Report', 20, yPos);
+    yPos += 15;
 
-  // Execution Metrics
-  doc.setFontSize(14);
-  doc.text('Execution Metrics', 20, yPos);
-  yPos += 8;
-  doc.setFontSize(11);
-  doc.text(`Total Executions: ${executions.length}`, 25, yPos);
-  yPos += 6;
-  doc.setTextColor(40, 167, 69);
-  doc.text(`Passed: ${passed}`, 25, yPos);
-  yPos += 6;
-  doc.setTextColor(220, 53, 69);
-  doc.text(`Failed: ${failed}`, 25, yPos);
-  yPos += 6;
-  doc.setTextColor(0, 123, 255);
-  doc.text(`Pass Rate: ${passRate}%`, 25, yPos);
-  yPos += 6;
-  doc.setTextColor(0, 0, 0);
-  doc.text(`Bugs Reported: ${bugs.length}`, 25, yPos);
-  yPos += 6;
-  const bugDetectionRate = executions.length > 0 ? ((bugs.length / executions.length) * 100).toFixed(2) : 0;
-  doc.text(`Bug Detection Rate: ${bugDetectionRate}%`, 25, yPos);
+    // Tester Info
+    doc.setFontSize(12);
+    doc.text(`Tester: ${user?.name || 'Unknown'}`, 20, yPos);
+    yPos += 7;
+    doc.text(`Email: ${user?.email || 'N/A'}`, 20, yPos);
+    yPos += 7;
+    doc.text(`Period: Last ${weeks} weeks`, 20, yPos);
+    yPos += 7;
+    doc.text(`Report Generated: ${new Date().toLocaleDateString()}`, 20, yPos);
+    yPos += 12;
 
-  return doc.output('arraybuffer');
+    // Execution Metrics
+    doc.setFontSize(14);
+    doc.text('Execution Metrics', 20, yPos);
+    yPos += 8;
+    doc.setFontSize(11);
+    doc.text(`Total Executions: ${executions.length}`, 25, yPos);
+    yPos += 6;
+    doc.setTextColor(40, 167, 69);
+    doc.text(`Passed: ${passed}`, 25, yPos);
+    yPos += 6;
+    doc.setTextColor(220, 53, 69);
+    doc.text(`Failed: ${failed}`, 25, yPos);
+    yPos += 6;
+    doc.setTextColor(0, 123, 255);
+    doc.text(`Pass Rate: ${passRate}%`, 25, yPos);
+    yPos += 6;
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Bugs Reported: ${bugs.length}`, 25, yPos);
+    yPos += 6;
+    const bugDetectionRate = executions.length > 0 ? ((bugs.length / executions.length) * 100).toFixed(2) : 0;
+    doc.text(`Bug Detection Rate: ${bugDetectionRate}%`, 25, yPos);
+
+    console.log(`[PDF Service] Generating ArrayBuffer output...`);
+    const arrayBuffer = doc.output('arraybuffer');
+    console.log(`[PDF Service] PDF generated successfully, size: ${arrayBuffer.byteLength} bytes`);
+    
+    return arrayBuffer;
+  } catch (error) {
+    console.error('[PDF Service] Error generating performance PDF:', error);
+    throw error;
+  }
 }
 
 export default {

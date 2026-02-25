@@ -193,7 +193,13 @@ async function getToken(sessionId) {
 export async function csrfProtectionPlugin(fastify, options = {}) {
   const { 
     headerName = 'x-csrf-token',
-    excludePaths = ['/health', '/api/auth/login', '/api/auth/signup', '/api/auth/verify-email'],
+    excludePaths = [
+      '/health',
+      '/api/auth/login',
+      '/api/auth/signup',
+      '/api/auth/verify-email',
+      '/api/test-suites', // Exclude test suite endpoints (uses JWT auth)
+    ],
   } = options;
 
   // Add CSRF utilities to fastify

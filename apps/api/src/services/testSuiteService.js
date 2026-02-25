@@ -114,7 +114,7 @@ export async function getProjectTestSuites(projectId, filters = {}) {
     ...(parentSuiteId !== undefined && {
       parentSuiteId: parentSuiteId ? Number(parentSuiteId) : null,
     }),
-    ...(!includeArchived && { isDeleted: false }),
+    ...((status !== 'ARCHIVED' && !includeArchived) && { isDeleted: false }),
     ...(search && {
       OR: [
         { name: { contains: search, mode: 'insensitive' } },

@@ -12,9 +12,13 @@ class ApiClient {
     const token = localStorage.getItem('token');
 
     const headers = {
-      'Content-Type': 'application/json',
       ...options.headers,
     };
+
+    // Only add Content-Type if there's a body
+    if (options.body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     if (token) {
       headers.Authorization = `Bearer ${token}`;
@@ -68,18 +72,20 @@ class ApiClient {
   }
 
   post(endpoint, data, options) {
+    const hasData = data !== undefined && data !== null;
     return this.#request(endpoint, {
       ...options,
       method: 'POST',
-      body: JSON.stringify(data),
+      ...(hasData && { body: JSON.stringify(data) }),
     });
   }
 
   put(endpoint, data, options) {
+    const hasData = data !== undefined && data !== null;
     return this.#request(endpoint, {
       ...options,
       method: 'PUT',
-      body: JSON.stringify(data),
+      ...(hasData && { body: JSON.stringify(data) }),
     });
   }
 
@@ -88,10 +94,11 @@ class ApiClient {
   }
 
   patch(endpoint, data, options) {
+    const hasData = data !== undefined && data !== null;
     return this.#request(endpoint, {
       ...options,
       method: 'PATCH',
-      body: JSON.stringify(data),
+      ...(hasData && { body: JSON.stringify(data) }),
     });
   }
 }

@@ -114,59 +114,85 @@ export default function ReportsPage() {
 
   const handleExport = async (runId, format) => {
     try {
+      console.log(`[Export] Starting ${format} export for run ${runId}...`);
       const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiBaseUrl}/api/test-runs/${runId}/export/${format}`, {
+      const url = `${apiBaseUrl}/api/test-runs/${runId}/export/${format}`;
+      console.log(`[Export] Fetching from: ${url}`);
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
       });
 
+      console.log(`[Export] Response status: ${response.status}`);
+      console.log(`[Export] Content-Type: ${response.headers.get('Content-Type')}`);
+
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('[Export] Error response:', errorText);
         throw new Error(errorText || 'Export failed');
       }
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      console.log(`[Export] Received blob of size: ${blob.size} bytes, type: ${blob.type}`);
+      
+      const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = blobUrl;
       
       const extension = format === 'excel' ? 'xlsx' : format;
       a.download = `test-run-${runId}.${extension}`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
+      
+      console.log(`[Export] Download initiated successfully`);
     } catch (err) {
+      console.error('[Export] Error:', err);
       alert(`Failed to export: ${err.message}`);
     }
   };
 
   const handleExportPerformance = async (format) => {
     try {
+      console.log(`[Performance Export] Starting ${format} export...`);
       const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiBaseUrl}/api/tester/reports/performance/${format}`, {
+      const url = `${apiBaseUrl}/api/tester/reports/performance/${format}`;
+      console.log(`[Performance Export] Fetching from: ${url}`);
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
       });
 
+      console.log(`[Performance Export] Response status: ${response.status}`);
+      console.log(`[Performance Export] Content-Type: ${response.headers.get('Content-Type')}`);
+
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('[Performance Export] Error response:', errorText);
         throw new Error(errorText || 'Export failed');
       }
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      console.log(`[Performance Export] Received blob of size: ${blob.size} bytes, type: ${blob.type}`);
+      
+      const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = blobUrl;
       
       a.download = `performance-report.${format}`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
+      
+      console.log(`[Performance Export] Download initiated successfully`);
     } catch (err) {
+      console.error('[Performance Export] Error:', err);
       alert(`Failed to export: ${err.message}`);
     }
   };

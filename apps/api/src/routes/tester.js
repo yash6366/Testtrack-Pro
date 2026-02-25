@@ -1041,14 +1041,32 @@ export async function testerRoutes(fastify) {
     async (request, reply) => {
       try {
         const { runId } = request.params;
+        console.log(`[PDF Export] Generating PDF for test run ${runId}...`);
+        
         const pdf = await generateExecutionPDF(Number(runId));
+        
+        if (!pdf) {
+          throw new Error('PDF generation returned empty result');
+        }
+        
+        console.log(`[PDF Export] PDF generated successfully, size: ${pdf.byteLength || pdf.length} bytes`);
+        
+        const buffer = Buffer.from(pdf);
+        console.log(`[PDF Export] Sending PDF buffer of ${buffer.length} bytes...`);
 
         reply
           .header('Content-Type', 'application/pdf')
           .header('Content-Disposition', `attachment; filename="test-run-${runId}.pdf"`)
-          .send(Buffer.from(pdf));
+          .send(buffer);
+          
+        console.log(`[PDF Export] PDF sent successfully for test run ${runId}`);
       } catch (error) {
         logError('Error exporting test run to PDF:', error);
+        console.error('[PDF Export] Error details:', {
+          message: error.message,
+          stack: error.stack,
+          runId: request.params.runId
+        });
         reply.code(500).send({ error: error.message });
       }
     },
@@ -1125,14 +1143,31 @@ export async function testerRoutes(fastify) {
         }
 
         const weeks = request.query.weeks ? Number(request.query.weeks) : 4;
+        console.log(`[PDF Export] Generating performance PDF for user ${userId}, weeks: ${weeks}...`);
+        
         const pdf = await generateTesterPerformancePDF(userId, weeks);
+        
+        if (!pdf) {
+          throw new Error('PDF generation returned empty result');
+        }
+        
+        console.log(`[PDF Export] Performance PDF generated successfully, size: ${pdf.byteLength || pdf.length} bytes`);
+        
+        const buffer = Buffer.from(pdf);
 
         reply
           .header('Content-Type', 'application/pdf')
           .header('Content-Disposition', `attachment; filename="tester-performance-${userId}.pdf"`)
-          .send(Buffer.from(pdf));
+          .send(buffer);
+          
+        console.log(`[PDF Export] Performance PDF sent successfully for user ${userId}`);
       } catch (error) {
         logError('Error exporting performance report to PDF:', error);
+        console.error('[PDF Export] Error details:', {
+          message: error.message,
+          stack: error.stack,
+          userId: request.query.userId || request.user.id
+        });
         reply.code(500).send({ error: error.message });
       }
     },

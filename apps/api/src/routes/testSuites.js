@@ -205,10 +205,17 @@ export async function testSuiteRoutes(fastify) {
         const { suiteId } = request.params;
         const userId = request.user.id;
 
+        console.log(`[Archive Suite] User ${userId} archiving suite ${suiteId}...`);
         const archived = await archiveTestSuite(Number(suiteId), userId);
+        console.log(`[Archive Suite] Suite ${suiteId} archived successfully`);
         reply.send(archived);
       } catch (error) {
         logError('Error archiving test suite:', error);
+        console.error('[Archive Suite] Error details:', {
+          message: error.message,
+          stack: error.stack,
+          suiteId: request.params.suiteId
+        });
         reply.code(500).send({ error: error.message });
       }
     },
