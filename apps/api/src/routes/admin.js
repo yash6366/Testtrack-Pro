@@ -649,6 +649,73 @@ export async function adminRoutes(fastify) {
   );
 
   /**
+   * Get all environments for a project
+   */
+  fastify.get(
+    '/api/admin/projects/:projectId/environments',
+    { preHandler: [requireAuth, adminOnly] },
+    async (request, reply) => {
+      try {
+        const { projectId } = request.params;
+
+        const environments = await adminProjectService.getProjectEnvironments(Number(projectId));
+
+        reply.send({ environments });
+      } catch (error) {
+        fastify.log.error(error);
+        reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Get environment details
+   */
+  fastify.get(
+    '/api/admin/projects/:projectId/environments/:envId',
+    { preHandler: [requireAuth, adminOnly] },
+    async (request, reply) => {
+      try {
+        const { envId } = request.params;
+
+        const environment = await adminProjectService.getEnvironmentDetails(Number(envId));
+
+        reply.send(environment);
+      } catch (error) {
+        fastify.log.error(error);
+        const statusCode = error.message === 'Environment not found' ? 404 : 500;
+        reply.code(statusCode).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Update environment
+   */
+  fastify.patch(
+    '/api/admin/projects/:projectId/environments/:envId',
+    { preHandler: [requireAuth, adminOnly] },
+    async (request, reply) => {
+      try {
+        const { envId } = request.params;
+        const { name, description, isActive, order } = request.body;
+
+        const environment = await adminProjectService.updateEnvironment(
+          Number(envId),
+          { name, description, isActive, order },
+          request.user.id,
+        );
+
+        reply.send(environment);
+      } catch (error) {
+        fastify.log.error(error);
+        const statusCode = error.message.includes('not found') ? 404 : 400;
+        reply.code(statusCode).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
    * Delete environment
    */
   fastify.delete(
@@ -689,6 +756,73 @@ export async function adminRoutes(fastify) {
       } catch (error) {
         fastify.log.error(error);
         reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Get all custom fields for a project
+   */
+  fastify.get(
+    '/api/admin/projects/:projectId/custom-fields',
+    { preHandler: [requireAuth, adminOnly] },
+    async (request, reply) => {
+      try {
+        const { projectId } = request.params;
+
+        const customFields = await adminProjectService.getProjectCustomFields(Number(projectId));
+
+        reply.send({ customFields });
+      } catch (error) {
+        fastify.log.error(error);
+        reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Get custom field details
+   */
+  fastify.get(
+    '/api/admin/projects/:projectId/custom-fields/:fieldId',
+    { preHandler: [requireAuth, adminOnly] },
+    async (request, reply) => {
+      try {
+        const { fieldId } = request.params;
+
+        const customField = await adminProjectService.getCustomFieldDetails(Number(fieldId));
+
+        reply.send(customField);
+      } catch (error) {
+        fastify.log.error(error);
+        const statusCode = error.message === 'Custom field not found' ? 404 : 500;
+        reply.code(statusCode).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Update custom field
+   */
+  fastify.patch(
+    '/api/admin/projects/:projectId/custom-fields/:fieldId',
+    { preHandler: [requireAuth, adminOnly] },
+    async (request, reply) => {
+      try {
+        const { fieldId } = request.params;
+        const { name, fieldType, options, isRequired, isActive, order } = request.body;
+
+        const customField = await adminProjectService.updateCustomField(
+          Number(fieldId),
+          { name, fieldType, options, isRequired, isActive, order },
+          request.user.id,
+        );
+
+        reply.send(customField);
+      } catch (error) {
+        fastify.log.error(error);
+        const statusCode = error.message.includes('not found') ? 404 : 400;
+        reply.code(statusCode).send({ error: error.message });
       }
     },
   );

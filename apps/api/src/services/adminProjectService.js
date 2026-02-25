@@ -669,3 +669,306 @@ export async function deleteEnvironment(envId, adminId) {
     oldValues: { name: env.name },
   });
 }
+
+/**
+ * Get all environments for a project
+ * @param {number} projectId - Project ID
+ * @returns {Promise<Array>} List of environments
+ */
+export async function getProjectEnvironments(projectId) {
+  // Validate project exists
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+  });
+
+  if (!project) {
+    throw new Error('Project not found');
+  }
+
+  const environments = await prisma.projectEnvironment.findMany({
+    where: { projectId },
+    orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+  });
+
+  return environments;
+}
+
+/**
+ * Get environment details
+ * @param {number} envId - Environment ID
+ * @returns {Promise<Object>} Environment details
+ */
+export async function getEnvironmentDetails(envId) {
+  const environment = await prisma.projectEnvironment.findUnique({
+    where: { id: envId },
+    include: {
+      project: {
+        select: { id: true, name: true, key: true },
+      },
+    },
+  });
+
+  if (!environment) {
+    throw new Error('Environment not found');
+  }
+
+  return environment;
+}
+
+/**
+ * Update environment
+ * @param {number} envId - Environment ID
+ * @param {Object} data - Environment update data
+ * @param {number} adminId - Admin user ID
+ * @returns {Promise<Object>} Updated environment
+ */
+export async function updateEnvironment(envId, data, adminId) {
+  const { name, description, isActive, order } = data;
+
+  // Check if environment exists
+  const existing = await prisma.projectEnvironment.findUnique({
+    where: { id: envId },
+    include: {
+      project: {
+        select: { id: true, name: true },
+      },
+    },
+  });
+
+  if (!existing) {
+    throw new Error('Environment not found');
+  }
+
+  // Build update data
+  const updateData = {};
+  const oldValues = {};
+  const newValues = {};
+
+  if (name !== undefined) {
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      throw new Error('Environment name is required');
+    }
+    
+    // Check if name is unique within the project
+    if (name.trim() !== existing.name) {
+      const duplicate = await prisma.projectEnvironment.findUnique({
+        where: {
+          projectId_name: {
+            projectId: existing.projectId,
+            name: name.trim(),
+          },
+        },
+      });
+
+      if (duplicate) {
+        throw new Error('Environment name already exists in this project');
+      }
+
+      updateData.name = name.trim();
+      oldValues.name = existing.name;
+      newValues.name = name.trim();
+    }
+  }
+
+  if (description !== undefined) {
+    updateData.description = description ? description.trim() : null;
+    oldValues.description = existing.description;
+    newValues.description = updateData.description;
+  }
+
+  if (isActive !== undefined) {
+    updateData.isActive = Boolean(isActive);
+    oldValues.isActive = existing.isActive;
+    newValues.isActive = updateData.isActive;
+  }
+
+  if (order !== undefined) {
+    updateData.order = Math.max(0, Number(order) || 0);
+    oldValues.order = existing.order;
+    newValues.order = updateData.order;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    throw new Error('No valid fields to update');
+  }
+
+  // Update environment
+  const updated = await prisma.projectEnvironment.update({
+    where: { id: envId },
+    data: updateData,
+  });
+
+  // Log audit
+  await logAuditAction(adminId, 'CONFIG_CHANGED', {
+    resourceType: 'PROJECT_ENVIRONMENT',
+    resourceId: envId,
+    description: `Updated environment "${existing.name}" in project "${existing.project.name}"`,
+    oldValues,
+    newValues,
+  });
+
+  return updated;
+}
+
+/**
+ * Get all custom fields for a project
+ * @param {number} projectId - Project ID
+ * @returns {Promise<Array>} List of custom fields
+ */
+export async function getProjectCustomFields(projectId) {
+  // Validate project exists
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+  });
+
+  if (!project) {
+    throw new Error('Project not found');
+  }
+
+  const customFields = await prisma.customField.findMany({
+    where: { projectId, isActive: true },
+    orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+  });
+
+  return customFields;
+}
+
+/**
+ * Get custom field details
+ * @param {number} fieldId - Custom field ID
+ * @returns {Promise<Object>} Custom field details
+ */
+export async function getCustomFieldDetails(fieldId) {
+  const customField = await prisma.customField.findUnique({
+    where: { id: fieldId },
+    include: {
+      project: {
+        select: { id: true, name: true, key: true },
+      },
+    },
+  });
+
+  if (!customField) {
+    throw new Error('Custom field not found');
+  }
+
+  return customField;
+}
+
+/**
+ * Update custom field
+ * @param {number} fieldId - Custom field ID
+ * @param {Object} data - Custom field update data
+ * @param {number} adminId - Admin user ID
+ * @returns {Promise<Object>} Updated custom field
+ */
+export async function updateCustomField(fieldId, data, adminId) {
+  const { name, fieldType, options, isRequired, isActive, order } = data;
+
+  // Check if custom field exists
+  const existing = await prisma.customField.findUnique({
+    where: { id: fieldId },
+    include: {
+      project: {
+        select: { id: true, name: true },
+      },
+    },
+  });
+
+  if (!existing) {
+    throw new Error('Custom field not found');
+  }
+
+  // Build update data
+  const updateData = {};
+  const oldValues = {};
+  const newValues = {};
+
+  if (name !== undefined) {
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      throw new Error('Custom field name is required');
+    }
+    
+    // Check if name is unique within the project
+    if (name.trim() !== existing.name) {
+      const duplicate = await prisma.customField.findUnique({
+        where: {
+          projectId_name: {
+            projectId: existing.projectId,
+            name: name.trim(),
+          },
+        },
+      });
+
+      if (duplicate) {
+        throw new Error('Custom field name already exists in this project');
+      }
+
+      updateData.name = name.trim();
+      oldValues.name = existing.name;
+      newValues.name = name.trim();
+    }
+  }
+
+  if (fieldType !== undefined) {
+    const validTypes = ['TEXT', 'NUMBER', 'SELECT', 'DATE', 'CHECKBOX'];
+    const normalizedType = String(fieldType).toUpperCase();
+    
+    if (!validTypes.includes(normalizedType)) {
+      throw new Error(`Invalid field type. Must be one of: ${validTypes.join(', ')}`);
+    }
+
+    updateData.fieldType = normalizedType;
+    oldValues.fieldType = existing.fieldType;
+    newValues.fieldType = normalizedType;
+  }
+
+  if (options !== undefined) {
+    if (Array.isArray(options)) {
+      updateData.options = options.filter(opt => typeof opt === 'string' && opt.trim().length > 0);
+    } else {
+      updateData.options = [];
+    }
+    oldValues.options = existing.options;
+    newValues.options = updateData.options;
+  }
+
+  if (isRequired !== undefined) {
+    updateData.isRequired = Boolean(isRequired);
+    oldValues.isRequired = existing.isRequired;
+    newValues.isRequired = updateData.isRequired;
+  }
+
+  if (isActive !== undefined) {
+    updateData.isActive = Boolean(isActive);
+    oldValues.isActive = existing.isActive;
+    newValues.isActive = updateData.isActive;
+  }
+
+  if (order !== undefined) {
+    updateData.order = Math.max(0, Number(order) || 0);
+    oldValues.order = existing.order;
+    newValues.order = updateData.order;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    throw new Error('No valid fields to update');
+  }
+
+  // Update custom field
+  const updated = await prisma.customField.update({
+    where: { id: fieldId },
+    data: updateData,
+  });
+
+  // Log audit
+  await logAuditAction(adminId, 'CONFIG_CHANGED', {
+    resourceType: 'CUSTOM_FIELD',
+    resourceId: fieldId,
+    description: `Updated custom field "${existing.name}" in project "${existing.project.name}"`,
+    oldValues,
+    newValues,
+  });
+
+  return updated;
+}

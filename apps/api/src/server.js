@@ -35,6 +35,8 @@ import apiKeyRoutes from './routes/apiKeys.js';
 import githubRoutes from './routes/github.js';
 import scheduledReportsRoutes from './routes/scheduledReports.js';
 import healthRoutes from './routes/health.js';
+import userProfileRoutes from './routes/userProfile.js';
+import userSessionRoutes from './routes/userSession.js';
 
 const fastify = Fastify({ logger: true });
 
@@ -66,6 +68,8 @@ fastify.register(healthRoutes);
 
 // Register routes
 fastify.register(authRoutes);
+fastify.register(userProfileRoutes);
+fastify.register(userSessionRoutes);
 fastify.register(testRoutes);
 fastify.register(chatRoutes);
 fastify.register(directMessageRoutes);
