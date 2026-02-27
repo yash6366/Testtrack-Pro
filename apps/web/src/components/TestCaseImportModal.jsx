@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import { apiClient } from '../lib/apiClient';
 import { Upload, X, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 
 /**
@@ -40,21 +40,21 @@ export default function TestCaseImportModal({ projectId, isOpen, onClose, onSucc
       try {
         const csvContent = event.target.result;
         
-        const response = await axios.post(
+        const response = await apiClient.post(
           `/api/projects/${projectId}/test-cases/import/csv`,
           { csvContent },
         );
 
-        setImportResults(response.data);
+        setImportResults(response);
         
-        if (response.data.imported.length > 0) {
+        if (response.imported.length > 0) {
           onSuccess(
-            `Successfully imported ${response.data.imported.length} test case(s). ` +
-            `${response.data.failed.length} failed.`,
+            `Successfully imported ${response.imported.length} test case(s). ` +
+            `${response.failed.length} failed.`,
           );
         }
       } catch (err) {
-        setError(err.response?.data?.error || 'Failed to import test cases');
+        setError(err.message || 'Failed to import test cases');
       } finally {
         setImporting(false);
       }

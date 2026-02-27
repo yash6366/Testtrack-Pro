@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react';
 import { X, Search, Check } from 'lucide-react';
 import Button from './common/Button';
-import axios from 'axios';
+import { apiClient } from '../lib/apiClient';
 import { logError } from '../lib/errorLogger';
 
 export default function TestCaseAssignmentModal({
@@ -30,17 +30,13 @@ export default function TestCaseAssignmentModal({
       setLoading(true);
       setError(null);
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/projects/${projectId}/test-cases`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+        const response = await apiClient.get(
+          `/api/projects/${projectId}/test-cases`,
         );
 
         // Filter out test cases that are already assigned
         const currentIds = currentTestCases.map(tc => tc.id);
-        const available = response.data.data.filter(
+        const available = response.testCases.filter(
           tc => !currentIds.includes(tc.id),
         );
         setAvailableTestCases(available);

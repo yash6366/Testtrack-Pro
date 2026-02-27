@@ -1,6 +1,7 @@
 import { logWarning } from './errorLogger';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const isDevelopment = import.meta.env.DEV;
 
 class ApiClient {
   constructor(baseURL = API_BASE_URL) {
@@ -58,11 +59,31 @@ class ApiClient {
       throw error;
     }
 
+    // Check if response has content
+    const contentType = response.headers.get('content-type');
+    const contentLength = response.headers.get('content-length');
+    
+    // Handle empty responses
+    if (!contentLength || contentLength === '0') {
+      return {};
+    }
+    
+    // Read response as text first (can only read body once)
+    const text = await response.text();
+    
+    if (!text || text.trim() === '') {
+      return {};
+    }
+    
+    // Try to parse as JSON
     try {
-      return await response.json();
+      return JSON.parse(text);
     } catch (parseError) {
-      // If response is not JSON, return empty object
-      logWarning('Response is not valid JSON:', { error: parseError });
+      // Log warning for non-JSON responses in development
+      if (isDevelopment) {
+        const preview = text.length > 100 ? text.substring(0, 100) + '...' : text;
+        console.warn(`[ApiClient] Non-JSON response from ${endpoint}:`, preview);
+      }
       return {};
     }
   }

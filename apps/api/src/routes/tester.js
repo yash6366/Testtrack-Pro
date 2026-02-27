@@ -423,7 +423,9 @@ export async function testerRoutes(fastify) {
         };
 
         const result = await getProjectTemplates(Number(projectId), filters);
-        reply.send(result);
+        reply
+          .header('Content-Type', 'application/json')
+          .send(result);
       } catch (error) {
         logError('Error fetching templates:', error);
         reply.code(500).send({ error: error.message });

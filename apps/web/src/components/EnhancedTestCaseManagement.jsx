@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks';
-import axios from 'axios';
+import { apiClient } from '@/lib/apiClient';
 import BulkTestCaseOperations from './BulkTestCaseOperations';
 import TestCaseImportModal from './TestCaseImportModal';
 import TestCaseTemplateSelector from './TestCaseTemplateSelector';
@@ -78,13 +78,13 @@ export default function EnhancedTestCaseManagement() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `/api/projects/${projectId}/test-cases`,
         { params: filters },
       );
-      setTestCases(response.data.testCases || []);
+      setTestCases(response.testCases || []);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load test cases');
+      setError(err.message || 'Failed to load test cases');
     } finally {
       setLoading(false);
     }
@@ -104,13 +104,13 @@ export default function EnhancedTestCaseManagement() {
           : null,
       };
 
-      await axios.post(`/api/projects/${projectId}/test-cases`, testCaseData);
+      await apiClient.post(`/api/projects/${projectId}/test-cases`, testCaseData);
       setSuccess('Test case created successfully');
       setShowCreateModal(false);
       resetForm();
       loadTestCases();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create test case');
+      setError(err.message || 'Failed to create test case');
     }
   };
 
@@ -128,7 +128,7 @@ export default function EnhancedTestCaseManagement() {
           : null,
       };
 
-      await axios.patch(
+      await apiClient.patch(
         `/api/projects/${projectId}/test-cases/${editingTestCase.id}`,
         testCaseData,
       );
@@ -138,7 +138,7 @@ export default function EnhancedTestCaseManagement() {
       resetForm();
       loadTestCases();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update test case');
+      setError(err.message || 'Failed to update test case');
     }
   };
 
@@ -148,11 +148,11 @@ export default function EnhancedTestCaseManagement() {
     }
 
     try {
-      await axios.delete(`/api/projects/${projectId}/test-cases/${id}`);
+      await apiClient.delete(`/api/projects/${projectId}/test-cases/${id}`);
       setSuccess('Test case deleted successfully');
       loadTestCases();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to delete test case');
+      setError(err.message || 'Failed to delete test case');
     }
   };
 
@@ -161,20 +161,20 @@ export default function EnhancedTestCaseManagement() {
     if (!newName) return;
 
     try {
-      await axios.post(
+      await apiClient.post(
         `/api/projects/${projectId}/test-cases/${tc.id}/clone`,
         { newName },
       );
       setSuccess('Test case cloned successfully');
       loadTestCases();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to clone test case');
+      setError(err.message || 'Failed to clone test case');
     }
   };
 
   const handleExportCSV = async () => {
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `/api/projects/${projectId}/test-cases/export/csv`,
         { responseType: 'blob' },
       );

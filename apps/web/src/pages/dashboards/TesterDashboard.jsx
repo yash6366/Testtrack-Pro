@@ -212,7 +212,19 @@ export default function TesterDashboard() {
             >
               View Reports & Analytics
             </button>
-            <button className="tt-btn tt-btn-outline w-full py-2 text-sm">View Test Cases</button>
+            <button 
+              onClick={() => {
+                const projectId = localStorage.getItem('selectedProjectId');
+                if (!projectId) {
+                  alert('Please select a project first');
+                  return;
+                }
+                navigate(`/projects/${projectId}/test-cases`);
+              }}
+              className="tt-btn tt-btn-outline w-full py-2 text-sm"
+            >
+              View Test Cases
+            </button>
           </div>
         </div>
 

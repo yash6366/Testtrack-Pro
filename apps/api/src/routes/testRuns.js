@@ -186,7 +186,7 @@ export async function testRunRoutes(fastify) {
                 testRunId: testRun.id,
                 testCaseId: Number(caseId),
                 status: 'BLOCKED', // Initial status
-                executedBy: userId,
+                userId: userId,
               },
               include: {
                 testCase: { 
@@ -218,7 +218,7 @@ export async function testRunRoutes(fastify) {
                 prisma.testExecutionStep.create({
                   data: {
                     executionId: execution.id,
-                    stepId: step.id,
+                    stepNumber: step.stepNumber,
                     status: 'SKIPPED', // Initial status before execution
                   },
                 }),

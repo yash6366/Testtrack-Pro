@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks';
-import axios from 'axios';
+import { apiClient } from '@/lib/apiClient';
+import BackButton from '@/components/ui/BackButton';
 
 /**
  * TestCaseManagement Component
@@ -60,15 +61,21 @@ export default function TestCaseManagement() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `/api/projects/${projectId}/test-cases`,
         {
           params: filters,
         },
       );
-      setTestCases(response.data.testCases || []);
+      // Handle empty or invalid responses
+      if (response && typeof response === 'object') {
+        setTestCases(Array.isArray(response.testCases) ? response.testCases : []);
+      } else {
+        setTestCases([]);
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load test cases');
+      setError(err.message || 'Failed to load test cases');
+      setTestCases([]);
     } finally {
       setLoading(false);
     }
@@ -88,7 +95,7 @@ export default function TestCaseManagement() {
           : null,
       };
 
-      const response = await axios.post(
+      const response = await apiClient.post(
         `/api/projects/${projectId}/test-cases`,
         testCaseData,
       );
@@ -98,7 +105,7 @@ export default function TestCaseManagement() {
       resetForm();
       loadTestCases();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create test case');
+      setError(err.message || 'Failed to create test case');
     }
   };
 
@@ -116,7 +123,7 @@ export default function TestCaseManagement() {
           : null,
       };
 
-      await axios.patch(
+      await apiClient.patch(
         `/api/projects/${projectId}/test-cases/${editingTestCase.id}`,
         testCaseData,
       );
@@ -126,7 +133,7 @@ export default function TestCaseManagement() {
       resetForm();
       loadTestCases();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update test case');
+      setError(err.message || 'Failed to update test case');
     }
   };
 
@@ -136,13 +143,13 @@ export default function TestCaseManagement() {
     }
 
     try {
-      await axios.delete(
+      await apiClient.delete(
         `/api/projects/${projectId}/test-cases/${id}`,
       );
       setSuccess('Test case deleted successfully');
       loadTestCases();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to delete test case');
+      setError(err.message || 'Failed to delete test case');
     }
   };
 
@@ -151,14 +158,14 @@ export default function TestCaseManagement() {
     if (!newName) return;
 
     try {
-      await axios.post(
+      await apiClient.post(
         `/api/projects/${projectId}/test-cases/${tc.id}/clone`,
         { newName },
       );
       setSuccess('Test case cloned successfully');
       loadTestCases();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to clone test case');
+      setError(err.message || 'Failed to clone test case');
     }
   };
 
@@ -174,7 +181,7 @@ export default function TestCaseManagement() {
     reader.onload = async (event) => {
       try {
         const csvContent = event.target.result;
-        const response = await axios.post(
+        const response = await apiClient.post(
           `/api/tester/projects/${projectId}/test-cases/import`,
           { csvContent },
         );
@@ -193,7 +200,7 @@ export default function TestCaseManagement() {
 
   const handleExportCSV = async () => {
     try {
-      const response = await axios.get(
+      const response = await apiClient.get(
         `/api/projects/${projectId}/test-cases/export/csv`,
         { responseType: 'blob' },
       );
@@ -271,47 +278,45 @@ export default function TestCaseManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <div className="min-h-screen bg-[var(--bg)] p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold text-gray-800">Test Case Management</h1>
-            <button
-              onClick={() => navigate(`/projects/${projectId}`)}
-              className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
-            >
-              Back to Project
-            </button>
+        <div className="mb-6">
+          <BackButton label="Back to Project" fallback="/dashboard" />
+          <div className="flex justify-between items-center mt-4">
+            <div>
+              <h1 className="text-3xl font-bold text-[var(--foreground)]">Test Case Management</h1>
+              <p className="text-[var(--muted)] mt-2">Create and manage test cases for your project</p>
+            </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex gap-3 flex-wrap mt-4">
             <button
               onClick={() => {
                 resetForm();
                 setEditingTestCase(null);
                 setShowCreateModal(true);
               }}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="tt-btn tt-btn-primary"
             >
               + Create Test Case
             </button>
             <button
               onClick={() => setShowImportModal(true)}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              className="tt-btn tt-btn-success"
             >
               📥 Import from CSV
             </button>
             <button
               onClick={handleExportCSV}
-              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+              className="tt-btn tt-btn-outline"
             >
               📤 Export to CSV
             </button>
             <button
               onClick={() => navigate(`/projects/${projectId}/templates`)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              className="tt-btn tt-btn-outline"
             >
               📋 Manage Templates
             </button>
@@ -320,32 +325,32 @@ export default function TestCaseManagement() {
 
         {/* Messages */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-4">
             {error}
-            <button onClick={() => setError('')} className="float-right">✕</button>
+            <button onClick={() => setError('')} className="float-right hover:opacity-70">✕</button>
           </div>
         )}
         {success && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg mb-4">
             {success}
-            <button onClick={() => setSuccess('')} className="float-right">✕</button>
+            <button onClick={() => setSuccess('')} className="float-right hover:opacity-70">✕</button>
           </div>
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
+        <div className="tt-card p-4 mb-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <input
               type="text"
               placeholder="Search test cases..."
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+              className="px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <select
               value={filters.type}
               onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+              className="px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Types</option>
               <option value="FUNCTIONAL">Functional</option>
@@ -356,7 +361,7 @@ export default function TestCaseManagement() {
             <select
               value={filters.priority}
               onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+              className="px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Priorities</option>
               <option value="P0">P0 - Critical</option>
@@ -367,7 +372,7 @@ export default function TestCaseManagement() {
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+              className="px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Status</option>
               <option value="DRAFT">Draft</option>
@@ -378,68 +383,68 @@ export default function TestCaseManagement() {
         </div>
 
         {/* Test Cases List */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="tt-card overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-gray-500">Loading test cases...</div>
+            <div className="p-8 text-center text-[var(--muted)]">Loading test cases...</div>
           ) : testCases.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-[var(--muted)]">
               No test cases found. Create one to get started!
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-100">
+                <thead className="bg-[var(--bg-elevated)] border-b border-[var(--border)]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Priority</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Steps</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-[var(--foreground)]">Name</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-[var(--foreground)]">Type</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-[var(--foreground)]">Priority</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-[var(--foreground)]">Status</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-[var(--foreground)]">Steps</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-[var(--foreground)]">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-[var(--border)]">
                   {testCases.map((tc) => (
-                    <tr key={tc.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-800 font-medium">{tc.name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{tc.type}</td>
+                    <tr key={tc.id} className="hover:bg-[var(--bg-elevated)] transition">
+                      <td className="px-6 py-4 text-sm text-[var(--foreground)] font-medium">{tc.name}</td>
+                      <td className="px-6 py-4 text-sm text-[var(--muted)]">{tc.type}</td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded text-sm font-semibold ${
-                          tc.priority === 'P0' ? 'bg-red-200 text-red-800' :
-                          tc.priority === 'P1' ? 'bg-orange-200 text-orange-800' :
-                          tc.priority === 'P2' ? 'bg-yellow-200 text-yellow-800' :
-                          'bg-green-200 text-green-800'
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                          tc.priority === 'P0' ? 'bg-red-500/10 text-red-600 dark:text-red-400' :
+                          tc.priority === 'P1' ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400' :
+                          tc.priority === 'P2' ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' :
+                          'bg-green-500/10 text-green-600 dark:text-green-400'
                         }`}>
                           {tc.priority}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded text-sm font-semibold ${
-                          tc.status === 'ACTIVE' ? 'bg-blue-200 text-blue-800' :
-                          tc.status === 'DRAFT' ? 'bg-gray-200 text-gray-800' :
-                          'bg-red-200 text-red-800'
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                          tc.status === 'ACTIVE' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' :
+                          tc.status === 'DRAFT' ? 'bg-gray-500/10 text-gray-600 dark:text-gray-400' :
+                          'bg-red-500/10 text-red-600 dark:text-red-400'
                         }`}>
                           {tc.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{tc.steps?.length || 0}</td>
+                      <td className="px-6 py-4 text-sm text-[var(--muted)]">{tc.steps?.length || 0}</td>
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
                           <button
                             onClick={() => openEditModal(tc)}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleCloneTestCase(tc)}
-                            className="text-green-600 hover:text-green-800 text-sm font-medium"
+                            className="text-green-600 dark:text-green-400 hover:underline text-sm font-medium"
                           >
                             Clone
                           </button>
                           <button
                             onClick={() => handleDeleteTestCase(tc.id)}
-                            className="text-red-600 hover:text-red-800 text-sm font-medium"
+                            className="text-red-600 dark:text-red-400 hover:underline text-sm font-medium"
                           >
                             Delete
                           </button>
@@ -455,10 +460,10 @@ export default function TestCaseManagement() {
 
         {/* Create/Edit Modal */}
         {(showCreateModal || editingTestCase) && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
-              <div className="sticky top-0 bg-gray-100 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-800">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-[var(--bg-elevated)] border-b border-[var(--border)] px-6 py-4 flex justify-between items-center">
+                <h2 className="text-xl font-bold text-[var(--foreground)]">
                   {editingTestCase ? 'Edit Test Case' : 'Create Test Case'}
                 </h2>
                 <button
@@ -467,7 +472,7 @@ export default function TestCaseManagement() {
                     setEditingTestCase(null);
                     resetForm();
                   }}
-                  className="text-gray-600 hover:text-gray-800 text-2xl"
+                  className="text-[var(--muted)] hover:text-[var(--foreground)] text-2xl transition"
                 >
                   ✕
                 </button>
@@ -481,14 +486,14 @@ export default function TestCaseManagement() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
 
                   <textarea
                     placeholder="Description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="2"
                   />
 
@@ -496,7 +501,7 @@ export default function TestCaseManagement() {
                     placeholder="Preconditions"
                     value={formData.preconditions}
                     onChange={(e) => setFormData({ ...formData, preconditions: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="2"
                   />
 
@@ -504,7 +509,7 @@ export default function TestCaseManagement() {
                     placeholder="Test Data (JSON format)"
                     value={formData.testData}
                     onChange={(e) => setFormData({ ...formData, testData: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="2"
                   />
 
@@ -513,14 +518,14 @@ export default function TestCaseManagement() {
                     placeholder="Environment (e.g., Development, Staging)"
                     value={formData.environment}
                     onChange={(e) => setFormData({ ...formData, environment: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
 
                   <div className="grid grid-cols-2 gap-4">
                     <select
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                      className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                      className="px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="FUNCTIONAL">Functional</option>
                       <option value="REGRESSION">Regression</option>
@@ -530,7 +535,7 @@ export default function TestCaseManagement() {
                     <select
                       value={formData.priority}
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                      className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                      className="px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="P0">P0 - Critical</option>
                       <option value="P1">P1 - High</option>
@@ -543,7 +548,7 @@ export default function TestCaseManagement() {
                     placeholder="Steps (Each step on new line with action, expected result separated by newline. Steps separated by blank line)"
                     value={formData.steps}
                     onChange={(e) => setFormData({ ...formData, steps: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="4"
                   />
                 </div>
@@ -551,7 +556,7 @@ export default function TestCaseManagement() {
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-medium"
+                    className="flex-1 tt-btn tt-btn-primary py-2 font-medium"
                   >
                     {editingTestCase ? 'Update' : 'Create'}
                   </button>
@@ -562,7 +567,7 @@ export default function TestCaseManagement() {
                       setEditingTestCase(null);
                       resetForm();
                     }}
-                    className="flex-1 bg-gray-300 text-gray-800 py-2 rounded hover:bg-gray-400 font-medium"
+                    className="flex-1 tt-btn tt-btn-outline py-2 font-medium"
                   >
                     Cancel
                   </button>
@@ -574,13 +579,13 @@ export default function TestCaseManagement() {
 
         {/* Import Modal */}
         {showImportModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-              <div className="bg-gray-100 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-800">Import Test Cases</h2>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg shadow-xl max-w-md w-full">
+              <div className="bg-[var(--bg-elevated)] border-b border-[var(--border)] px-6 py-4 flex justify-between items-center">
+                <h2 className="text-xl font-bold text-[var(--foreground)]">Import Test Cases</h2>
                 <button
                   onClick={() => setShowImportModal(false)}
-                  className="text-gray-600 hover:text-gray-800 text-2xl"
+                  className="text-[var(--muted)] hover:text-[var(--foreground)] text-2xl transition"
                 >
                   ✕
                 </button>
@@ -588,7 +593,7 @@ export default function TestCaseManagement() {
 
               <form onSubmit={handleImportCSV} className="p-6">
                 <div className="space-y-4">
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-[var(--muted)] text-sm">
                     Upload a CSV file with test cases. Headers should include: Name, Description, Type, Priority, Severity, Status, Module, Tags, Preconditions, TestData, Environment
                   </p>
 
@@ -597,21 +602,21 @@ export default function TestCaseManagement() {
                     name="csvFile"
                     accept=".csv"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 font-medium"
+                    className="flex-1 tt-btn tt-btn-success py-2 font-medium"
                   >
                     Import
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowImportModal(false)}
-                    className="flex-1 bg-gray-300 text-gray-800 py-2 rounded hover:bg-gray-400 font-medium"
+                    className="flex-1 tt-btn tt-btn-outline py-2 font-medium"
                   >
                     Cancel
                   </button>

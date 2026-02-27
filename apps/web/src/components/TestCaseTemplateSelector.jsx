@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiClient } from '../lib/apiClient';
 import { FileTemplate, Plus, Edit2, Trash2, Copy, X } from 'lucide-react';
 
 /**
@@ -26,8 +26,8 @@ export default function TestCaseTemplateSelector({
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`/api/projects/${projectId}/templates`);
-      setTemplates(response.data.templates || []);
+      const response = await apiClient.get(`/api/projects/${projectId}/templates`);
+      setTemplates(response.templates || []);
     } catch (err) {
       setError('Failed to load templates');
     } finally {
@@ -42,7 +42,7 @@ export default function TestCaseTemplateSelector({
     }
 
     try {
-      const response = await axios.post(
+      const response = await apiClient.post(
         `/api/templates/${template.id}/create-test-case`,
         {
           projectId: Number(projectId),
@@ -50,11 +50,11 @@ export default function TestCaseTemplateSelector({
         },
       );
 
-      onSelectTemplate(response.data);
+      onSelectTemplate(response);
       setSelectedTemplate(null);
       setTestCaseName('');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create test case from template');
+      setError(err.message || 'Failed to create test case from template');
     }
   };
 

@@ -49,7 +49,7 @@ export default function TestRunCreation() {
           `/api/projects/${projectId}/test-cases`,
         );
 
-        const cases = response?.data || response?.testCases || [];
+        const cases = response?.testCases || [];
         setTestCases(Array.isArray(cases) ? cases : []);
       } catch (err) {
         logError(err, 'TestRunCreation.loadTestCases');
@@ -156,7 +156,7 @@ export default function TestRunCreation() {
       {/* Header */}
       <div className="bg-[var(--bg-elevated)] border-b border-[var(--border)]">
         <div className="max-w-4xl mx-auto px-6 py-8">
-          <BackButton label="Back to Reports" fallback="/reports" />
+          <BackButton label="Back to Dashboard" fallback="/dashboard" />
           <h1 className="text-3xl font-bold mb-2">Create Test Run</h1>
           <p className="text-[var(--muted)]">
             Select test cases and configure your test run

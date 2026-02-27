@@ -52,9 +52,15 @@ export default function TestCaseTemplateManagement() {
       const data = await apiClient.get(
         `/api/tester/projects/${projectId}/templates?isActive=true`,
       );
-      setTemplates(data.templates || []);
+      // Handle empty or invalid responses
+      if (data && typeof data === 'object') {
+        setTemplates(Array.isArray(data.templates) ? data.templates : []);
+      } else {
+        setTemplates([]);
+      }
     } catch (err) {
       setError(err.message || 'Failed to load templates');
+      setTemplates([]);
     } finally {
       setLoading(false);
     }
