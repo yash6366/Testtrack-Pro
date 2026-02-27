@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks';
 import apiClient from '@/lib/apiClient';
+import BackButton from '@/components/ui/BackButton';
 
 /**
  * TestCaseTemplateManagement Component
@@ -212,35 +213,27 @@ export default function TestCaseTemplateManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <div className="min-h-screen bg-[var(--bg)] p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold text-gray-800">
-              Test Case Templates
-            </h1>
-            <button
-              onClick={() =>
-                navigate(
-                  `/projects/${projectId}/test-cases`,
-                )
-              }
-              className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
-            >
-              Back to Test Cases
-            </button>
+        <div className="mb-6">
+          <BackButton label="Back to Test Cases" fallback="/dashboard" />
+          <div className="flex justify-between items-center mt-4">
+            <div>
+              <h1 className="text-3xl font-bold text-[var(--foreground)]">Test Case Templates</h1>
+              <p className="text-[var(--muted)] mt-2">Create and manage reusable test case templates</p>
+            </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap mt-4">
             <button
               onClick={() => {
                 resetForm();
                 setEditingTemplate(null);
                 setShowCreateModal(true);
               }}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="tt-btn tt-btn-primary"
             >
               + Create Template
             </button>
@@ -249,22 +242,22 @@ export default function TestCaseTemplateManagement() {
 
         {/* Messages */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-4">
             {error}
             <button
               onClick={() => setError('')}
-              className="float-right"
+              className="float-right hover:opacity-70"
             >
               ✕
             </button>
           </div>
         )}
         {success && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg mb-4">
             {success}
             <button
               onClick={() => setSuccess('')}
-              className="float-right"
+              className="float-right hover:opacity-70"
             >
               ✕
             </button>
@@ -274,26 +267,28 @@ export default function TestCaseTemplateManagement() {
         {/* Templates Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
-            <div className="col-span-full text-center text-gray-500 py-8">
-              Loading templates...
+            <div className="col-span-full text-center text-[var(--muted)] py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+              <p>Loading templates...</p>
             </div>
           ) : templates.length === 0 ? (
-            <div className="col-span-full text-center text-gray-500 py-8">
-              No templates yet. Create one to get started!
+            <div className="col-span-full text-center text-[var(--muted)] py-8">
+              <p className="text-lg mb-2">No templates yet</p>
+              <p className="text-sm">Create one to get started!</p>
             </div>
           ) : (
             templates.map(template => (
               <div
                 key={template.id}
-                className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
+                className="tt-card p-6 hover:shadow-lg transition-shadow"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-lg font-bold text-gray-800">
+                    <h3 className="text-lg font-bold text-[var(--foreground)]">
                       {template.name}
                     </h3>
                     {template.category && (
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-sm text-[var(--muted)] mt-1">
                         📁 {template.category}
                       </p>
                     )}
@@ -301,26 +296,26 @@ export default function TestCaseTemplateManagement() {
                   <span
                     className={`px-2 py-1 rounded text-xs font-semibold ${
                       template.type === 'FUNCTIONAL'
-                        ? 'bg-blue-200 text-blue-800'
+                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
                         : template.type === 'REGRESSION'
-                        ? 'bg-purple-200 text-purple-800'
-                        : 'bg-orange-200 text-orange-800'
+                        ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300'
+                        : 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
                     }`}
                   >
                     {template.type}
                   </span>
                 </div>
 
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-[var(--muted)] mb-3">
                   {template.description}
                 </p>
 
                 {template.templateSteps?.length > 0 && (
-                  <div className="bg-gray-50 rounded p-3 mb-3">
-                    <p className="text-xs font-semibold text-gray-700 mb-2">
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded p-3 mb-3">
+                    <p className="text-xs font-semibold text-[var(--foreground)] mb-2">
                       {template.templateSteps.length} Steps
                     </p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-[var(--muted)]">
                       {template.templateSteps[0]?.action}
                     </p>
                   </div>
@@ -332,13 +327,13 @@ export default function TestCaseTemplateManagement() {
                       {template.tags.slice(0, 3).map((tag, i) => (
                         <span
                           key={i}
-                          className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
+                          className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded"
                         >
                           {tag}
                         </span>
                       ))}
                       {template.tags.length > 3 && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-[var(--muted)]">
                           +{template.tags.length - 3} more
                         </span>
                       )}
@@ -353,19 +348,19 @@ export default function TestCaseTemplateManagement() {
                       setUseFormData({ testCaseName: '' });
                       setShowUseModal(true);
                     }}
-                    className="flex-1 bg-green-600 text-white py-2 rounded text-sm hover:bg-green-700 font-medium"
+                    className="flex-1 tt-btn tt-btn-success text-sm"
                   >
                     Use Template
                   </button>
                   <button
                     onClick={() => openEditModal(template)}
-                    className="px-3 py-2 bg-blue-200 text-blue-800 rounded text-sm hover:bg-blue-300 font-medium"
+                    className="tt-btn tt-btn-outline text-sm"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDeleteTemplate(template.id)}
-                    className="px-3 py-2 bg-red-200 text-red-800 rounded text-sm hover:bg-red-300 font-medium"
+                    className="tt-btn tt-btn-danger text-sm"
                   >
                     Delete
                   </button>
@@ -377,10 +372,10 @@ export default function TestCaseTemplateManagement() {
 
         {/* Create/Edit Modal */}
         {(showCreateModal || editingTemplate) && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
-              <div className="sticky top-0 bg-gray-100 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-800">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="tt-card max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-gray-100 dark:bg-gray-800 px-6 py-4 flex justify-between items-center border-b border-[var(--border)]">
+                <h2 className="text-xl font-bold text-[var(--foreground)]">
                   {editingTemplate
                     ? 'Edit Template'
                     : 'Create Template'}
@@ -391,7 +386,7 @@ export default function TestCaseTemplateManagement() {
                     setEditingTemplate(null);
                     resetForm();
                   }}
-                  className="text-gray-600 hover:text-gray-800 text-2xl"
+                  className="text-[var(--muted)] hover:text-[var(--foreground)] text-2xl"
                 >
                   ✕
                 </button>
@@ -417,7 +412,7 @@ export default function TestCaseTemplateManagement() {
                       })
                     }
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
 
                   <textarea
@@ -429,7 +424,7 @@ export default function TestCaseTemplateManagement() {
                         description: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="2"
                   />
 
@@ -443,7 +438,7 @@ export default function TestCaseTemplateManagement() {
                         category: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
 
                   <textarea
@@ -455,7 +450,7 @@ export default function TestCaseTemplateManagement() {
                         preconditions: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="2"
                   />
 
@@ -468,7 +463,7 @@ export default function TestCaseTemplateManagement() {
                         testData: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="2"
                   />
 
@@ -482,7 +477,7 @@ export default function TestCaseTemplateManagement() {
                         environment: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
 
                   <div className="grid grid-cols-2 gap-4">
@@ -494,7 +489,7 @@ export default function TestCaseTemplateManagement() {
                           type: e.target.value,
                         })
                       }
-                      className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                      className="px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="FUNCTIONAL">Functional</option>
                       <option value="REGRESSION">Regression</option>
@@ -509,7 +504,7 @@ export default function TestCaseTemplateManagement() {
                           priority: e.target.value,
                         })
                       }
-                      className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                      className="px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="P0">P0 - Critical</option>
                       <option value="P1">P1 - High</option>
@@ -527,7 +522,7 @@ export default function TestCaseTemplateManagement() {
                         templateSteps: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="4"
                   />
 
@@ -541,14 +536,14 @@ export default function TestCaseTemplateManagement() {
                         tags: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-medium"
+                    className="flex-1 tt-btn tt-btn-primary"
                   >
                     {editingTemplate ? 'Update' : 'Create'}
                   </button>
@@ -559,7 +554,7 @@ export default function TestCaseTemplateManagement() {
                       setEditingTemplate(null);
                       resetForm();
                     }}
-                    className="flex-1 bg-gray-300 text-gray-800 py-2 rounded hover:bg-gray-400 font-medium"
+                    className="flex-1 tt-btn tt-btn-outline"
                   >
                     Cancel
                   </button>
@@ -571,15 +566,15 @@ export default function TestCaseTemplateManagement() {
 
         {/* Use Template Modal */}
         {showUseModal && selectedTemplate && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-              <div className="bg-gray-100 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-800">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="tt-card max-w-md w-full">
+              <div className="bg-gray-100 dark:bg-gray-800 px-6 py-4 flex justify-between items-center border-b border-[var(--border)]">
+                <h2 className="text-xl font-bold text-[var(--foreground)]">
                   Create Test Case from Template
                 </h2>
                 <button
                   onClick={() => setShowUseModal(false)}
-                  className="text-gray-600 hover:text-gray-800 text-2xl"
+                  className="text-[var(--muted)] hover:text-[var(--foreground)] text-2xl"
                 >
                   ✕
                 </button>
@@ -587,8 +582,8 @@ export default function TestCaseTemplateManagement() {
 
               <form onSubmit={handleUseTemplate} className="p-6">
                 <div className="space-y-4">
-                  <p className="text-gray-600">
-                    Template: <span className="font-bold">
+                  <p className="text-[var(--muted)]">
+                    Template: <span className="font-bold text-[var(--foreground)]">
                       {selectedTemplate.name}
                     </span>
                   </p>
@@ -604,21 +599,21 @@ export default function TestCaseTemplateManagement() {
                       })
                     }
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 font-medium"
+                    className="flex-1 tt-btn tt-btn-success"
                   >
                     Create
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowUseModal(false)}
-                    className="flex-1 bg-gray-300 text-gray-800 py-2 rounded hover:bg-gray-400 font-medium"
+                    className="flex-1 tt-btn tt-btn-outline"
                   >
                     Cancel
                   </button>

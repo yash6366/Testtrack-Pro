@@ -74,8 +74,9 @@ model User {
   createdMilestones  Milestone[] @relation("CreatedBy")
   assignedMilestones Milestone[] @relation("AssignedTo")
 
-  createdTestSuites  TestSuite[] @relation("CreatedBy")
-  assignedTestSuites TestSuite[] @relation("AssignedTo")
+  createdTestSuites     TestSuite[] @relation("CreatedBy")
+  assignedTestSuites    TestSuite[] @relation("AssignedTo")
+  createdTestCaseTemplates TestCaseTemplate[]
 
   createdTestPlans  TestPlan[] @relation("CreatedBy")
   executedTestPlans TestPlan[] @relation("ExecutedBy")
@@ -231,17 +232,18 @@ model Project {
 
   owner User @relation(fields: [ownerId], references: [id], onDelete: Restrict)
 
-  userAllocations ProjectUserAllocation[]
-  testCases       TestCase[]
-  testRuns        TestRun[]
-  testSuites      TestSuite[]
-  testPlans       TestPlan[]
-  milestones      Milestone[]
-  bugs            Bug[]
-  customFields    CustomField[]
-  environments    ProjectEnvironment[]
-  webhooks        Webhook[]
-  apiKeys         ApiKey[]
+  userAllocations   ProjectUserAllocation[]
+  testCases         TestCase[]
+  testCaseTemplates TestCaseTemplate[]
+  testRuns          TestRun[]
+  testSuites        TestSuite[]
+  testPlans         TestPlan[]
+  milestones        Milestone[]
+  bugs              Bug[]
+  customFields      CustomField[]
+  environments      ProjectEnvironment[]
+  webhooks          Webhook[]
+  apiKeys           ApiKey[]
 
   @@index([ownerId])
   @@index([status])
@@ -366,21 +368,46 @@ model TestCaseVersion {
 
 model TestCaseTemplate {
   id            Int      @id @default(autoincrement())
-  projectId     Int?
+  projectId     Int
   name          String
   description   String?
+  category      String?
   type          String   @default("FUNCTIONAL")
   priority      String   @default("P2")
   severity      String   @default("MINOR")
   preconditions String?
   testData      String?
   environment   String?
+  moduleArea    String?
   tags          String[] @default([])
+  isActive      Boolean  @default(true)
   isPublic      Boolean  @default(false)
+  createdBy     Int
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  project       Project                   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  creator       User                      @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  templateSteps TestCaseTemplateStep[]
+
   @@index([projectId])
+  @@index([createdBy])
+  @@index([isActive])
+}
+
+model TestCaseTemplateStep {
+  id             Int      @id @default(autoincrement())
+  templateId     Int
+  stepNumber     Int
+  action         String
+  expectedResult String?
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  template TestCaseTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
 }
 
 model TestCaseCounter {

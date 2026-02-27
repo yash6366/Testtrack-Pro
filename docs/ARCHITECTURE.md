@@ -4,7 +4,7 @@
 
 TestTrack Pro is a comprehensive software testing management platform built with a modern, production-ready monorepo architecture. The system is organized around **projects** as the primary organizational unit, with multiple users collaborating through role-based access control (ADMIN, DEVELOPER, TESTER).
 
-**Version**: 0.6.2  
+**Version**:  V1  
 **Status**: Production-Ready (70%+ Test Coverage)
 
 ## Tech Stack

@@ -155,6 +155,17 @@
     opacity: 0.9;
   }
 
+  .tt-btn-success {
+    background: #16a34a;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+  }
+
+  .tt-btn-success:hover {
+    background: #15803d;
+    transform: translateY(-1px);
+  }
+
   .tt-pill {
     display: inline-flex;
     align-items: center;
