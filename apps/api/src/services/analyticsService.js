@@ -268,14 +268,31 @@ export async function getReopenedBugsAnalysis(projectId, weeks = 4) {
       },
     }),
 
-    Promise.resolve(0),
+    prisma.bug.count({
+      where: {
+        projectId,
+        createdAt: { gte: startDate },
+        status: 'REOPENED',
+      },
+    }),
 
-    Promise.resolve([]),
+    prisma.bug.groupBy({
+      by: ['assigneeId'],
+      where: {
+        projectId,
+        createdAt: { gte: startDate },
+        status: 'REOPENED',
+      },
+      _count: true,
+    }),
   ]);
 
   const reopenRate = totalBugs > 0 ? ((reopenedBugs / totalBugs) * 100).toFixed(2) : 0;
 
-  const assignmentDetails = [];
+  const assignmentDetails = assignments.map((a) => ({
+    assigneeId: a.assigneeId,
+    reopenedCount: a._count,
+  }));
 
   return {
     projectId,

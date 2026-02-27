@@ -106,7 +106,7 @@ const getTestCasesSchema = {
       description: 'Test cases retrieved successfully',
       type: 'object',
       properties: {
-        data: {
+        testCases: {
           type: 'array',
           items: testCaseObject,
         },
@@ -591,7 +591,7 @@ export async function testRoutes(fastify) {
   // Create test case
   fastify.post(
     '/api/projects/:projectId/test-cases',
-    { schema: createTestCaseSchema, preHandler: [requirePermission('testCase:create')] },
+    { schema: createTestCaseSchema, preHandler: [requireAuth, requirePermission('testCase:create')] },
     async (request, reply) => {
       try {
         const { projectId } = request.params;
@@ -686,7 +686,7 @@ export async function testRoutes(fastify) {
   // Update test case
   fastify.patch(
     '/api/projects/:projectId/test-cases/:testCaseId',
-    { schema: updateTestCaseSchema, preHandler: [requirePermission('testCase:edit')] },
+    { schema: updateTestCaseSchema, preHandler: [requireAuth, requirePermission('testCase:edit')] },
     async (request, reply) => {
       try {
         const { testCaseId } = request.params;
@@ -710,7 +710,7 @@ export async function testRoutes(fastify) {
   // Soft-delete test case
   fastify.delete(
     '/api/projects/:projectId/test-cases/:testCaseId',
-    { schema: deleteTestCaseSchema, preHandler: [requirePermission('testCase:delete')] },
+    { schema: deleteTestCaseSchema, preHandler: [requireAuth, requirePermission('testCase:delete')] },
     async (request, reply) => {
       try {
         const { testCaseId } = request.params;
@@ -733,7 +733,7 @@ export async function testRoutes(fastify) {
   // Restore deleted test case
   fastify.post(
     '/api/projects/:projectId/test-cases/:testCaseId/restore',
-    { schema: restoreTestCaseSchema, preHandler: [requirePermission('testCase:create')] },
+    { schema: restoreTestCaseSchema, preHandler: [requireAuth, requirePermission('testCase:create')] },
     async (request, reply) => {
       try {
         const { testCaseId } = request.params;
@@ -756,7 +756,7 @@ export async function testRoutes(fastify) {
   // Clone test case
   fastify.post(
     '/api/projects/:projectId/test-cases/:testCaseId/clone',
-    { schema: cloneTestCaseSchema, preHandler: [requirePermission('testCase:clone')] },
+    { schema: cloneTestCaseSchema, preHandler: [requireAuth, requirePermission('testCase:clone')] },
     async (request, reply) => {
       try {
         const { testCaseId } = request.params;
@@ -908,7 +908,7 @@ export async function testRoutes(fastify) {
   // Import test cases from CSV
   fastify.post(
     '/api/projects/:projectId/test-cases/import/csv',
-    { schema: importTestCasesSchema, preHandler: [requirePermission('testCase:import')] },
+    { schema: importTestCasesSchema, preHandler: [requireAuth, requirePermission('testCase:import')] },
     async (request, reply) => {
       try {
         const { projectId } = request.params;
@@ -942,7 +942,7 @@ export async function testRoutes(fastify) {
   // Bulk update test cases
   fastify.post(
     '/api/projects/:projectId/test-cases/bulk/update',
-    { schema: bulkUpdateSchema, preHandler: [requirePermission('testCase:edit')] },
+    { schema: bulkUpdateSchema, preHandler: [requireAuth, requirePermission('testCase:edit')] },
     async (request, reply) => {
       try {
         const userId = request.user.id;
@@ -966,7 +966,7 @@ export async function testRoutes(fastify) {
   // Bulk delete test cases
   fastify.post(
     '/api/projects/:projectId/test-cases/bulk/delete',
-    { schema: bulkDeleteSchema, preHandler: [requirePermission('testCase:delete')] },
+    { schema: bulkDeleteSchema, preHandler: [requireAuth, requirePermission('testCase:delete')] },
     async (request, reply) => {
       try {
         const { testCaseIds } = request.body;
@@ -1091,7 +1091,7 @@ export async function testRoutes(fastify) {
   // Create template
   fastify.post(
     '/api/projects/:projectId/templates',
-    { schema: createTemplateSchema, preHandler: [requirePermission('testPlan:create')] },
+    { schema: createTemplateSchema, preHandler: [requireAuth, requirePermission('testPlan:create')] },
     async (request, reply) => {
       try {
         const { projectId } = request.params;
@@ -1118,7 +1118,7 @@ export async function testRoutes(fastify) {
   // Update template
   fastify.patch(
     '/api/templates/:templateId',
-    { schema: updateTemplateSchema, preHandler: [requirePermission('testPlan:edit')] },
+    { schema: updateTemplateSchema, preHandler: [requireAuth, requirePermission('testPlan:edit')] },
     async (request, reply) => {
       try {
         const { templateId } = request.params;
@@ -1142,7 +1142,7 @@ export async function testRoutes(fastify) {
   // Delete template
   fastify.delete(
     '/api/templates/:templateId',
-    { schema: deleteTemplateSchema, preHandler: [requirePermission('testPlan:delete')] },
+    { schema: deleteTemplateSchema, preHandler: [requireAuth, requirePermission('testPlan:delete')] },
     async (request, reply) => {
       try {
         const { templateId } = request.params;

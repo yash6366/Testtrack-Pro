@@ -18,6 +18,7 @@ export default function EnhancedTestCaseManagement() {
   
   const [testCases, setTestCases] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
@@ -55,7 +56,7 @@ export default function EnhancedTestCaseManagement() {
       environment: '',
       moduleArea: '',
       tags: '',
-      steps: [],
+      steps: '',
       estimatedDurationMinutes: '',
       assignedToId: '',
       ownedById: user?.id || '',
@@ -92,7 +93,10 @@ export default function EnhancedTestCaseManagement() {
 
   const handleCreateTestCase = async (e) => {
     e.preventDefault();
+    if (submitting) return; // Prevent double submission
+    
     setError('');
+    setSubmitting(true);
     
     try {
       const testCaseData = {
@@ -108,15 +112,20 @@ export default function EnhancedTestCaseManagement() {
       setSuccess('Test case created successfully');
       setShowCreateModal(false);
       resetForm();
-      loadTestCases();
+      await loadTestCases();
+      setSubmitting(false);
     } catch (err) {
       setError(err.message || 'Failed to create test case');
+      setSubmitting(false);
     }
   };
 
   const handleUpdateTestCase = async (e) => {
     e.preventDefault();
+    if (submitting) return; // Prevent double submission
+    
     setError('');
+    setSubmitting(true);
 
     try {
       const testCaseData = {
@@ -136,9 +145,11 @@ export default function EnhancedTestCaseManagement() {
       setSuccess('Test case updated successfully');
       setEditingTestCase(null);
       resetForm();
-      loadTestCases();
+      await loadTestCases();
+      setSubmitting(false);
     } catch (err) {
       setError(err.message || 'Failed to update test case');
+      setSubmitting(false);
     }
   };
 

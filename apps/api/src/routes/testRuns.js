@@ -232,7 +232,7 @@ export async function testRunRoutes(fastify) {
           where: { id: testRun.id },
           data: {
             status: 'IN_PROGRESS',
-            actualStartDate: new Date(),
+            startedAt: new Date(),
           },
           include: {
             executions: {
@@ -358,7 +358,7 @@ export async function testRunRoutes(fastify) {
             status: status || undefined,
             environment: environment !== undefined ? environment : undefined,
             buildVersion: buildVersion !== undefined ? buildVersion : undefined,
-            actualEndDate: status === 'COMPLETED' ? new Date() : undefined,
+            completedAt: status === 'COMPLETED' ? new Date() : undefined,
           },
           include: {
             executor: { select: { name: true, email: true } },

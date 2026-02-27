@@ -16,6 +16,7 @@ export default function TestCaseManagement() {
   
   const [testCases, setTestCases] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
@@ -46,7 +47,7 @@ export default function TestCaseManagement() {
     environment: '',
     moduleArea: '',
     tags: '',
-    steps: [],
+    steps: '',
     estimatedDurationMinutes: '',
     assignedToId: '',
     ownedById: user?.id || '',
@@ -83,7 +84,10 @@ export default function TestCaseManagement() {
 
   const handleCreateTestCase = async (e) => {
     e.preventDefault();
+    if (submitting) return; // Prevent double submission
+    
     setError('');
+    setSubmitting(true);
     
     try {
       const testCaseData = {
@@ -103,15 +107,20 @@ export default function TestCaseManagement() {
       setSuccess('Test case created successfully');
       setShowCreateModal(false);
       resetForm();
-      loadTestCases();
+      await loadTestCases();
+      setSubmitting(false);
     } catch (err) {
       setError(err.message || 'Failed to create test case');
+      setSubmitting(false);
     }
   };
 
   const handleUpdateTestCase = async (e) => {
     e.preventDefault();
+    if (submitting) return; // Prevent double submission
+    
     setError('');
+    setSubmitting(true);
 
     try {
       const testCaseData = {
@@ -129,11 +138,14 @@ export default function TestCaseManagement() {
       );
 
       setSuccess('Test case updated successfully');
+      setShowCreateModal(false);
       setEditingTestCase(null);
       resetForm();
-      loadTestCases();
+      await loadTestCases();
+      setSubmitting(false);
     } catch (err) {
       setError(err.message || 'Failed to update test case');
+      setSubmitting(false);
     }
   };
 
@@ -242,7 +254,7 @@ export default function TestCaseManagement() {
       environment: '',
       moduleArea: '',
       tags: '',
-      steps: [],
+      steps: '',
       estimatedDurationMinutes: '',
       assignedToId: '',
       ownedById: user?.id || '',
@@ -556,9 +568,10 @@ export default function TestCaseManagement() {
                 <div className="flex gap-3 mt-6">
                   <button
                     type="submit"
-                    className="flex-1 tt-btn tt-btn-primary py-2 font-medium"
+                    disabled={submitting}
+                    className="flex-1 tt-btn tt-btn-primary py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {editingTestCase ? 'Update' : 'Create'}
+                    {submitting ? 'Saving...' : editingTestCase ? 'Update' : 'Create'}
                   </button>
                   <button
                     type="button"

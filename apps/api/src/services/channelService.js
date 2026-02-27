@@ -1,6 +1,6 @@
 import { getPrismaClient } from '../lib/prisma.js';
 
-const DEFAULT_UNIVERSAL_CHANNEL_NAME = 'Univarsal Channel';
+const DEFAULT_UNIVERSAL_CHANNEL_NAME = 'Universal Channel';
 
 function getUniversalChannelName() {
   return process.env.UNIVERSAL_CHANNEL_NAME || DEFAULT_UNIVERSAL_CHANNEL_NAME;

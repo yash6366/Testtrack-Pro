@@ -9,15 +9,32 @@ class ApiClient {
   }
 
   async #request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
+    // Extract params and build query string
+    const { params, ...fetchOptions } = options;
+    let url = `${this.baseURL}${endpoint}`;
+    
+    // Add query parameters if present
+    if (params && typeof params === 'object') {
+      const queryParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, value);
+        }
+      });
+      const queryString = queryParams.toString();
+      if (queryString) {
+        url += `?${queryString}`;
+      }
+    }
+    
     const token = localStorage.getItem('token');
 
     const headers = {
-      ...options.headers,
+      ...fetchOptions.headers,
     };
 
     // Only add Content-Type if there's a body
-    if (options.body !== undefined) {
+    if (fetchOptions.body !== undefined) {
       headers['Content-Type'] = 'application/json';
     }
 
@@ -28,7 +45,7 @@ class ApiClient {
     let response;
     try {
       response = await fetch(url, {
-        ...options,
+        ...fetchOptions,
         headers,
       });
     } catch (networkError) {
