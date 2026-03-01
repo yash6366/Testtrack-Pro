@@ -1,17 +1,20 @@
 import { logWarning } from './errorLogger';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const normalizeBaseUrl = (value) => String(value || '').replace(/\/+$/, '');
+const normalizeEndpoint = (value) => (String(value || '').startsWith('/') ? String(value || '') : `/${String(value || '')}`);
+
+const API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_API_URL || 'http://localhost:3001');
 const isDevelopment = import.meta.env.DEV;
 
 class ApiClient {
   constructor(baseURL = API_BASE_URL) {
-    this.baseURL = baseURL;
+    this.baseURL = normalizeBaseUrl(baseURL);
   }
 
   async #request(endpoint, options = {}) {
     // Extract params and build query string
     const { params, ...fetchOptions } = options;
-    let url = `${this.baseURL}${endpoint}`;
+    let url = `${this.baseURL}${normalizeEndpoint(endpoint)}`;
     
     // Add query parameters if present
     if (params && typeof params === 'object') {
