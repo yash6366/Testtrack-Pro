@@ -3,7 +3,8 @@ import { logWarning } from '../lib/errorLogger';
 
 export const AuthContext = createContext(null);
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const normalizeBaseUrl = (value) => String(value || '').replace(/\/+$/, '');
+const API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_API_URL || 'http://localhost:3001');
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
