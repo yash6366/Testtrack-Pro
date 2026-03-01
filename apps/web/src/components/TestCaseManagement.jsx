@@ -51,6 +51,7 @@ export default function TestCaseManagement() {
     estimatedDurationMinutes: '',
     assignedToId: '',
     ownedById: user?.id || '',
+    changeNote: '',
   });
 
   // Load test cases
@@ -258,6 +259,7 @@ export default function TestCaseManagement() {
       estimatedDurationMinutes: '',
       assignedToId: '',
       ownedById: user?.id || '',
+      changeNote: '',
     });
   };
 
@@ -278,6 +280,7 @@ export default function TestCaseManagement() {
       estimatedDurationMinutes: tc.estimatedDurationMinutes || '',
       assignedToId: tc.assignedToId || '',
       ownedById: tc.ownedById || user?.id,
+      changeNote: '',
     });
     setEditingTestCase(tc);
   };
@@ -563,6 +566,17 @@ export default function TestCaseManagement() {
                     className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="4"
                   />
+
+                  {editingTestCase && (
+                    <textarea
+                      placeholder="Change summary (required when updating) *"
+                      value={formData.changeNote}
+                      onChange={(e) => setFormData({ ...formData, changeNote: e.target.value })}
+                      className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows="2"
+                      required={editingTestCase}
+                    />
+                  )}
                 </div>
 
                 <div className="flex gap-3 mt-6">

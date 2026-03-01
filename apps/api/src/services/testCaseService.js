@@ -230,32 +230,20 @@ export async function updateTestCase(testCaseId, updates, userId, auditContext =
   // Capture current state for version snapshot (before update)
   const versionSnapshot = {
     testCaseId: existing.id,
-    caseVersion: existing.version,
+    versionNumber: existing.version,
     name: existing.name,
     description: existing.description,
+    preconditions: existing.preconditions,
+    testData: existing.testData,
+    environment: existing.environment,
     type: existing.type,
     priority: existing.priority,
     severity: existing.severity,
     status: existing.status,
-    automationStatus: existing.automationStatus,
-    preconditions: existing.preconditions,
-    postconditions: existing.postconditions,
-    testData: existing.testData,
-    expectedResult: null, // Not on test case level
-    tags: existing.tags,
-    steps: existing.steps.map(step => ({
-      action: step.action,
-      expectedResult: step.expectedResult,
-      testData: step.testData,
-      notes: step.notes,
-    })),
-    changeNote: trimmedChangeNote,
-    changedBy: userId,
-    changedAt: new Date(),
   };
 
   // Update test case with version increment and create version snapshot in transaction
-  const [updated] = await prisma.$transaction([
+  let [updated] = await prisma.$transaction([
     prisma.testCase.update({
       where: { id: testCaseId },
       data: {
