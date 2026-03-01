@@ -5,6 +5,10 @@ export const AuthContext = createContext(null);
 
 const normalizeBaseUrl = (value) => String(value || '').replace(/\/+$/, '');
 const API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_API_URL || 'http://localhost:3001');
+const joinApiUrl = (path) => {
+  const normalizedPath = String(path || '').replace(/^\/+/, '');
+  return `${API_BASE_URL}/${normalizedPath}`;
+};
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -72,7 +76,7 @@ export function AuthProvider({ children }) {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+      const response = await fetch(joinApiUrl('api/auth/signup'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, role }),
@@ -107,7 +111,7 @@ export function AuthProvider({ children }) {
     clearAuth();
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(joinApiUrl('api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -146,7 +150,7 @@ export function AuthProvider({ children }) {
     try {
       // Call logout API to invalidate token server-side
       if (currentToken) {
-        const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        const response = await fetch(joinApiUrl('api/auth/logout'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -186,7 +190,7 @@ export function AuthProvider({ children }) {
     try {
       // Call logout-all API to invalidate ALL tokens server-side
       if (currentToken) {
-        const response = await fetch(`${API_BASE_URL}/api/auth/logout-all`, {
+        const response = await fetch(joinApiUrl('api/auth/logout-all'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
