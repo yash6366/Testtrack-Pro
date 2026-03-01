@@ -1,0 +1,19 @@
+# Exclude unnecessary files from Vercel deployment
+node_modules
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+dist
+.turbo
+.eslintcache
+*.log
+coverage
+.vitest
+tests
+*.test.jsx
+*.spec.jsx
+README.md
+package-lock.json
+pnpm-lock.yaml
