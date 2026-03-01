@@ -59,6 +59,7 @@ model User {
   verifiedBugs Bug[] @relation("VerifiedBy")
 
   bugComments  BugComment[]
+  bugHistory   BugHistory[]
   auditLogs    AuditLog[]
   activityLogs UserActivityLog[]
   sessions     UserSession[]
