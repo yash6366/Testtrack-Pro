@@ -7,6 +7,9 @@
     "dev": "node --watch src/server.js",
     "build": "echo 'No build needed for Node.js'",
     "start": "node src/server.js",
+    "db:migrate": "prisma migrate deploy",
+    "db:generate": "prisma generate",
+    "prestart": "pnpm run db:generate && pnpm run db:migrate",
     "lint": "eslint ."
   },
   "dependencies": {

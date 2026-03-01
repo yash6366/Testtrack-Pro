@@ -1,0 +1,11 @@
+{
+  "build": {
+    "builder": "nixpacks",
+    "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter api run db:generate"
+  },
+  "deploy": {
+    "startCommand": "pnpm --filter api start",
+    "restartPolicyMaxRetries": 5,
+    "restartPolicyWindowSeconds": 600
+  }
+}

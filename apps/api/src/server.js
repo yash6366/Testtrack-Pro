@@ -106,8 +106,9 @@ const start = async () => {
     logInfo('Role-based channels initialized');
     
     await ensureAllUsersInUniversalChannel();
-    await fastify.listen({ port: 3001, host: '0.0.0.0' });
-    fastify.log.info('Server running on http://localhost:3001');
+    const port = process.env.PORT || 3001;
+    await fastify.listen({ port, host: '0.0.0.0' });
+    fastify.log.info(`Server running on port ${port}`);
 
     // Setup Socket.IO after server is listening
     const io = setupSocket(fastify);

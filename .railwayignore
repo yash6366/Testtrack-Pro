@@ -1,0 +1,13 @@
+# Exclude unnecessary packages from Railway deployment
+apps/web
+docs
+.github
+scripts
+packages/*/tests
+**/*.test.js
+**/*.spec.js
+**/.turbo
+coverage
+*.log
+.git
+.gitignore
