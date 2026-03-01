@@ -5,6 +5,7 @@
 
 import { getPrismaClient } from '../lib/prisma.js';
 import { logAuditAction } from './auditService.js';
+import { getBugHistory } from './bugService.js';
 
 const prisma = getPrismaClient();
 
@@ -142,19 +143,28 @@ export async function updateFixDocumentation(bugId, fixData, userId) {
     },
   });
 
-  // Create history entries for each changed field
-  // Note: BugHistory model not implemented yet - skipping history tracking
-  // for (const [fieldName, newValue] of Object.entries(changes)) {
-  //   await prisma.bugHistory.create({
-  //     data: {
-  //       bugId: bugId,
-  //       fieldName,
-  //       oldValue: String(bug[fieldName] || ''),
-  //       newValue: String(newValue),
-  //       changedBy: userId,
-  //     },
-  //   });
-  // }
+  // Create history entries for each changed field (now using dedicated logBugHistory)
+  for (const [fieldName, newValue] of Object.entries(changes)) {
+    const oldValue = bug[fieldName];
+    const logBugHistoryFunc = async (bugId, changedBy, field, oldVal, newVal) => {
+      try {
+        await prisma.bugHistory.create({
+          data: {
+            bugId,
+            changedBy,
+            fieldName: field,
+            oldValue: oldVal ? String(oldVal) : null,
+            newValue: newVal ? String(newVal) : null,
+          },
+        });
+      } catch (error) {
+        // Non-critical - log but don't fail
+        console.error(`Failed to log bug history for bug ${bugId}:`, error);
+      }
+    };
+    
+    await logBugHistoryFunc(bugId, userId, fieldName, oldValue, newValue);
+  }
 
   // Audit log
   await logAuditAction(userId, 'BUG_FIX_DOCUMENTED', {
@@ -356,7 +366,12 @@ export async function getBugWithTestDetails(bugId) {
         },
         orderBy: { commentedAt: 'desc' },
       },
-      // history: BugHistory model not implemented
+      history: {
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
       retestRequests: true,
     },
   });
@@ -432,17 +447,16 @@ export async function requestBugRetest(bugId, data, userId) {
   });
 
   // Create history entry
-  // Note: BugHistory model not implemented yet - skipping history tracking
-  // await prisma.bugHistory.create({
-  //   data: {
-  //     bugId: bugId,
-  //     fieldName: 'status',
-  //     oldValue: 'FIXED',
-  //     newValue: 'FIXED',
-  //     changedBy: userId,
-  //     changeReason: 'Developer requested retest after fix',
-  //   },
-  // });
+  await prisma.bugHistory.create({
+    data: {
+      bugId: bugId,
+      fieldName: 'retestRequested',
+      oldValue: null,
+      newValue: 'PENDING',
+      changedBy: userId,
+      changeNote: notes || 'Developer requested retest after fix',
+    },
+  });
 
   // Audit log
   await logAuditAction(userId, 'BUG_RETEST_REQUESTED', {

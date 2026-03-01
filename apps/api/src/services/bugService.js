@@ -94,6 +94,59 @@ async function notifyMentions({ users, comment, bug, authorId }) {
 }
 
 /**
+ * Log bug history entry for tracking changes
+ * @param {number} bugId - Bug ID
+ * @param {number} changedBy - User ID of who made the change
+ * @param {string} fieldName - Name of the field changed
+ * @param {string} oldValue - Previous value
+ * @param {string} newValue - New value
+ * @param {string} changeNote - Optional note about the change
+ * @returns {Promise<Object>} Created history entry
+ */
+async function logBugHistory(bugId, changedBy, fieldName, oldValue, newValue, changeNote = null) {
+  try {
+    return await prisma.bugHistory.create({
+      data: {
+        bugId,
+        changedBy,
+        fieldName,
+        oldValue: oldValue ? String(oldValue) : null,
+        newValue: newValue ? String(newValue) : null,
+        changeNote,
+      },
+    });
+  } catch (error) {
+    // Non-critical error, log but don't fail the operation
+    logError(`Failed to log bug history for bug ${bugId}:`, error);
+  }
+}
+
+/**
+ * Get formatted bug history
+ * @param {number} bugId - Bug ID
+ * @returns {Promise<Array>} Formatted history entries
+ */
+export async function getBugHistory(bugId) {
+  const history = await prisma.bugHistory.findMany({
+    where: { bugId },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return history.map((entry) => ({
+    id: entry.id,
+    field: entry.fieldName,
+    oldValue: entry.oldValue,
+    newValue: entry.newValue,
+    changedBy: entry.user,
+    changedAt: entry.createdAt,
+    changeNote: entry.changeNote,
+  }));
+}
+
+/**
  * Generate unique bug number with atomic increment to prevent collisions
  * Uses database transaction with serializable isolation to prevent race conditions
  * @param {number} projectId - Project ID
@@ -389,6 +442,14 @@ export async function updateBug(bugId, updates, userId, projectId, permissionCon
     },
   });
 
+  // Log history entries for changed fields
+  if (severity && severity !== existing.severity) {
+    await logBugHistory(bugId, userId, 'severity', existing.severity, severity);
+  }
+  if (priority && priority !== existing.priority) {
+    await logBugHistory(bugId, userId, 'priority', existing.priority, priority);
+  }
+
   // Audit log
   await logAuditAction(userId, 'BUG_STATUS_CHANGED', {
     resourceType: 'BUG',
@@ -499,17 +560,8 @@ export async function changeBugStatus(bugId, newStatus, userId, role, auditConte
     },
   });
 
-  // Create history entry
-  // Note: BugHistory model not implemented - skipping
-  // await prisma.bugHistory.create({
-  //   data: {
-  //     bugId: bugId,
-  //     fieldName: 'status',
-  //     oldValue: bug.status,
-  //     newValue: newStatus,
-  //     changedBy: userId,
-  //   },
-  // });
+  // Log history entry
+  await logBugHistory(bugId, userId, 'status', bug.status, newStatus);
 
   // Audit log
   await logAuditAction(userId, 'BUG_STATUS_CHANGED', {
@@ -590,6 +642,9 @@ export async function assignBug(bugId, assigneeId, userId, projectId, permission
       reporter: { select: { id: true, name: true, email: true } },
     },
   });
+
+  // Log history entry
+  await logBugHistory(bugId, userId, 'assigneeId', bug.assigneeId ? String(bug.assigneeId) : null, String(assigneeId));
 
   // Audit log
   await logAuditAction(userId, 'BUG_ASSIGNED', {
@@ -879,7 +934,12 @@ export async function getBugDetails(bugId, projectId) {
         },
         orderBy: { createdAt: 'desc' },
       },
-      // history: BugHistory model not implemented
+      history: {
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
       retestRequests: true,
       attachments: {
         where: { isDeleted: false },

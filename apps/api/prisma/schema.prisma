@@ -687,7 +687,8 @@ model Bug {
   comments    BugComment[]
   milestone   Milestone?   @relation(fields: [milestoneId], references: [id])
   milestoneId Int?
-
+  
+  history        BugHistory[]
   retestRequests BugRetestRequest[]
 
   @@index([projectId])
@@ -735,6 +736,24 @@ model BugRetestRequest {
   bug Bug @relation(fields: [bugId], references: [id], onDelete: Cascade)
 
   @@index([bugId])
+}
+
+model BugHistory {
+  id              Int      @id @default(autoincrement())
+  bugId           Int
+  changedBy       Int
+  fieldName       String   // Field that changed (e.g., status, assignee, priority)
+  oldValue        String?  // Previous value
+  newValue        String?  // New value
+  changeNote      String?  // Optional note about the change
+  createdAt       DateTime @default(now())
+
+  bug  Bug  @relation(fields: [bugId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [changedBy], references: [id], onDelete: Restrict)
+
+  @@index([bugId])
+  @@index([changedBy])
+  @@index([createdAt])
 }
 
 // ============================================
