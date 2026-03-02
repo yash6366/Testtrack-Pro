@@ -6,6 +6,7 @@
 
 import { getPrismaClient } from '../lib/prisma.js';
 import { logInfo, logError } from '../lib/logger.js';
+import { sendNotificationEmail } from './emailService.js';
 
 const prisma = getPrismaClient();
 
@@ -68,9 +69,40 @@ export async function emitNotificationToUser(userId, notification, sendEmail = f
   if (sendEmail) {
     try {
       await createDeliveryRecord(notification.id, 'EMAIL', 'PENDING');
-      // Email sending is handled by emailService - just track it here
+      
+      // Get user email from database
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true },
+      });
+
+      if (user && user.email) {
+        try {
+          // Send notification email
+          await sendNotificationEmail(user.email, {
+            id: notification.id,
+            title: notification.title,
+            message: notification.message,
+            type: notification.type,
+            sourceType: notification.sourceType,
+            sourceId: notification.sourceId,
+            actionUrl: notification.actionUrl,
+            actionType: notification.actionType,
+          });
+
+          // Mark email as delivered
+          await updateDeliveryStatus(notification.id, 'EMAIL', 'DELIVERED', new Date());
+        } catch (emailError) {
+          logError('Failed to send notification email', { error: emailError, userId, notificationId: notification.id });
+          // Mark email delivery as failed for retry
+          await updateDeliveryStatus(notification.id, 'EMAIL', 'FAILED', null, emailError.message);
+        }
+      } else {
+        // No email found for user
+        await updateDeliveryStatus(notification.id, 'EMAIL', 'BOUNCED', null, 'User email not found');
+      }
     } catch (error) {
-      // Email tracking failed, but notification was sent
+      logError('Error in email delivery tracking', { error, userId, notificationId: notification.id });
     }
   }
 }
@@ -211,10 +243,16 @@ export async function retryFailedDeliveries() {
       where: {
         status: 'FAILED',
         retryCount: { lt: 3 },
-        nextRetryAt: { lt: new Date() },
+        nextRetryAt: { lte: new Date() },
       },
       include: {
-        notification: true,
+        notification: {
+          include: {
+            user: {
+              select: { id: true, email: true },
+            },
+          },
+        },
       },
       take: 100, // Limit to 100 per batch
     });
@@ -225,6 +263,9 @@ export async function retryFailedDeliveries() {
     let failed = 0;
 
     for (const delivery of failedDeliveries) {
+      let retrySuccess = false;
+      let retryError = null;
+
       try {
         if (delivery.channel === 'IN_APP') {
           // Emit via Socket.IO again
@@ -237,29 +278,67 @@ export async function retryFailedDeliveries() {
               type: delivery.notification.type,
             });
 
-            await updateDeliveryStatus(
-              delivery.notificationId,
-              delivery.channel,
-              'DELIVERED',
-            );
-            succeeded++;
+            retrySuccess = true;
+          } else {
+            throw new Error('Socket.IO instance not initialized');
+          }
+        } else if (delivery.channel === 'EMAIL') {
+          // Retry email delivery
+          if (delivery.notification.user && delivery.notification.user.email) {
+            await sendNotificationEmail(delivery.notification.user.email, {
+              id: delivery.notification.id,
+              title: delivery.notification.title,
+              message: delivery.notification.message,
+              type: delivery.notification.type,
+              sourceType: delivery.notification.sourceType,
+              sourceId: delivery.notification.sourceId,
+              actionUrl: delivery.notification.actionUrl,
+              actionType: delivery.notification.actionType,
+            });
+
+            retrySuccess = true;
+          } else {
+            throw new Error('User email not found');
           }
         }
-        // EMAIL retry would be handled by email service
       } catch (error) {
-        logError('Retry failed for delivery', { error, deliveryId: delivery.id, notificationId: delivery.notificationId });
-        failed++;
+        retryError = error;
+        retrySuccess = false;
+      }
+
+      // Update delivery status based on result
+      if (retrySuccess) {
+        // Mark as delivered
+        await updateDeliveryStatus(
+          delivery.notificationId,
+          delivery.channel,
+          'DELIVERED',
+        );
+        succeeded++;
+      } else {
+        // Mark as failed again for retry or mark as bounced if max retries exceeded
+        logError('Retry failed for delivery', { error: retryError, deliveryId: delivery.id, notificationId: delivery.notificationId, channel: delivery.channel, retryCount: delivery.retryCount });
 
         if (delivery.retryCount >= 2) {
-          // Mark as bounced after 3 attempts
+          // Mark as bounced after 3 attempts (retryCount 0, 1, 2 = 3 attempts)
           await updateDeliveryStatus(
             delivery.notificationId,
             delivery.channel,
             'BOUNCED',
             null,
-            'Max retries exceeded',
+            `Max retries exceeded: ${retryError.message}`,
+          );
+        } else {
+          // Mark as failed again for next retry
+          await updateDeliveryStatus(
+            delivery.notificationId,
+            delivery.channel,
+            'FAILED',
+            null,
+            retryError.message,
           );
         }
+        failed++;
       }
     }
 

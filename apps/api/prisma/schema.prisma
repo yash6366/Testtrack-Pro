@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,108 +7,76 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================
-// USER MANAGEMENT MODELS
-// ============================================
-
 model User {
-  id         Int     @id @default(autoincrement())
-  email      String  @unique
-  password   String?
-  name       String
-  picture    String?
-  role       String  @default("DEVELOPER") // ADMIN, TESTER, DEVELOPER, GUEST
-  isVerified Boolean @default(false)
-  isActive   Boolean @default(true)
-
-  // Account security
+  id                       Int                     @id @default(autoincrement())
+  email                    String                  @unique
+  password                 String?
+  name                     String
+  role                     String                  @default("DEVELOPER")
+  isVerified               Boolean                 @default(false)
+  isActive                 Boolean                 @default(true)
   verificationToken        String?
   verificationTokenExpiry  DateTime?
-  failedLoginAttempts      Int       @default(0)
+  failedLoginAttempts      Int                     @default(0)
   lockedUntil              DateTime?
   lastLoginAt              DateTime?
   passwordResetToken       String?
   passwordResetTokenExpiry DateTime?
-  passwordHistory          String[]  @default([]) // Array of hashed passwords for history
-  tokenVersion             Int       @default(0) // For invalidating tokens on logout
-
-  // Timestamps
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  // Relations
-  projects           Project[]
-  projectAllocations ProjectUserAllocation[]
-  createdTestCases   TestCase[]              @relation("CreatedBy")
-  assignedTestCases  TestCase[]              @relation("AssignedTo")
-  ownedTestCases     TestCase[]              @relation("OwnedBy")
-  modifiedTestCases  TestCase[]              @relation("LastModifiedBy")
-  deletedTestCases   TestCase[]              @relation("DeletedBy")
-
-  testRuns          TestRun[]       @relation("ExecutedBy")
-  createdTestRuns   TestRun[]       @relation("CreatedBy")
-  testExecutions    TestExecution[]
-  executedSuiteRuns TestSuiteRun[]  @relation("TestSuiteRunExecutor")
-
-  reportedBugs Bug[] @relation("ReportedBy")
-  assignedBugs Bug[] @relation("AssignedTo")
-  verifiedBugs Bug[] @relation("VerifiedBy")
-
-  bugComments  BugComment[]
-  bugHistory   BugHistory[]
-  auditLogs    AuditLog[]
-  activityLogs UserActivityLog[]
-  sessions     UserSession[]
-
-  channelMembers  ChannelMember[]
-  createdChannels ChannelMessage[] @relation("ChannelMessages")
-  channelsCreated Channel[]        @relation("ChannelsCreatedBy")
-  notifications   Notification[]
-  notificationPreferences NotificationPreference?
-  digestSchedule  DigestSchedule?
-  apiKeys         ApiKey[]
-
-  createdMilestones  Milestone[] @relation("CreatedBy")
-  assignedMilestones Milestone[] @relation("AssignedTo")
-
-  createdTestSuites     TestSuite[] @relation("CreatedBy")
-  assignedTestSuites    TestSuite[] @relation("AssignedTo")
+  passwordHistory          String[]                @default([])
+  tokenVersion             Int                     @default(0)
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  deletedAt                DateTime?
+  picture                  String?
+  isMuted                  Boolean                 @default(false)
+  mutedUntil               DateTime?
+  muteReason               String?
+  mutedBy                  Int?
+  apiKeys                  ApiKey[]
+  auditLogs                AuditLog[]
+  assignedBugs             Bug[]                   @relation("AssignedTo")
+  reportedBugs             Bug[]                   @relation("ReportedBy")
+  verifiedBugs             Bug[]                   @relation("VerifiedBy")
+  bugComments              BugComment[]
+  bugHistory               BugHistory[]
+  channelsCreated          Channel[]               @relation("ChannelsCreatedBy")
+  disabledChannels         Channel[]               @relation("DisabledBy")
+  lockedChannels           Channel[]               @relation("LockedBy")
+  channelMembers           ChannelMember[]
+  deletedMessages          ChannelMessage[]        @relation("DeletedBy")
+  createdChannels          ChannelMessage[]        @relation("ChannelMessages")
+  auditLogEntries          ChatAuditLog[]          @relation("AuditLogAdmin")
+  digestSchedule           DigestSchedule?
+  directMessagesReceived   DirectMessage[]         @relation("DirectMessagesReceived")
+  directMessagesSent       DirectMessage[]         @relation("DirectMessagesSent")
+  directMessageReactions   DirectMessageReaction[] @relation("DirectMessageReactions")
+  messageMentions          MessageMention[]        @relation("MessageMentions")
+  messageReactions         MessageReaction[]       @relation("MessageReactions")
+  assignedMilestones       Milestone[]             @relation("AssignedTo")
+  createdMilestones        Milestone[]             @relation("CreatedBy")
+  notifications            Notification[]
+  notificationPreferences  NotificationPreference?
+  oauthIntegrations        OAuthIntegration[]
+  pinnedMessages           PinnedMessage[]         @relation("PinnedMessages")
+  projects                 Project[]
+  projectAllocations       ProjectUserAllocation[]
+  assignedTestCases        TestCase[]              @relation("AssignedTo")
+  createdTestCases         TestCase[]              @relation("CreatedBy")
+  deletedTestCases         TestCase[]              @relation("DeletedBy")
+  modifiedTestCases        TestCase[]              @relation("LastModifiedBy")
+  ownedTestCases           TestCase[]              @relation("OwnedBy")
   createdTestCaseTemplates TestCaseTemplate[]
-
-  createdTestPlans  TestPlan[] @relation("CreatedBy")
-  executedTestPlans TestPlan[] @relation("ExecutedBy")
-
-  oauthIntegrations OAuthIntegration[]
-
-  // Chat enhancements
-  messageMentions MessageMention[] @relation("MessageMentions")
-  messageReactions MessageReaction[] @relation("MessageReactions")
-  pinnedMessages  PinnedMessage[] @relation("PinnedMessages")
-
-  // Direct Messages
-  directMessagesSent DirectMessage[] @relation("DirectMessagesSent")
-  directMessagesReceived DirectMessage[] @relation("DirectMessagesReceived")
-  directMessageReactions DirectMessageReaction[] @relation("DirectMessageReactions")
-
-  // Admin controls - Mute functionality
-  isMuted Boolean @default(false) // Is user currently muted
-  mutedUntil DateTime? // When mute expires
-  muteReason String? // Admin reason for mute
-  mutedBy Int? // Admin ID who muted this user
-
-  // Messages deleted by this admin
-  deletedMessages ChannelMessage[] @relation("DeletedBy")
-  
-  // Webhooks created by this user
-  webhooksCreated Webhook[] @relation("WebhooksCreated")
-
-  // Channels locked/disabled by this admin
-  lockedChannels Channel[] @relation("LockedBy")
-  disabledChannels Channel[] @relation("DisabledBy")
-
-  // Audit logs created by this admin
-  auditLogEntries ChatAuditLog[] @relation("AuditLogAdmin")
+  testExecutions           TestExecution[]
+  createdTestPlans         TestPlan[]              @relation("CreatedBy")
+  executedTestPlans        TestPlan[]              @relation("ExecutedBy")
+  createdTestRuns          TestRun[]               @relation("CreatedBy")
+  testRuns                 TestRun[]               @relation("ExecutedBy")
+  assignedTestSuites       TestSuite[]             @relation("AssignedTo")
+  createdTestSuites        TestSuite[]             @relation("CreatedBy")
+  executedSuiteRuns        TestSuiteRun[]          @relation("TestSuiteRunExecutor")
+  activityLogs             UserActivityLog[]
+  sessions                 UserSession[]
+  webhooksCreated          Webhook[]               @relation("WebhooksCreated")
 
   @@index([email])
   @@index([role])
@@ -122,14 +87,13 @@ model ProjectUserAllocation {
   id          Int      @id @default(autoincrement())
   projectId   Int
   userId      Int
-  projectRole String   @default("TESTER") // Project-specific role
+  projectRole String   @default("TESTER")
   isActive    Boolean  @default(true)
   allocatedAt DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, userId])
   @@index([projectId])
@@ -146,8 +110,7 @@ model UserActivityLog {
   ipAddress    String?
   userAgent    String?
   createdAt    DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([createdAt])
@@ -166,8 +129,7 @@ model UserSession {
   rotatedAt        DateTime?
   revokedAt        DateTime?
   expiresAt        DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
@@ -177,19 +139,18 @@ model UserSession {
 model AuditLog {
   id           Int      @id @default(autoincrement())
   userId       Int
-  action       String // TESTCASE_CREATED, BUG_UPDATED, etc.
-  resourceType String // TESTCASE, BUG, PROJECT, etc.
+  action       String
+  resourceType String
   resourceId   Int?
   resourceName String?
   projectId    Int?
   description  String?
-  oldValues    String? // JSON stringified
-  newValues    String? // JSON stringified
+  oldValues    String?
+  newValues    String?
   timestamp    DateTime @default(now())
   ipAddress    String?
   userAgent    String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([action])
@@ -200,14 +161,13 @@ model AuditLog {
 model OAuthIntegration {
   id         Int      @id @default(autoincrement())
   userId     Int
-  provider   String // GOOGLE, GITHUB
-  providerId String // User ID from OAuth provider
+  provider   String
+  providerId String
   email      String?
-  metadata   Json? // Additional provider data
+  metadata   Json?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerId])
   @@index([userId])
@@ -215,36 +175,30 @@ model OAuthIntegration {
   @@index([createdAt])
 }
 
-// ============================================
-// PROJECT MODELS
-// ============================================
-
 model Project {
-  id          Int       @id @default(autoincrement())
-  name        String
-  description String?
-  key         String    @unique // Project key for bug numbering (e.g., PROJ)
-  ownerId     Int
-  status      String    @default("ACTIVE") // ACTIVE, ARCHIVED, INACTIVE
-  isPublic    Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  owner User @relation(fields: [ownerId], references: [id], onDelete: Restrict)
-
+  id                Int                     @id @default(autoincrement())
+  name              String
+  description       String?
+  key               String                  @unique
+  ownerId           Int
+  status            String                  @default("ACTIVE")
+  isPublic          Boolean                 @default(false)
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  deletedAt         DateTime?
+  apiKeys           ApiKey[]
+  bugs              Bug[]
+  customFields      CustomField[]
+  milestones        Milestone[]
+  owner             User                    @relation(fields: [ownerId], references: [id])
+  environments      ProjectEnvironment[]
   userAllocations   ProjectUserAllocation[]
   testCases         TestCase[]
   testCaseTemplates TestCaseTemplate[]
+  testPlans         TestPlan[]
   testRuns          TestRun[]
   testSuites        TestSuite[]
-  testPlans         TestPlan[]
-  milestones        Milestone[]
-  bugs              Bug[]
-  customFields      CustomField[]
-  environments      ProjectEnvironment[]
   webhooks          Webhook[]
-  apiKeys           ApiKey[]
 
   @@index([ownerId])
   @@index([status])
@@ -259,69 +213,55 @@ model ProjectEnvironment {
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, name])
   @@index([projectId])
   @@index([isActive])
 }
 
-// ============================================
-// TEST CASE MODELS
-// ============================================
-
 model TestCase {
-  id                       Int      @id @default(autoincrement())
+  id                       Int                 @id @default(autoincrement())
   projectId                Int
-  testCaseId               String?  @unique // Human-readable ID like PROJ-TC-001
   name                     String
   description              String?
   preconditions            String?
-  postconditions           String?
   testData                 String?
   environment              String?
-  type                     String   @default("FUNCTIONAL") // FUNCTIONAL, PERFORMANCE, SECURITY, USABILITY
-  priority                 String   @default("P2") // P0, P1, P2, P3, P4
-  severity                 String   @default("MINOR") // CRITICAL, MAJOR, MINOR, TRIVIAL
-  status                   String   @default("DRAFT") // DRAFT, READY, IN_PROGRESS, COMPLETED, DEPRECATED
+  type                     String              @default("FUNCTIONAL")
+  priority                 String              @default("P2")
+  severity                 String              @default("MINOR")
+  status                   String              @default("DRAFT")
   estimatedDurationMinutes Int?
   moduleArea               String?
-  tags                     String[] @default([])
-  version                  Int      @default(1)
-  automationStatus         String?  @default("MANUAL") // MANUAL, AUTOMATED, SEMI_AUTOMATED
+  tags                     String[]            @default([])
+  assignedToId             Int?
+  ownedById                Int?
+  createdBy                Int
+  lastModifiedBy           Int
+  deletedBy                Int?
+  isDeleted                Boolean             @default(false)
+  deletedAt                DateTime?
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  milestoneId              Int?
+  testCaseId               String?             @unique
+  postconditions           String?
+  version                  Int                 @default(1)
+  automationStatus         String?             @default("MANUAL")
   automationScriptLink     String?
-
-  // Relationships
-  assignedToId   Int?
-  ownedById      Int?
-  createdBy      Int
-  lastModifiedBy Int
-  deletedBy      Int?
-
-  // Soft delete
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  project    Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  steps      TestCaseStep[]
-  versions   TestCaseVersion[]
-  executions TestExecution[]   @relation("TestCaseToExecution")
-  bugs       Bug[]             @relation("TestCaseToBug")
-
-  creator      User  @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
-  assignedTo   User? @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
-  owner        User? @relation("OwnedBy", fields: [ownedById], references: [id], onDelete: SetNull)
-  lastModifier User  @relation("LastModifiedBy", fields: [lastModifiedBy], references: [id])
-  deleter      User? @relation("DeletedBy", fields: [deletedBy], references: [id], onDelete: SetNull)
-
-  suites      TestSuiteTestCase[]
-  milestone   Milestone?          @relation(fields: [milestoneId], references: [id])
-  milestoneId Int?
+  bugs                     Bug[]               @relation("TestCaseToBug")
+  assignedTo               User?               @relation("AssignedTo", fields: [assignedToId], references: [id])
+  creator                  User                @relation("CreatedBy", fields: [createdBy], references: [id])
+  deleter                  User?               @relation("DeletedBy", fields: [deletedBy], references: [id])
+  lastModifier             User                @relation("LastModifiedBy", fields: [lastModifiedBy], references: [id])
+  milestone                Milestone?          @relation(fields: [milestoneId], references: [id])
+  owner                    User?               @relation("OwnedBy", fields: [ownedById], references: [id])
+  project                  Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  steps                    TestCaseStep[]
+  versions                 TestCaseVersion[]
+  executions               TestExecution[]     @relation("TestCaseToExecution")
+  suites                   TestSuiteTestCase[]
 
   @@index([projectId])
   @@index([status])
@@ -336,12 +276,11 @@ model TestCaseStep {
   stepNumber     Int
   action         String
   expectedResult String
-  testData       String?
   notes          String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-
-  testCase TestCase @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+  testData       String?
+  testCase       TestCase @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
 
   @@index([testCaseId])
 }
@@ -360,35 +299,33 @@ model TestCaseVersion {
   severity      String
   status        String
   createdAt     DateTime @default(now())
-
-  testCase TestCase @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+  testCase      TestCase @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
 
   @@unique([testCaseId, versionNumber])
   @@index([testCaseId])
 }
 
 model TestCaseTemplate {
-  id            Int      @id @default(autoincrement())
+  id            Int                    @id @default(autoincrement())
   projectId     Int
   name          String
   description   String?
-  category      String?
-  type          String   @default("FUNCTIONAL")
-  priority      String   @default("P2")
-  severity      String   @default("MINOR")
+  type          String                 @default("FUNCTIONAL")
+  priority      String                 @default("P2")
+  severity      String                 @default("MINOR")
   preconditions String?
   testData      String?
   environment   String?
-  moduleArea    String?
-  tags          String[] @default([])
-  isActive      Boolean  @default(true)
-  isPublic      Boolean  @default(false)
+  tags          String[]               @default([])
+  isPublic      Boolean                @default(false)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  category      String?
+  isActive      Boolean                @default(true)
   createdBy     Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  project       Project                   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  creator       User                      @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  moduleArea    String?
+  creator       User                   @relation(fields: [createdBy], references: [id])
+  project       Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
   templateSteps TestCaseTemplateStep[]
 
   @@index([projectId])
@@ -397,16 +334,15 @@ model TestCaseTemplate {
 }
 
 model TestCaseTemplateStep {
-  id             Int      @id @default(autoincrement())
+  id             Int              @id @default(autoincrement())
   templateId     Int
   stepNumber     Int
   action         String
   expectedResult String?
   notes          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  template TestCaseTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  template       TestCaseTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   @@index([templateId])
 }
@@ -419,113 +355,94 @@ model TestCaseCounter {
   @@index([projectId])
 }
 
-// ============================================
-// TEST SUITE MODELS
-// ============================================
-
 model TestSuite {
-  id            Int       @id @default(autoincrement())
+  id            Int                 @id @default(autoincrement())
   projectId     Int
   name          String
   description   String?
   parentSuiteId Int?
-  priority      String    @default("P2")
-  status        String    @default("ACTIVE")
+  priority      String              @default("P2")
+  status        String              @default("ACTIVE")
   createdBy     Int
   assignedToId  Int?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
   deletedAt     DateTime?
-  isDeleted     Boolean   @default(false)
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  creator User    @relation("CreatedBy", fields: [createdBy], references: [id])
-
-  assignedTo User? @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
-
-  parentSuite TestSuite?  @relation("SuiteHierarchy", fields: [parentSuiteId], references: [id], onDelete: SetNull)
-  childSuites TestSuite[] @relation("SuiteHierarchy")
-
-  testCases TestSuiteTestCase[]
-  runs      TestSuiteRun[]
+  isDeleted     Boolean             @default(false)
+  assignedTo    User?               @relation("AssignedTo", fields: [assignedToId], references: [id])
+  creator       User                @relation("CreatedBy", fields: [createdBy], references: [id])
+  parentSuite   TestSuite?          @relation("SuiteHierarchy", fields: [parentSuiteId], references: [id])
+  childSuites   TestSuite[]         @relation("SuiteHierarchy")
+  project       Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  runs          TestSuiteRun[]
+  testCases     TestSuiteTestCase[]
 
   @@index([projectId])
   @@index([isDeleted])
 }
 
 model TestSuiteTestCase {
-  id         Int @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   suiteId    Int
   testCaseId Int
-  order      Int @default(0)
-
-  suite    TestSuite @relation(fields: [suiteId], references: [id], onDelete: Cascade)
-  testCase TestCase  @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+  order      Int       @default(0)
+  suite      TestSuite @relation(fields: [suiteId], references: [id], onDelete: Cascade)
+  testCase   TestCase  @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
 
   @@unique([suiteId, testCaseId])
   @@index([suiteId])
   @@index([testCaseId])
 }
 
-// ============================================
-// TEST RUN & EXECUTION MODELS
-// ============================================
-
 model TestRun {
-  id             Int     @id @default(autoincrement())
+  id             Int             @id @default(autoincrement())
   projectId      Int
   name           String
   description    String?
   environment    String?
   buildVersion   String?
-  status         String  @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED, CANCELLED
-  totalTestCases Int     @default(0)
-  passedCount    Int     @default(0)
-  failedCount    Int     @default(0)
-  blockedCount   Int     @default(0)
-  skippedCount   Int     @default(0)
-
-  executedBy  Int
-  createdBy   Int
-  startedAt   DateTime?
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  executor User    @relation("ExecutedBy", fields: [executedBy], references: [id])
-  creator  User    @relation("CreatedBy", fields: [createdBy], references: [id])
-
-  executions TestExecution[]
-  suiteRuns  TestSuiteRun[]
+  status         String          @default("PLANNED")
+  totalTestCases Int             @default(0)
+  passedCount    Int             @default(0)
+  failedCount    Int             @default(0)
+  blockedCount   Int             @default(0)
+  skippedCount   Int             @default(0)
+  executedBy     Int
+  createdBy      Int
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  executions     TestExecution[]
+  creator        User            @relation("CreatedBy", fields: [createdBy], references: [id])
+  executor       User            @relation("ExecutedBy", fields: [executedBy], references: [id])
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  suiteRuns      TestSuiteRun[]
 
   @@index([projectId])
   @@index([status])
 }
 
 model TestExecution {
-  id                    Int     @id @default(autoincrement())
+  id                    Int                     @id @default(autoincrement())
   testRunId             Int
   testCaseId            Int
-  suiteRunId            Int?    // Link to suite run if part of suite execution
-  status                String  @default("BLOCKED") // BLOCKED, READY, PASSED, FAILED, SKIPPED, NOT_RUN
+  status                String                  @default("BLOCKED")
   actualResult          String?
   actualDurationSeconds Int?
-
-  userId      Int
-  startedAt   DateTime?
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  testRun  TestRun       @relation(fields: [testRunId], references: [id], onDelete: Cascade)
-  testCase TestCase      @relation("TestCaseToExecution", fields: [testCaseId], references: [id], onDelete: Cascade)
-  executor User          @relation(fields: [userId], references: [id], onDelete: SetNull)
-  suiteRun TestSuiteRun? @relation(fields: [suiteRunId], references: [id], onDelete: SetNull)
-
-  steps    TestExecutionStep[]
-  evidence TestExecutionEvidence[]
-  bugs     Bug[]                   @relation("ExecutionToBug")
+  userId                Int
+  startedAt             DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  suiteRunId            Int?
+  bugs                  Bug[]                   @relation("ExecutionToBug")
+  suiteRun              TestSuiteRun?           @relation(fields: [suiteRunId], references: [id])
+  testCase              TestCase                @relation("TestCaseToExecution", fields: [testCaseId], references: [id], onDelete: Cascade)
+  testRun               TestRun                 @relation(fields: [testRunId], references: [id], onDelete: Cascade)
+  executor              User                    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  evidence              TestExecutionEvidence[]
+  steps                 TestExecutionStep[]
 
   @@index([testRunId])
   @@index([testCaseId])
@@ -534,94 +451,83 @@ model TestExecution {
 }
 
 model TestExecutionStep {
-  id           Int      @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   executionId  Int
   stepNumber   Int
-  status       String   @default("BLOCKED") // PASSED, FAILED, SKIPPED, BLOCKED
+  status       String        @default("BLOCKED")
   actualResult String?
   notes        String?
-  createdAt    DateTime @default(now())
-
-  execution TestExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now())
+  execution    TestExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
 
   @@index([executionId])
 }
 
 model TestExecutionEvidence {
-  id          Int      @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   executionId Int
   filename    String
   url         String
   mimeType    String?
   size        Int?
-  type        String   @default("SCREENSHOT") // SCREENSHOT, ATTACHMENT, VIDEO, LOG
-  createdAt   DateTime @default(now())
-
-  execution TestExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  type        String        @default("SCREENSHOT")
+  createdAt   DateTime      @default(now())
+  execution   TestExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
 
   @@index([executionId])
 }
 
-// ============================================
-// TEST PLAN MODELS
-// ============================================
-
 model TestPlan {
-  id              Int     @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   projectId       Int
   name            String
   description     String?
-  scope           String? // Scope of the test plan
-  status          String  @default("DRAFT") // DRAFT, READY, IN_PROGRESS, COMPLETED
-  testCaseIds     Int[]   @default([]) // Array of test case IDs in this plan
-  plannedDuration Int? // Planned duration in minutes
-  plannerNotes    String? // Notes from the planner
-
-  createdBy  Int
-  executedBy Int?
-
-  startDate DateTime?
-  endDate   DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  creator  User    @relation("CreatedBy", fields: [createdBy], references: [id])
-  executor User?   @relation("ExecutedBy", fields: [executedBy], references: [id], onDelete: SetNull)
+  status          String    @default("DRAFT")
+  createdBy       Int
+  executedBy      Int?
+  startDate       DateTime?
+  endDate         DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  scope           String?
+  testCaseIds     Int[]     @default([])
+  plannedDuration Int?
+  plannerNotes    String?
+  creator         User      @relation("CreatedBy", fields: [createdBy], references: [id])
+  executor        User?     @relation("ExecutedBy", fields: [executedBy], references: [id])
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@index([status])
 }
 
 model TestSuiteRun {
-  id                 Int      @id @default(autoincrement())
+  id                 Int             @id @default(autoincrement())
   suiteId            Int
   projectId          Int
-  testRunId          Int?     // Link to the parent test run
   name               String
-  description        String?
   environment        String?
   buildVersion       String?
-  status             String   @default("PLANNED") // PLANNED, IN_PROGRESS, PASSED, FAILED, COMPLETED, CANCELLED
-  totalTestCases     Int      @default(0)
-  executedCount      Int      @default(0)
-  passedCount        Int      @default(0)
-  failedCount        Int      @default(0)
-  blockedCount       Int      @default(0)
-  skippedCount       Int      @default(0)
-  stopOnFailure      Boolean  @default(false)
-  executeChildSuites Boolean  @default(true)
+  status             String          @default("PLANNED")
+  totalTestCases     Int             @default(0)
+  passedCount        Int             @default(0)
+  failedCount        Int             @default(0)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  testRunId          Int?
+  description        String?
+  executedCount      Int             @default(0)
+  blockedCount       Int             @default(0)
+  skippedCount       Int             @default(0)
+  stopOnFailure      Boolean         @default(false)
+  executeChildSuites Boolean         @default(true)
   executedBy         Int
   actualStartDate    DateTime?
   actualEndDate      DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  suite      TestSuite       @relation(fields: [suiteId], references: [id], onDelete: Cascade)
-  testRun    TestRun?        @relation(fields: [testRunId], references: [id], onDelete: SetNull)
-  executor   User            @relation("TestSuiteRunExecutor", fields: [executedBy], references: [id])
-  executions TestExecution[]
+  executions         TestExecution[]
+  executor           User            @relation("TestSuiteRunExecutor", fields: [executedBy], references: [id])
+  suite              TestSuite       @relation(fields: [suiteId], references: [id], onDelete: Cascade)
+  testRun            TestRun?        @relation(fields: [testRunId], references: [id])
 
   @@index([suiteId])
   @@index([projectId])
@@ -630,67 +536,52 @@ model TestSuiteRun {
   @@index([status])
 }
 
-// ============================================
-// BUG/DEFECT MODELS
-// ============================================
-
 model Bug {
-  id              Int     @id @default(autoincrement())
-  projectId       Int
-  bugNumber       String  @unique // e.g., PROJ-001
-  title           String
-  description     String
-  environment     String?
-  affectedVersion String?
-  reproducibility String  @default("SOMETIMES") // ALWAYS, OFTEN, SOMETIMES, RARELY, CANNOT_REPRODUCE
-
-  status   String @default("NEW") // NEW, OPEN, IN_PROGRESS, FIXED, VERIFIED, CLOSED
-  priority String @default("P3") // P0, P1, P2, P3
-  severity String @default("MINOR") // CRITICAL, MAJOR, MINOR, TRIVIAL
-
-  reportedBy Int
-  assigneeId Int?
-  verifiedBy Int?
-
-  testCaseId  Int?
-  executionId Int?
-
-  stepsToReproduce String?
-  actualBehavior   String?
-  expectedBehavior String?
-
+  id                Int                @id @default(autoincrement())
+  projectId         Int
+  bugNumber         String             @unique
+  title             String
+  description       String
+  environment       String?
+  affectedVersion   String?
+  reproducibility   String             @default("SOMETIMES")
+  status            String             @default("NEW")
+  priority          String             @default("P3")
+  severity          String             @default("MINOR")
+  reportedBy        Int
+  assigneeId        Int?
+  verifiedBy        Int?
+  testCaseId        Int?
+  executionId       Int?
+  stepsToReproduce  String?
+  actualBehavior    String?
+  expectedBehavior  String?
   fixDocumentation  String?
+  resolvedAt        DateTime?
+  verifiedAt        DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  closedAt          DateTime?
+  milestoneId       Int?
+  actualFixHours    Float?
+  codeReviewUrl     String?
+  fixBranchName     String?
   fixStrategy       String?
+  fixedInCommitHash String?
+  fixedInVersion    String?
   rootCauseAnalysis String?
   rootCauseCategory String?
-  fixedInCommitHash String?
-  fixBranchName     String?
-  codeReviewUrl     String?
-  actualFixHours    Float?
   targetFixVersion  String?
-  fixedInVersion    String?
-
-  resolvedAt DateTime?
-  verifiedAt DateTime?
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  closedAt  DateTime?
-
-  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  reporter User    @relation("ReportedBy", fields: [reportedBy], references: [id])
-  assignee User?   @relation("AssignedTo", fields: [assigneeId], references: [id], onDelete: SetNull)
-  verifier User?   @relation("VerifiedBy", fields: [verifiedBy], references: [id], onDelete: SetNull)
-
-  testCase  TestCase?      @relation("TestCaseToBug", fields: [testCaseId], references: [id], onDelete: SetNull)
-  execution TestExecution? @relation("ExecutionToBug", fields: [executionId], references: [id], onDelete: SetNull)
-
-  comments    BugComment[]
-  milestone   Milestone?   @relation(fields: [milestoneId], references: [id])
-  milestoneId Int?
-  
-  history        BugHistory[]
-  retestRequests BugRetestRequest[]
+  assignee          User?              @relation("AssignedTo", fields: [assigneeId], references: [id])
+  execution         TestExecution?     @relation("ExecutionToBug", fields: [executionId], references: [id])
+  milestone         Milestone?         @relation(fields: [milestoneId], references: [id])
+  project           Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reporter          User               @relation("ReportedBy", fields: [reportedBy], references: [id])
+  testCase          TestCase?          @relation("TestCaseToBug", fields: [testCaseId], references: [id])
+  verifier          User?              @relation("VerifiedBy", fields: [verifiedBy], references: [id])
+  comments          BugComment[]
+  history           BugHistory[]
+  retestRequests    BugRetestRequest[]
 
   @@index([projectId])
   @@index([status])
@@ -707,19 +598,18 @@ model BugCounter {
 }
 
 model BugComment {
-  id        Int      @id @default(autoincrement())
-  bugId     Int
-  userId    Int
-  comment   String
+  id              Int          @id @default(autoincrement())
+  bugId           Int
+  userId          Int
+  comment         String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
   parentCommentId Int?
-  editedAt  DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  bug  Bug  @relation(fields: [bugId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parent BugComment? @relation("BugCommentThread", fields: [parentCommentId], references: [id], onDelete: Cascade)
-  replies BugComment[] @relation("BugCommentThread")
+  editedAt        DateTime?
+  bug             Bug          @relation(fields: [bugId], references: [id], onDelete: Cascade)
+  parent          BugComment?  @relation("BugCommentThread", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies         BugComment[] @relation("BugCommentThread")
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([bugId])
   @@index([userId])
@@ -730,89 +620,73 @@ model BugRetestRequest {
   id        Int      @id @default(autoincrement())
   bugId     Int
   reason    String?
-  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  status    String   @default("PENDING")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  bug Bug @relation(fields: [bugId], references: [id], onDelete: Cascade)
+  bug       Bug      @relation(fields: [bugId], references: [id], onDelete: Cascade)
 
   @@index([bugId])
 }
 
 model BugHistory {
-  id              Int      @id @default(autoincrement())
-  bugId           Int
-  changedBy       Int
-  fieldName       String   // Field that changed (e.g., status, assignee, priority)
-  oldValue        String?  // Previous value
-  newValue        String?  // New value
-  changeNote      String?  // Optional note about the change
-  createdAt       DateTime @default(now())
-
-  bug  Bug  @relation(fields: [bugId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [changedBy], references: [id], onDelete: Restrict)
+  id         Int      @id @default(autoincrement())
+  bugId      Int
+  changedBy  Int
+  fieldName  String
+  oldValue   String?
+  newValue   String?
+  changeNote String?
+  createdAt  DateTime @default(now())
+  bug        Bug      @relation(fields: [bugId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [changedBy], references: [id])
 
   @@index([bugId])
   @@index([changedBy])
   @@index([createdAt])
 }
 
-// ============================================
-// MILESTONE MODELS
-// ============================================
-
 model Milestone {
-  id          Int       @id @default(autoincrement())
-  projectId   Int
-  name        String
-  description String?
-  startDate   DateTime?
-  dueDate     DateTime?
-  status      String    @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED, ON_HOLD, CANCELLED
-
+  id           Int        @id @default(autoincrement())
+  projectId    Int
+  name         String
+  description  String?
+  startDate    DateTime?
+  dueDate      DateTime?
+  status       String     @default("PLANNED")
   createdBy    Int
   assignedToId Int?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  creator    User    @relation("CreatedBy", fields: [createdBy], references: [id])
-  assignedTo User?   @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
-
-  testCases TestCase[]
-  bugs      Bug[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  bugs         Bug[]
+  assignedTo   User?      @relation("AssignedTo", fields: [assignedToId], references: [id])
+  creator      User       @relation("CreatedBy", fields: [createdBy], references: [id])
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  testCases    TestCase[]
 
   @@index([projectId])
   @@index([status])
 }
 
-// ============================================
-// NOTIFICATION & COLLABORATION MODELS
-// ============================================
-
 model Notification {
-  id            Int     @id @default(autoincrement())
+  id            Int                    @id @default(autoincrement())
   userId        Int
-  type          String // BUG_ASSIGNED, TESTCASE_ASSIGNED, etc.
+  type          String
   title         String
   message       String
-  resourceType  String? // BUG, TESTCASE, EXECUTION, etc.
+  resourceType  String?
   resourceId    Int?
   relatedUserId Int?
+  isRead        Boolean                @default(false)
+  readAt        DateTime?
+  createdAt     DateTime               @default(now())
+  expiresAt     DateTime?
   sourceType    String?
   sourceId      Int?
   actionUrl     String?
   actionType    String?
   metadata      Json?
-
-  isRead    Boolean   @default(false)
-  readAt    DateTime?
-  createdAt DateTime  @default(now())
-  expiresAt DateTime? // Notification expiration
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deliveries NotificationDelivery[]
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries    NotificationDelivery[]
 
   @@index([userId])
   @@index([isRead])
@@ -821,57 +695,50 @@ model Notification {
 }
 
 model NotificationPreference {
-  id Int @id @default(autoincrement())
-  userId Int @unique
-
-  emailEnabled Boolean @default(true)
-  emailBugCreated Boolean @default(true)
-  emailBugAssigned Boolean @default(true)
-  emailBugCommented Boolean @default(true)
-  emailBugStatusChanged Boolean @default(true)
-  emailTestFailed Boolean @default(true)
-  emailMentioned Boolean @default(true)
-  emailAnnouncements Boolean @default(true)
-
-  inAppEnabled Boolean @default(true)
-  inAppBugCreated Boolean @default(true)
-  inAppBugAssigned Boolean @default(true)
-  inAppBugCommented Boolean @default(true)
-  inAppBugStatusChanged Boolean @default(true)
-  inAppTestFailed Boolean @default(true)
-  inAppMentioned Boolean @default(true)
-  inAppAnnouncements Boolean @default(true)
-
-  digestEnabled Boolean @default(false)
-  digestFrequency String @default("daily")
-  digestTime String @default("09:00")
-
-  quietHoursEnabled Boolean @default(false)
-  quietHourStart String @default("22:00")
-  quietHourEnd String @default("08:00")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    Int      @id @default(autoincrement())
+  userId                Int      @unique
+  emailEnabled          Boolean  @default(true)
+  emailBugCreated       Boolean  @default(true)
+  emailBugAssigned      Boolean  @default(true)
+  emailBugCommented     Boolean  @default(true)
+  emailBugStatusChanged Boolean  @default(true)
+  emailTestFailed       Boolean  @default(true)
+  emailMentioned        Boolean  @default(true)
+  emailAnnouncements    Boolean  @default(true)
+  inAppEnabled          Boolean  @default(true)
+  inAppBugCreated       Boolean  @default(true)
+  inAppBugAssigned      Boolean  @default(true)
+  inAppBugCommented     Boolean  @default(true)
+  inAppBugStatusChanged Boolean  @default(true)
+  inAppTestFailed       Boolean  @default(true)
+  inAppMentioned        Boolean  @default(true)
+  inAppAnnouncements    Boolean  @default(true)
+  digestEnabled         Boolean  @default(false)
+  digestFrequency       String   @default("daily")
+  digestTime            String   @default("09:00")
+  quietHoursEnabled     Boolean  @default(false)
+  quietHourStart        String   @default("22:00")
+  quietHourEnd          String   @default("08:00")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model NotificationDelivery {
-  id Int @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   notificationId Int
-  channel String
-  status String
-  failureReason String?
-  retryCount Int @default(0)
-  nextRetryAt DateTime?
-  deliveredAt DateTime?
-  openedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  channel        String
+  status         String
+  failureReason  String?
+  retryCount     Int          @default(0)
+  nextRetryAt    DateTime?
+  deliveredAt    DateTime?
+  openedAt       DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 
   @@index([notificationId])
   @@index([status])
@@ -881,16 +748,15 @@ model NotificationDelivery {
 model DigestSchedule {
   id               Int       @id @default(autoincrement())
   userId           Int       @unique
-  frequency        String    @default("DAILY") // DAILY or WEEKLY
-  preferredTime    String    @default("09:00") // "HH:MM" format
+  frequency        String    @default("DAILY")
+  preferredTime    String    @default("09:00")
   timezone         String    @default("UTC")
   enabled          Boolean   @default(true)
   nextDigestAt     DateTime
   lastDigestSentAt DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([nextDigestAt])
@@ -898,35 +764,31 @@ model DigestSchedule {
 }
 
 model Channel {
-  id              Int      @id @default(autoincrement())
-  name            String   @unique
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
   description     String?
-  type            String   @default("GROUP") // GROUP, DIRECT
-  channelType     String   @default("general") // general, role_based, project
-  isPrivate       Boolean  @default(false)
-  isSystemChannel Boolean  @default(false)
-  allowedRoles    String[]  @default([]) // ADMIN, TESTER, DEVELOPER - for role-based channels
-  projectName     String?   // For project-based channels
-  archived        Boolean   @default(false)
+  isPrivate       Boolean          @default(false)
+  isSystemChannel Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  type            String           @default("GROUP")
   createdById     Int?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Admin controls - Lock and Disable
-  isLocked Boolean @default(false) // Channel is locked, non-admins cannot send messages
-  lockedById Int? // Admin ID who locked this channel
-  lockedAt DateTime? // When channel was locked
-
-  isDisabled Boolean @default(false) // Chat disabled, non-admins cannot access
-  disabledById Int? // Admin ID who disabled chat
-  disabledAt DateTime? // When chat was disabled
-
-  createdBy User?            @relation("ChannelsCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  lockedBy User?             @relation("LockedBy", fields: [lockedById], references: [id], onDelete: SetNull)
-  disabledBy User?           @relation("DisabledBy", fields: [disabledById], references: [id], onDelete: SetNull)
-  members   ChannelMember[]
-  messages  ChannelMessage[]
-  pinnedMessages PinnedMessage[]
+  channelType     String           @default("general")
+  allowedRoles    String[]         @default([])
+  projectName     String?
+  archived        Boolean          @default(false)
+  isLocked        Boolean          @default(false)
+  lockedById      Int?
+  lockedAt        DateTime?
+  isDisabled      Boolean          @default(false)
+  disabledById    Int?
+  disabledAt      DateTime?
+  createdBy       User?            @relation("ChannelsCreatedBy", fields: [createdById], references: [id])
+  disabledBy      User?            @relation("DisabledBy", fields: [disabledById], references: [id])
+  lockedBy        User?            @relation("LockedBy", fields: [lockedById], references: [id])
+  members         ChannelMember[]
+  messages        ChannelMessage[]
+  pinnedMessages  PinnedMessage[]
 
   @@index([isSystemChannel])
   @@index([type])
@@ -939,9 +801,8 @@ model ChannelMember {
   channelId Int
   userId    Int
   joinedAt  DateTime @default(now())
-
-  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([channelId, userId])
   @@index([channelId])
@@ -949,63 +810,41 @@ model ChannelMember {
 }
 
 model ChannelMessage {
-  id              Int      @id @default(autoincrement())
-  channelId       Int
-  userId          Int
-  message         String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // JSON reaction summary for quick lookups
+  id                Int               @id @default(autoincrement())
+  channelId         Int
+  userId            Int
+  message           String
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
   reactionsSnapshot Json?
-
-  // Pin metadata (for direct access without join)
-  isPinned   Boolean   @default(false)
-  pinnedById Int?
-  pinnedAt   DateTime?
-
-  // Admin controls - Soft delete
-  isDeleted Boolean @default(false) // Message is soft deleted
-  deletedById Int? // Admin ID who deleted this message
-  deletedAt DateTime? // When message was deleted
-
-  channel         Channel               @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  sender          User                  @relation("ChannelMessages", fields: [userId], references: [id], onDelete: Cascade)
-  deletedBy       User?                 @relation("DeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
-  
-  // Mentions in this message
-  mentions        MessageMention[]
-  
-  // Reactions to this message
-  reactions       MessageReaction[]
-  
-  // Replies to this message
-  replies         MessageReply[]        @relation("RepliedToMessage")
-  
-  // If this is a reply, the original message
-  replyToId       Int?
-  replyTo         MessageReply[]        @relation("ReplyFromMessage")
-  
-  // Pinned message reference
-  pinnedMessage   PinnedMessage?
+  isPinned          Boolean           @default(false)
+  pinnedById        Int?
+  pinnedAt          DateTime?
+  isDeleted         Boolean           @default(false)
+  deletedById       Int?
+  deletedAt         DateTime?
+  replyToId         Int?
+  channel           Channel           @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  deletedBy         User?             @relation("DeletedBy", fields: [deletedById], references: [id])
+  sender            User              @relation("ChannelMessages", fields: [userId], references: [id], onDelete: Cascade)
+  mentions          MessageMention[]
+  reactions         MessageReaction[]
+  replies           MessageReply?     @relation("RepliedToMessage")
+  replyTo           MessageReply[]    @relation("ReplyFromMessage")
+  pinnedMessage     PinnedMessage?
 
   @@index([channelId])
   @@index([userId])
   @@index([createdAt])
 }
 
-// ============================================
-// CHAT ENHANCEMENTS
-// ============================================
-
 model MessageMention {
-  id        Int      @id @default(autoincrement())
-  messageId Int
+  id              Int            @id @default(autoincrement())
+  messageId       Int
   mentionedUserId Int
-  createdAt DateTime @default(now())
-
-  message ChannelMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  mentionedUser User @relation("MessageMentions", fields: [mentionedUserId], references: [id], onDelete: Cascade)
+  createdAt       DateTime       @default(now())
+  mentionedUser   User           @relation("MessageMentions", fields: [mentionedUserId], references: [id], onDelete: Cascade)
+  message         ChannelMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   @@unique([messageId, mentionedUserId])
   @@index([messageId])
@@ -1013,14 +852,13 @@ model MessageMention {
 }
 
 model MessageReaction {
-  id        Int      @id @default(autoincrement())
+  id        Int            @id @default(autoincrement())
   messageId Int
   userId    Int
-  emoji     String   // 👍 👀 ✅ ❗ etc
-  createdAt DateTime @default(now())
-
-  message ChannelMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  user    User    @relation("MessageReactions", fields: [userId], references: [id], onDelete: Cascade)
+  emoji     String
+  createdAt DateTime       @default(now())
+  message   ChannelMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User           @relation("MessageReactions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([messageId, userId, emoji])
   @@index([messageId])
@@ -1028,60 +866,46 @@ model MessageReaction {
 }
 
 model MessageReply {
-  id              Int      @id @default(autoincrement())
-  messageId       Int      // The reply message itself
-  replyToId       Int      // The original message being replied to
-  createdAt       DateTime @default(now())
-
+  id        Int            @id @default(autoincrement())
+  messageId Int            @unique
+  replyToId Int
+  createdAt DateTime       @default(now())
   message   ChannelMessage @relation("RepliedToMessage", fields: [messageId], references: [id], onDelete: Cascade)
   replyTo   ChannelMessage @relation("ReplyFromMessage", fields: [replyToId], references: [id], onDelete: Cascade)
 
-  @@unique([messageId])
   @@index([messageId])
   @@index([replyToId])
 }
 
 model PinnedMessage {
-  id        Int      @id @default(autoincrement())
-  channelId Int
-  messageId Int      @unique
-  pinnedBy  Int
-  pinnedAt  DateTime @default(now())
-
-  channel   Channel         @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  message   ChannelMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  pinnedByUser User         @relation("PinnedMessages", fields: [pinnedBy], references: [id], onDelete: Cascade)
+  id           Int            @id @default(autoincrement())
+  channelId    Int
+  messageId    Int            @unique
+  pinnedBy     Int
+  pinnedAt     DateTime       @default(now())
+  channel      Channel        @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  message      ChannelMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  pinnedByUser User           @relation("PinnedMessages", fields: [pinnedBy], references: [id], onDelete: Cascade)
 
   @@unique([channelId, messageId])
   @@index([channelId])
   @@index([pinnedAt])
 }
 
-// ============================================
-// DIRECT MESSAGING
-// ============================================
-
 model DirectMessage {
-  id          Int      @id @default(autoincrement())
+  id          Int                     @id @default(autoincrement())
   senderId    Int
   recipientId Int
   message     String
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  sender    User @relation("DirectMessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
-  recipient User @relation("DirectMessagesReceived", fields: [recipientId], references: [id], onDelete: Cascade)
-
-  // Reactions on DMs
-  reactions DirectMessageReaction[]
-
-  // Replies to DMs
-  replies DirectMessageReply[] @relation("RepliedToMessage")
-
-  // If this is a reply, the original message
-  replyToId Int?
-  replyTo DirectMessageReply[] @relation("ReplyFromMessage")
+  isRead      Boolean                 @default(false)
+  replyToId   Int?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  recipient   User                    @relation("DirectMessagesReceived", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender      User                    @relation("DirectMessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
+  reactions   DirectMessageReaction[]
+  replies     DirectMessageReply?     @relation("RepliedToMessage")
+  replyTo     DirectMessageReply[]    @relation("ReplyFromMessage")
 
   @@index([senderId])
   @@index([recipientId])
@@ -1090,14 +914,13 @@ model DirectMessage {
 }
 
 model DirectMessageReaction {
-  id        Int      @id @default(autoincrement())
+  id        Int           @id @default(autoincrement())
   messageId Int
   userId    Int
   emoji     String
-  createdAt DateTime @default(now())
-
-  message DirectMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  user    User         @relation("DirectMessageReactions", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+  message   DirectMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User          @relation("DirectMessageReactions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([messageId, userId, emoji])
   @@index([messageId])
@@ -1105,86 +928,78 @@ model DirectMessageReaction {
 }
 
 model DirectMessageReply {
-  id        Int      @id @default(autoincrement())
-  messageId Int      // The reply message itself
-  replyToId Int      // The original message being replied to
-  createdAt DateTime @default(now())
+  id        Int           @id @default(autoincrement())
+  messageId Int           @unique
+  replyToId Int
+  createdAt DateTime      @default(now())
+  message   DirectMessage @relation("RepliedToMessage", fields: [messageId], references: [id], onDelete: Cascade)
+  replyTo   DirectMessage @relation("ReplyFromMessage", fields: [replyToId], references: [id], onDelete: Cascade)
 
-  message DirectMessage @relation("RepliedToMessage", fields: [messageId], references: [id], onDelete: Cascade)
-  replyTo DirectMessage @relation("ReplyFromMessage", fields: [replyToId], references: [id], onDelete: Cascade)
-
-  @@unique([messageId])
   @@index([messageId])
   @@index([replyToId])
 }
 
-// ============================================
-// API & INTEGRATION MODELS
-// ============================================
-
 model ApiKey {
   id         Int       @id @default(autoincrement())
-  projectId  Int
   name       String
-  keyHash    String    @unique
   isActive   Boolean   @default(true)
-  rateLimit  Int       @default(1000)
   lastUsedAt DateTime?
-  createdBy  Int
   createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
   expiresAt  DateTime?
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  creator User    @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  createdBy  Int
+  keyHash    String    @unique
+  projectId  Int
+  rateLimit  Int       @default(1000)
+  updatedAt  DateTime  @updatedAt
+  creator    User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@index([isActive])
 }
 
 model Webhook {
-  id              Int       @id @default(autoincrement())
+  id              Int               @id @default(autoincrement())
   projectId       Int
-  name            String
   url             String
-  events          String[]  @default([]) // Array of events: BUG_CREATED, TEST_COMPLETED, etc.
-  description     String?
-  isActive        Boolean   @default(true)
+  isActive        Boolean           @default(true)
   secret          String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  autoDisabledAt  DateTime?
   createdById     Int
-  failureCount    Int       @default(0)
-  lastSuccessAt   DateTime?
+  description     String?
+  events          String[]          @default([])
+  failureCount    Int               @default(0)
   lastFailureAt   DateTime?
+  lastSuccessAt   DateTime?
   lastTriggeredAt DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  project    Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  creator    User              @relation("WebhooksCreated", fields: [createdById], references: [id], onDelete: Cascade)
-  deliveries WebhookDelivery[]
+  name            String
+  creator         User              @relation("WebhooksCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  deliveries      WebhookDelivery[]
 
   @@index([projectId])
   @@index([isActive])
 }
 
 model WebhookDelivery {
-  id            Int       @id @default(autoincrement())
-  webhookId     Int
-  event         String
-  payload       String // JSON stringified
-  status        String    @default("PENDING") // PENDING, RETRYING, SUCCESS, FAILED
-  attemptCount  Int       @default(0)
-  scheduledAt   DateTime
-  deliveredAt   DateTime?
-  responseCode  Int?
-  responseBody  String?
-  errorMessage  String?
-  durationMs    Int?
-  nextRetryAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  id           Int       @id @default(autoincrement())
+  webhookId    Int
+  event        String
+  payload      String
+  status       String    @default("PENDING")
+  attemptCount Int       @default(0)
+  scheduledAt  DateTime
+  deliveredAt  DateTime?
+  responseCode Int?
+  responseBody String?
+  errorMessage String?
+  durationMs   Int?
+  nextRetryAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  webhook      Webhook   @relation(fields: [webhookId], references: [id], onDelete: Cascade)
 
   @@index([webhookId])
   @@index([status])
@@ -1196,7 +1011,7 @@ model WebhookLog {
   id             Int      @id @default(autoincrement())
   webhookId      Int
   event          String
-  payload        String? // JSON stringified
+  payload        String?
   responseStatus Int?
   responseBody   String?
   error          String?
@@ -1206,18 +1021,14 @@ model WebhookLog {
   @@index([createdAt])
 }
 
-// ============================================
-// SEARCH & CUSTOM FIELD MODELS
-// ============================================
-
 model SearchIndex {
   id           Int      @id @default(autoincrement())
   projectId    Int
-  resourceType String // TESTCASE, BUG, EXECUTION
+  resourceType String
   resourceId   Int
   title        String
   description  String?
-  searchText   String? // Concatenated searchable text
+  searchText   String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -1230,31 +1041,26 @@ model CustomField {
   id         Int      @id @default(autoincrement())
   projectId  Int
   name       String
-  fieldType  String // TEXT, NUMBER, SELECT, DATE, CHECKBOX
-  options    String[] @default([]) // For SELECT type
+  fieldType  String
+  options    String[] @default([])
   isRequired Boolean  @default(false)
   isActive   Boolean  @default(true)
   order      Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, name])
   @@index([projectId])
 }
 
-// ============================================
-// SCHEDULED REPORT & ANALYTICS
-// ============================================
-
 model ScheduledReport {
   id         Int       @id @default(autoincrement())
   projectId  Int
   name       String
-  type       String // EXECUTION_SUMMARY, BUG_SUMMARY, CUSTOM
-  frequency  String // DAILY, WEEKLY, MONTHLY
-  recipients String[]  @default([]) // Email addresses
+  type       String
+  frequency  String
+  recipients String[]  @default([])
   isActive   Boolean   @default(true)
   lastSentAt DateTime?
   nextSendAt DateTime?
@@ -1265,23 +1071,18 @@ model ScheduledReport {
   @@index([isActive])
 }
 
-// ============================================
-// ADMIN AUDIT LOG FOR CHAT CONTROLS
-// ============================================
-
 model ChatAuditLog {
-  id          Int      @id @default(autoincrement())
-  adminId     Int
-  adminName   String   // Denormalized for readability
-  actionType  String   // MESSAGE_DELETED, USER_MUTED, USER_UNMUTED, CHANNEL_LOCKED, CHANNEL_UNLOCKED, CHAT_DISABLED, CHAT_ENABLED
-  targetId    Int?     // message_id, user_id, or channel_id
-  targetName  String?  // For readability
-  targetType  String?  // MESSAGE, USER, CHANNEL
-  reason      String?  // Optional reason provided by admin
-  timestamp   DateTime @default(now())
-  createdAt   DateTime @default(now())
-
-  admin User @relation("AuditLogAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+  id         Int      @id @default(autoincrement())
+  adminId    Int
+  adminName  String
+  actionType String
+  targetId   Int?
+  targetName String?
+  targetType String?
+  reason     String?
+  timestamp  DateTime @default(now())
+  createdAt  DateTime @default(now())
+  admin      User     @relation("AuditLogAdmin", fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([adminId])
   @@index([actionType])

@@ -7,6 +7,7 @@ import { getPrismaClient } from '../lib/prisma.js';
 import { createAuthGuards } from '../lib/rbac.js';
 import { requirePermission } from '../lib/policy.js';
 import { logError } from '../lib/logger.js';
+import { logAuditAction } from '../services/auditService.js';
 import {
   generateExecutionReport,
   generateTesterPerformanceReport,
@@ -1188,6 +1189,511 @@ export async function testerRoutes(fastify) {
         reply.send(metrics);
       } catch (error) {
         logError('Error fetching project metrics:', error);
+        reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  // ============================================
+  // ADVANCED TESTER WORKFLOWS
+  // ============================================
+
+  /**
+   * Fail test execution step and create bug immediately
+   * Workflow: Tester fails a step and creates a bug in one action
+   */
+  fastify.post(
+    '/api/tester/test-executions/:executionId/steps/:stepId/fail-and-create-bug',
+    { preHandler: [requirePermission('bug:create')] },
+    async (request, reply) => {
+      try {
+        const { executionId, stepId } = request.params;
+        const userId = request.user.id;
+        const {
+          bugTitle,
+          bugDescription,
+          environment,
+          priority = 'P2',
+          severity = 'MINOR',
+          stepsToReproduce,
+          expectedBehavior,
+          actualBehavior,
+        } = request.body;
+
+        // Validate required fields
+        if (!bugTitle || !bugDescription) {
+          return reply.code(400).send({
+            error: 'bugTitle and bugDescription are required',
+          });
+        }
+
+        if (!environment) {
+          return reply.code(400).send({
+            error: 'environment is required (DEVELOPMENT, STAGING, UAT, PRODUCTION)',
+          });
+        }
+
+        // Get execution and step details
+        const execution = await prisma.testExecution.findUnique({
+          where: { id: Number(executionId) },
+          include: {
+            testCase: {
+              select: {
+                id: true,
+                name: true,
+                projectId: true,
+              },
+            },
+            testRun: {
+              select: {
+                projectId: true,
+              },
+            },
+          },
+        });
+
+        if (!execution) {
+          return reply.code(404).send({ error: 'Execution not found' });
+        }
+
+        const projectId = execution.testRun.projectId;
+
+        // Verify user has access to the project
+        const projectAccess = await prisma.project.findUnique({
+          where: { id: projectId },
+          include: {
+            userAllocations: {
+              where: { userId, isActive: true },
+            },
+          },
+        });
+
+        if (!projectAccess?.userAllocations?.length) {
+          return reply.code(403).send({ error: 'Not authorized to access this project' });
+        }
+
+        // Update step status to FAILED
+        await prisma.testExecutionStep.update({
+          where: {
+            executionId_stepId: {
+              executionId: Number(executionId),
+              stepId: Number(stepId),
+            },
+          },
+          data: {
+            status: 'FAILED',
+            completedAt: new Date(),
+          },
+        });
+
+        // Create the bug
+        const bug = await prisma.bug.create({
+          data: {
+            projectId,
+            bugNumber: '', // Will be set after we generate it
+            title: bugTitle,
+            description: bugDescription,
+            environment,
+            priority,
+            severity,
+            status: 'NEW',
+            reportedBy: userId,
+            testCaseId: execution.testCase.id,
+            executionId: Number(executionId),
+            stepsToReproduce: stepsToReproduce || null,
+            expectedBehavior: expectedBehavior || null,
+            actualBehavior: actualBehavior || null,
+          },
+        });
+
+        // Generate unique bug number
+        const counter = await prisma.bugCounter.upsert({
+          where: { projectId },
+          create: { projectId, nextNumber: 1 },
+          update: { nextNumber: { increment: 1 } },
+        });
+
+        const project = await prisma.project.findUnique({
+          where: { id: projectId },
+          select: { key: true },
+        });
+
+        const bugNumber = `${project.key}-${counter.nextNumber.toString().padStart(3, '0')}`;
+
+        // Update bug with generated number
+        const updatedBug = await prisma.bug.update({
+          where: { id: bug.id },
+          data: { bugNumber },
+          include: {
+            reporter: { select: { id: true, name: true, email: true } },
+            assignee: { select: { id: true, name: true, email: true } },
+            testCase: { select: { id: true, name: true } },
+            execution: { select: { id: true, status: true } },
+          },
+        });
+
+        // Log audit
+        await logAuditAction(userId, 'BUG_CREATED_FROM_FAILED_TEST', {
+          resourceType: 'BUG',
+          resourceId: updatedBug.id,
+          resourceName: bugNumber,
+          projectId,
+          description: `Bug created from failed test step: ${updatedBug.title}`,
+          metadata: { executionId, stepId, testCaseId: execution.testCase.id },
+        });
+
+        reply.code(201).send({
+          success: true,
+          message: 'Step marked as FAILED and bug created',
+          bug: updatedBug,
+          stepUpdateConfirmation: {
+            executionId,
+            stepId,
+            status: 'FAILED',
+          },
+        });
+      } catch (error) {
+        logError('Error failing step and creating bug:', error);
+        reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Verify a bug fix (tester marks bug as verified after retesting)
+   */
+  fastify.post(
+    '/api/tester/projects/:projectId/bugs/:bugId/verify',
+    { preHandler: [requirePermission('bug:verify')] },
+    async (request, reply) => {
+      try {
+        const { projectId, bugId } = request.params;
+        const userId = request.user.id;
+        const { testExecutionId, notes } = request.body;
+
+        // Get bug
+        const bug = await prisma.bug.findUnique({
+          where: { id: Number(bugId) },
+          include: {
+            testCase: { select: { id: true, name: true } },
+            execution: { select: { id: true, status: true } },
+          },
+        });
+
+        if (!bug) {
+          return reply.code(404).send({ error: 'Bug not found' });
+        }
+
+        if (Number(bug.projectId) !== Number(projectId)) {
+          return reply.code(403).send({ error: 'Bug not in this project' });
+        }
+
+        if (!['FIXED', 'REOPENED'].includes(bug.status)) {
+          return reply.code(400).send({
+            error: `Bug must be in FIXED or REOPENED status to verify (current: ${bug.status})`,
+          });
+        }
+
+        // Update bug status to VERIFIED
+        const verifiedBug = await prisma.bug.update({
+          where: { id: Number(bugId) },
+          data: {
+            status: 'VERIFIED',
+            verifiedBy: userId,
+            verifiedAt: new Date(),
+          },
+          include: {
+            reporter: { select: { id: true, name: true, email: true } },
+            assignee: { select: { id: true, name: true, email: true } },
+            verifier: { select: { id: true, name: true, email: true } },
+            testCase: { select: { id: true, name: true } },
+          },
+        });
+
+        // Log history
+        await prisma.bugHistory.create({
+          data: {
+            bugId: Number(bugId),
+            changedBy: userId,
+            fieldName: 'status',
+            oldValue: bug.status,
+            newValue: 'VERIFIED',
+            changeNote: notes || 'Bug verified by tester',
+          },
+        });
+
+        // Log audit
+        await logAuditAction(userId, 'BUG_VERIFIED', {
+          resourceType: 'BUG',
+          resourceId: Number(bugId),
+          resourceName: bug.bugNumber,
+          projectId: Number(projectId),
+          description: `Bug marked as VERIFIED: ${bug.title}`,
+          metadata: { testExecutionId },
+        });
+
+        reply.send({
+          success: true,
+          message: 'Bug verified successfully',
+          bug: verifiedBug,
+        });
+      } catch (error) {
+        logError('Error verifying bug:', error);
+        reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Request bug retest (tester asks for retest after developer fix)
+   */
+  fastify.post(
+    '/api/tester/projects/:projectId/bugs/:bugId/retest-request',
+    { preHandler: [requireAuth, requireRoles(['TESTER'])] },
+    async (request, reply) => {
+      try {
+        const { projectId, bugId } = request.params;
+        const userId = request.user.id;
+        const { reason } = request.body;
+
+        // Get bug
+        const bug = await prisma.bug.findUnique({
+          where: { id: Number(bugId) },
+          include: {
+            assignee: { select: { id: true, name: true, email: true } },
+          },
+        });
+
+        if (!bug) {
+          return reply.code(404).send({ error: 'Bug not found' });
+        }
+
+        if (Number(bug.projectId) !== Number(projectId)) {
+          return reply.code(403).send({ error: 'Bug not in this project' });
+        }
+
+        if (bug.status !== 'FIXED') {
+          return reply.code(400).send({
+            error: `Bug must be in FIXED status to request retest (current: ${bug.status})`,
+          });
+        }
+
+        // Create retest request
+        const retestRequest = await prisma.bugRetestRequest.create({
+          data: {
+            bugId: Number(bugId),
+            reason: reason || null,
+            status: 'PENDING',
+          },
+        });
+
+        // Log audit
+        await logAuditAction(userId, 'BUG_RETEST_REQUESTED', {
+          resourceType: 'BUG',
+          resourceId: Number(bugId),
+          resourceName: bug.bugNumber,
+          projectId: Number(projectId),
+          description: `Retest requested for bug: ${bug.title}`,
+          metadata: { reason },
+        });
+
+        reply.code(201).send({
+          success: true,
+          message: 'Retest request created successfully',
+          retestRequest,
+          bugNumber: bug.bugNumber,
+        });
+      } catch (error) {
+        logError('Error requesting bug retest:', error);
+        reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Get test suite execution metrics and analytics
+   */
+  fastify.get(
+    '/api/tester/test-suites/:suiteId/metrics',
+    { preHandler: [requireAuth, requireRoles(['TESTER', 'DEVELOPER', 'ADMIN'])] },
+    async (request, reply) => {
+      try {
+        const { suiteId } = request.params;
+
+        // Get suite details
+        const suite = await prisma.testSuite.findUnique({
+          where: { id: Number(suiteId) },
+          include: {
+            testCases: {
+              select: {
+                testCaseId: true,
+              },
+            },
+          },
+        });
+
+        if (!suite) {
+          return reply.code(404).send({ error: 'Test suite not found' });
+        }
+
+        const testCaseIds = suite.testCases.map((tc) => tc.testCaseId);
+
+        // Get execution metrics
+        const suiteRuns = await prisma.testSuiteRun.findMany({
+          where: { suiteId: Number(suiteId) },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+        });
+
+        // Calculate metrics
+        const totalRuns = suiteRuns.length;
+        const passedRuns = suiteRuns.filter((r) => r.status === 'PASSED').length;
+        const failedRuns = suiteRuns.filter((r) => r.status === 'FAILED').length;
+        const passRate = totalRuns > 0 ? ((passedRuns / totalRuns) * 100).toFixed(2) : 0;
+
+        // Average execution time
+        const completedRuns = suiteRuns.filter((r) => r.completedAt);
+        let avgExecutionTime = 0;
+        if (completedRuns.length > 0) {
+          const totalTime = completedRuns.reduce((sum, run) => {
+            if (run.completedAt && run.startedAt) {
+              return sum + (new Date(run.completedAt) - new Date(run.startedAt));
+            }
+            return sum;
+          }, 0);
+          avgExecutionTime = Math.round(totalTime / completedRuns.length / 1000); // seconds
+        }
+
+        // Test case statistics
+        const testCaseStats = await prisma.testExecution.groupBy({
+          by: ['status'],
+          where: {
+            testCaseId: { in: testCaseIds },
+          },
+          _count: { status: true },
+        });
+
+        // Recent executions
+        const recentExecutions = await prisma.testExecution.findMany({
+          where: {
+            testCaseId: { in: testCaseIds },
+          },
+          include: {
+            testCase: {
+              select: { id: true, name: true },
+            },
+          },
+          orderBy: { startedAt: 'desc' },
+          take: 10,
+        });
+
+        reply.send({
+          suite: {
+            id: suite.id,
+            name: suite.name,
+            description: suite.description,
+            totalTestCases: testCaseIds.length,
+          },
+          metrics: {
+            totalRuns,
+            passedRuns,
+            failedRuns,
+            passRate: Number(passRate),
+            avgExecutionTimeSeconds: avgExecutionTime,
+          },
+          testCaseStatistics: testCaseStats,
+          recentRuns: suiteRuns.slice(0, 5),
+          recentExecutions,
+        });
+      } catch (error) {
+        logError('Error fetching test suite metrics:', error);
+        reply.code(500).send({ error: error.message });
+      }
+    },
+  );
+
+  /**
+   * Export test cases to CSV
+   */
+  fastify.get(
+    '/api/tester/projects/:projectId/test-cases/export/csv',
+    { preHandler: [requireAuth, requireRoles(['TESTER', 'DEVELOPER', 'ADMIN'])] },
+    async (request, reply) => {
+      try {
+        const { projectId } = request.params;
+
+        // Get all test cases
+        const testCases = await prisma.testCase.findMany({
+          where: {
+            projectId: Number(projectId),
+            isDeleted: false,
+          },
+          include: {
+            steps: {
+              orderBy: { stepNumber: 'asc' },
+            },
+            creator: { select: { name: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        if (testCases.length === 0) {
+          return reply.code(404).send({ error: 'No test cases found to export' });
+        }
+
+        // Generate CSV
+        const csvHeaders = [
+          'Test Case ID',
+          'Name',
+          'Description',
+          'Type',
+          'Priority',
+          'Severity',
+          'Status',
+          'Pre-conditions',
+          'Post-conditions',
+          'Steps',
+          'Expected Results',
+          'Created By',
+          'Created At',
+          'Tags',
+        ];
+
+        const csvRows = testCases.map((tc) => [
+          tc.testCaseId || tc.id,
+          `"${tc.name}"`,
+          `"${tc.description || ''}"`,
+          tc.type,
+          tc.priority,
+          tc.severity,
+          tc.status,
+          `"${tc.preconditions || ''}"`,
+          `"${tc.postconditions || ''}"`,
+          `"${tc.steps
+            .map((s) => `Step ${s.stepNumber}: ${s.action}`)
+            .join(' | ')}"`,
+          `"${tc.steps
+            .map((s) => `Step ${s.stepNumber}: ${s.expectedResult}`)
+            .join(' | ')}"`,
+          tc.creator.name,
+          new Date(tc.createdAt).toISOString(),
+          tc.tags.join('; '),
+        ]);
+
+        const csv = [
+          csvHeaders.join(','),
+          ...csvRows.map((row) => row.join(',')),
+        ].join('\n');
+
+        reply
+          .header('Content-Type', 'text/csv')
+          .header(
+            'Content-Disposition',
+            `attachment; filename="test-cases-${projectId}-${Date.now()}.csv"`,
+          )
+          .send(csv);
+      } catch (error) {
+        logError('Error exporting test cases:', error);
         reply.code(500).send({ error: error.message });
       }
     },

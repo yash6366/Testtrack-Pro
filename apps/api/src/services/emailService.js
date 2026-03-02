@@ -392,6 +392,70 @@ export async function sendBugStatusChangedEmail(recipientEmail, bugData, oldStat
 }
 
 /**
+ * Send generic notification email
+ * Used by the notification system to send in-app notifications via email as well
+ * @param {string} recipientEmail - Recipient email address
+ * @param {Object} notification - Notification object with title, message, type, etc.
+ * @returns {Promise<Object>} Resend response
+ */
+export async function sendNotificationEmail(recipientEmail, notification) {
+  const notificationUrl = `${FRONTEND_URL}`;
+
+  try {
+    // Build notification type icon
+    const typeIcons = {
+      BUG: '🐛',
+      TEST: '✅',
+      DEPLOYMENT: '🚀',
+      MILESTONE: '🎯',
+      TEAM: '👥',
+      ALERT: '⚠️',
+      INFO: 'ℹ️',
+    };
+
+    const icon = typeIcons[notification.type] || '📢';
+
+    const response = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+      to: recipientEmail,
+      subject: `${icon} ${notification.title}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 8px 8px 0 0; color: white;">
+            <h2 style="margin: 0; font-size: 24px;">${icon} ${notification.title}</h2>
+            ${notification.sourceType ? `<p style="margin: 5px 0 0 0; opacity: 0.9;"><strong>${notification.sourceType}</strong></p>` : ''}
+          </div>
+
+          <div style="padding: 20px; background: white; border: 1px solid #e0e0e0; border-top: none;">
+            <p style="line-height: 1.6; margin: 0; word-break: break-word; white-space: pre-wrap;">${notification.message || ''}</p>
+            
+            ${notification.actionUrl ? `
+              <div style="margin-top: 20px; text-align: center;">
+                <a href="${notification.actionUrl}" style="background-color: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                  ${notification.actionType === 'LINK' ? 'View Details' : 'Take Action'}
+                </a>
+              </div>
+            ` : ''}
+          </div>
+
+          <div style="padding: 15px; background: #f0f0f0; border-radius: 0 0 8px 8px; font-size: 12px; color: #666; text-align: center;">
+            <p style="margin: 0;">You received this notification because you're part of the project.</p>
+            <p style="margin: 5px 0 0 0;">
+              <a href="${FRONTEND_URL}/notifications/preferences" style="color: #667eea; text-decoration: none;">Manage notification preferences</a>
+            </p>
+          </div>
+        </div>
+      `,
+    });
+
+    return response;
+  } catch (error) {
+    logError('Failed to send notification email', { error, recipientEmail, title: notification.title });
+    throw new Error('Failed to send notification email');
+  }
+}
+
+/**
  * Generic function to send an email
  * @param {Object} options - Email options
  * @param {string} options.to - Recipient email
