@@ -5,3 +5,7 @@ export { useSocket } from './useSocket';
 export { useTheme } from './useTheme';
 export { useBug } from './useBug';
 export { useBugList } from './useBugList';
+
+// New API service hooks
+export { useBugList as useBugAPI, useBug as useBugDetail, useCreateBug, useUpdateBug, useBugComments } from './useBugAPI.js';
+export { useProjectList, useProject as useProjectDetail, useProjectMembers, useProjectStats } from './useProjectAPI.js';

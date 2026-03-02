@@ -1,0 +1,125 @@
+# =============================================================================
+# TestTrack Pro - Docker Compose (Local Development)
+# =============================================================================
+# This configuration is for local development with hot-reloading
+# For production deployment, use docker-compose.production.yml
+
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: testtrack-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: testtrack
+      POSTGRES_PASSWORD: testtrack_dev_password
+      POSTGRES_DB: testtrack_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./apps/api/prisma/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testtrack"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - testtrack-network
+
+  # Redis Cache & Pub/Sub
+  redis:
+    image: redis:7-alpine
+    container_name: testtrack-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass testtrack_redis_password
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - testtrack-network
+
+  # API Backend (Development mode with hot-reload)
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: dependencies
+    container_name: testtrack-api-dev
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    env_file:
+      - apps/api/.env
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://testtrack:testtrack_dev_password@postgres:5432/testtrack_dev
+      REDIS_URL: redis://:testtrack_redis_password@redis:6379
+      PORT: 3001
+    volumes:
+      # Mount source code for hot-reload
+      - ./apps/api:/app/apps/api
+      - ./packages/shared:/app/packages/shared
+      # Prevent node_modules conflicts
+      - /app/node_modules
+      - /app/apps/api/node_modules
+    command: sh -c "cd apps/api && pnpm exec prisma migrate deploy && pnpm run dev"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - testtrack-network
+
+  # Web Frontend (Development mode with Vite hot-reload)
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: dependencies
+    container_name: testtrack-web-dev
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:3001
+      VITE_WS_URL: ws://localhost:3001
+      VITE_APP_NAME: TestTrack Pro
+      VITE_APP_VERSION: 0.6.2
+    volumes:
+      # Mount source code for hot-reload
+      - ./apps/web:/app/apps/web
+      - ./packages/shared:/app/packages/shared
+      # Prevent node_modules conflicts
+      - /app/node_modules
+      - /app/apps/web/node_modules
+    command: sh -c "cd apps/web && pnpm run dev --host 0.0.0.0"
+    depends_on:
+      - api
+    networks:
+      - testtrack-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  testtrack-network:
+    driver: bridge

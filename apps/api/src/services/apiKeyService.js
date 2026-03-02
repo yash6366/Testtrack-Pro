@@ -1,23 +1,36 @@
 /**
  * API KEY SERVICE
  * Manages API key generation, validation, and revocation for CI/CD integrations
+ * CRITICAL: Uses bcrypt hashing (not SHA256) for API key security
  */
 
 import { getPrismaClient } from '../lib/prisma.js';
 import { logAuditAction } from './auditService.js';
 import { assertPermissionContext } from '../lib/policy.js';
+import { logInfo, logError, logWarn } from '../lib/logger.js';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 const prisma = getPrismaClient();
+const KEY_PREFIX = 'sk_';  // Prefix for API keys: sk_abc123...
+const KEY_LENGTH = 48;  // 48 bytes = 64 chars in hex
+const BCRYPT_ROUNDS = 12;  // Same security level as password hashing
 
-// Generate secure random key
+/**
+ * Generate secure random API key
+ * Returns: sk_<48-byte-random-hex>
+ */
 function generateApiKey() {
-  return crypto.randomBytes(32).toString('hex');
+  const randomBytes = crypto.randomBytes(KEY_LENGTH);
+  return KEY_PREFIX + randomBytes.toString('hex');
 }
 
-// Hash API key for storage
-function hashApiKey(key) {
-  return crypto.createHash('sha256').update(key).digest('hex');
+/**
+ * Hash API key using bcrypt (same as password hashing)
+ * IMPORTANT: Must use bcrypt, not SHA256! API keys are sensitive credentials.
+ */
+async function hashApiKey(key) {
+  return await bcrypt.hash(key, BCRYPT_ROUNDS);
 }
 
 // Create new API key
@@ -41,36 +54,44 @@ export async function createApiKey(projectId, data, userId, permissionContext = 
     throw new Error('API key with this name already exists');
   }
 
-  // Generate the key
-  const rawKey = generateApiKey();
-  const keyHash = hashApiKey(rawKey);
+  try {
+    // Generate the key
+    const rawKey = generateApiKey();
+    const keyHash = await hashApiKey(rawKey);  // Now async with bcrypt
 
-  const apiKey = await prisma.apiKey.create({
-    data: {
-      projectId: Number(projectId),
-      name,
-      keyHash,
-      expiresAt: expiresAt ? new Date(expiresAt) : null,
-      rateLimit: Number(rateLimit),
-      isActive: true,
-      createdBy: userId,
-    },
-    include: {
-      creator: { select: { id: true, name: true, email: true } },
-    },
-  });
+    const apiKey = await prisma.apiKey.create({
+      data: {
+        projectId: Number(projectId),
+        name,
+        keyHash,
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+        rateLimit: Number(rateLimit),
+        isActive: true,
+        createdBy: userId,
+      },
+      include: {
+        creator: { select: { id: true, name: true, email: true } },
+      },
+    });
 
-  await logAuditAction(userId, 'APIKEY_CREATED', {
-    resourceType: 'APIKEY',
-    resourceId: apiKey.id,
-    resourceName: apiKey.name,
-    projectId: apiKey.projectId,
-  });
+    await logAuditAction(userId, 'APIKEY_CREATED', {
+      resourceType: 'APIKEY',
+      resourceId: apiKey.id,
+      resourceName: apiKey.name,
+      projectId: apiKey.projectId,
+    });
 
-  return {
-    ...apiKey,
-    key: rawKey, // Return the unhashed key only at creation
-  };
+    logInfo('API key created securely', { userId, projectId, keyId: apiKey.id });
+
+    return {
+      ...apiKey,
+      key: rawKey, // Return the unhashed key only at creation
+      warning: 'Store this key securely. You will not see it again after this response.',
+    };
+  } catch (error) {
+    logError('Failed to create API key', error, { userId, projectId });
+    throw error;
+  }
 }
 
 // Get all API keys for project
@@ -138,37 +159,48 @@ export async function getApiKeyById(apiKeyId, projectId) {
 
 // Validate API key
 export async function validateApiKey(apiKey) {
-  const keyHash = hashApiKey(apiKey);
+  if (!apiKey || !apiKey.startsWith(KEY_PREFIX)) {
+    return { valid: false, reason: 'Invalid API key format' };
+  }
 
-  const key = await prisma.apiKey.findUnique({
-    where: { keyHash },
-    include: { project: true },
-  });
+  try {
+    // Get all active, non-expired keys for comparison
+    // We can't use keyHash in WHERE because we need to compare with bcrypt
+    const keys = await prisma.apiKey.findMany({
+      where: {
+        isActive: true,
+        expiresAt: { gt: new Date() },  // Not expired
+      },
+      include: { project: true },
+      take: 100,  // Reasonable limit to prevent DOS
+    });
 
-  if (!key) {
+    // Check each key with bcrypt.compare
+    for (const key of keys) {
+      const isMatch = await bcrypt.compare(apiKey, key.keyHash);
+      if (isMatch) {
+        // Update last used timestamp (non-blocking)
+        prisma.apiKey.update({
+          where: { id: key.id },
+          data: { lastUsedAt: new Date() },
+        }).catch(err => logWarn('Failed to update API key lastUsedAt', err));
+
+        logInfo('API key validated', { keyId: key.id });
+
+        return {
+          valid: true,
+          projectId: key.projectId,
+          name: key.name,
+          rateLimit: key.rateLimit,
+        };
+      }
+    }
+
     return { valid: false, reason: 'Invalid API key' };
+  } catch (error) {
+    logError('API key validation error', error);
+    return { valid: false, reason: 'Validation error' };
   }
-
-  if (!key.isActive) {
-    return { valid: false, reason: 'API key has been revoked' };
-  }
-
-  if (key.expiresAt && new Date(key.expiresAt) < new Date()) {
-    return { valid: false, reason: 'API key has expired' };
-  }
-
-  // Update last used timestamp
-  await prisma.apiKey.update({
-    where: { id: key.id },
-    data: { lastUsedAt: new Date() },
-  });
-
-  return {
-    valid: true,
-    projectId: key.projectId,
-    name: key.name,
-    rateLimit: key.rateLimit,
-  };
 }
 
 // Revoke API key
@@ -284,26 +316,34 @@ export async function regenerateApiKey(apiKeyId, userId, projectId, permissionCo
     throw new Error('API key not found');
   }
 
-  const rawKey = generateApiKey();
-  const keyHash = hashApiKey(rawKey);
+  try {
+    const rawKey = generateApiKey();
+    const keyHash = await hashApiKey(rawKey);  // Now async with bcrypt
 
-  const updated = await prisma.apiKey.update({
-    where: { id: Number(apiKeyId) },
-    data: { keyHash },
-    include: { creator: { select: { id: true, name: true, email: true } } },
-  });
+    const updated = await prisma.apiKey.update({
+      where: { id: Number(apiKeyId) },
+      data: { keyHash },
+      include: { creator: { select: { id: true, name: true, email: true } } },
+    });
 
-  await logAuditAction(userId, 'APIKEY_REGENERATED', {
-    resourceType: 'APIKEY',
-    resourceId: apiKeyId,
-    resourceName: updated.name,
-    projectId: updated.projectId,
-  });
+    await logAuditAction(userId, 'APIKEY_REGENERATED', {
+      resourceType: 'APIKEY',
+      resourceId: apiKeyId,
+      resourceName: updated.name,
+      projectId: updated.projectId,
+    });
 
-  return {
-    ...updated,
-    key: rawKey,
-  };
+    logInfo('API key regenerated', { userId, projectId, keyId: apiKeyId });
+
+    return {
+      ...updated,
+      key: rawKey,
+      warning: 'Store this key securely. You will not see it again after this response.',
+    };
+  } catch (error) {
+    logError('Failed to regenerate API key', error, { userId, projectId, keyId: apiKeyId });
+    throw error;
+  }
 }
 
 // Get API key usage stats

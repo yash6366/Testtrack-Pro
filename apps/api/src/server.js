@@ -3,9 +3,12 @@ import helmet from '@fastify/helmet';
 import { setupCors } from './plugins/cors.js';
 import { setupJwt } from './plugins/jwt.js';
 import { setupHelmet } from './plugins/helmet.js';
+import { httpsEnforcementPlugin, httpsSecurityHeadersPlugin } from './plugins/httpsEnforcement.js';
 import { setupSwagger } from './plugins/swagger.js';
 import { rateLimitPlugin } from './plugins/rateLimit.js';
 import { csrfProtectionPlugin } from './plugins/csrfProtection.js';
+import { errorHandlerPlugin } from './plugins/errorHandler.js';
+import { requestContextPlugin } from './plugins/requestContext.js';
 import { initializeLogger, createRequestLoggerMiddleware, logInfo, logError } from './lib/logger.js';
 import { setupSocket, initializeRedis } from './lib/socket.js';
 import { initializeNotificationEmitter } from './services/notificationEmitter.js';
@@ -47,6 +50,12 @@ initializeLogger(fastify.log);
 // Log server startup
 logInfo('Starting TestTrack Pro API server');
 
+// Register error handler EARLY (before other plugins/routes)
+await fastify.register(errorHandlerPlugin);
+
+// Register request context plugin (adds request IDs for tracing)
+await fastify.register(requestContextPlugin);
+
 // Register request logging middleware
 await fastify.register(async (fastify) => {
   fastify.addHook('onRequest', await createRequestLoggerMiddleware());
@@ -54,6 +63,11 @@ await fastify.register(async (fastify) => {
 await setupCors(fastify);
 await setupJwt(fastify);
 await setupHelmet(fastify);
+
+// HTTPS enforcement and security headers
+await fastify.register(httpsEnforcementPlugin);
+await fastify.register(httpsSecurityHeadersPlugin);
+
 await fastify.register(rateLimitPlugin);
 await fastify.register(csrfProtectionPlugin);
 
