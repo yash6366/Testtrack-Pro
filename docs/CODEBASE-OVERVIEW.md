@@ -25,15 +25,15 @@ Comprehensive analysis and structure guide for developers working on TestTrack P
 
 | Metric | Value |
 |--------|-------|
-| **Total Files** | 200+ |
-| **Routes** | 23 route modules |
-| **Services** | 32 service files |
-| **Frontend Pages** | 38 page components |
-| **Frontend Components** | 65+ reusable components |
-| **Database Models** | 50+ Prisma models |
-| **Database Migrations** | 13 completed migrations |
+| **Total Files** | 250+ |
+| **Routes** | 27 route modules |
+| **Services** | 35 service files |
+| **Frontend Pages** | 41+ page components |
+| **Frontend Components** | 75+ reusable components |
+| **Database Models** | 55+ Prisma models (User, Project, TestCase, Execution, Bug, Channel, etc.) |
+| **Database Migrations** | 16+ completed migrations |
 | **Test Coverage** | 70%+ |
-| **Lines of Documentation** | 5000+ |
+| **Lines of Documentation** | 6000+ |
 
 ---
 
@@ -96,308 +96,418 @@ Comprehensive analysis and structure guide for developers working on TestTrack P
 
 ## Service Layer Guide
 
-### 32 Services Organized by Domain
+### 35 Services Organized by Domain
 
 #### Authentication & Authorization (3)
-- **`authService.js`** (280 lines)
+- **`authService.js`** (400+ lines)
   - User signup with email verification
-  - Login with JWT token generation
-  - Password reset workflow
-  - Token refresh with rotation
-  - OAuth integration setup
+  - Login with JWT token generation and refresh
+  - Password reset workflow with secure tokens
+  - Token refresh with rotation strategy
+  - OAuth 2.0 provider integration (Google, GitHub)
+  - Session management with token versioning
 
-- **`rbac.js`** (256 lines) - Library, not service
-  - JWT token verification
-  - Role extraction from tokens
-  - Token version validation (invalidation)
-  - User loading from database
+- **`oauthService.js`** 
+  - OAuth provider setup and validation
+  - Google OAuth configuration handling
+  - GitHub OAuth configuration handling
+  - Token exchange and user linking
 
-- **`permissions.js`** - Permission matrix definition
-  - ADMIN, DEVELOPER, TESTER, GUEST roles
-  - Granular permission definitions
-  - Permission checker implementation
+- **`userProfileService.js`**
+  - User profile retrieval and updates
+  - Public profile access
+  - User statistics (assigned tests, bugs fixed, etc.)
+  - Profile picture management
 
-#### Test Management (4)
-- **`testCaseService.js`**
+#### Test Management (5)
+- **`testCaseService.js`** (1000+ lines)
   - Create, read, update, soft-delete test cases
-  - Version history tracking
-  - Test case templates
-  - Bulk import/export
+  - Version history and change tracking
+  - Test case assignment and ownership
+  - Bulk import/export with CSV/Excel support
+  - Test case cloning and templates
+  - Archive and restore functionality
 
-- **`testSuiteService.js`**
-  - Suite creation and hierarchy
-  - Suite-to-testcase mapping
+- **`testSuiteService.js`** (800+ lines)
+  - Suite creation with hierarchical organization
+  - Suite-to-testcase mapping and reordering
   - Suite execution tracking
+  - Dynamic suite evaluation
+  - Suite cloning and bulk operations
+  - Parent-child suite relationships
 
-- **`testPlanService.js`**
-  - Test plan creation and lifecycle
+- **`testPlanService.js`** (300+ lines)
+  - Test plan creation and lifecycle management
   - Test case assignment to plans
   - Plan execution tracking
+  - Plan cloning and templates
+  - Execution report generation
 
-- **`testCaseTemplateService.js`**
-  - Reusable test case templates
-  - Public/private templates
-  - Template instantiation
-
-#### Test Execution (2)
-- **`testCasePermissions.js`**
-  - Resource-level access control
-  - Step visibility based on user role
+- **`testCaseTemplateService.js`** (400+ lines)
+  - Reusable test case templates with default fields
+  - Template management (create, update, delete)
+  - Template instantiation for new test cases
+  - Public/private template scoping
 
 - **`bulkTestCaseService.js`**
-  - Bulk import from CSV/Excel
-  - Bulk export with formatting
-  - Batch operations
+  - Bulk import from CSV with validation
+  - Bulk export with formatting options
+  - Batch operations on multiple test cases
+  - Data validation before import
+
+#### Test Execution (2)
+- **`testRunCreationService.js` (implicit in testRuns route)**
+  - Test run creation and setup
+  - Test case selection for runs
+  - Execution environment configuration
+
+- **`testSuiteExecutionService.js`** (600+ lines)
+  - Suite run creation and execution
+  - Suite execution metrics calculation
+  - Suite execution trends and analytics
+  - Suite run comparison
+  - Execution report generation
 
 #### Bug/Defect Management (3)
-- **`bugService.js`** (1000+ lines)
+- **`bugService.js`** (1200+ lines)
   - Bug creation from test failures
-  - Status workflow management
-  - Fix documentation (V1 NEW)
-  - Bug comments and discussions
-  - Retest request workflow
+  - Status workflow management (NEW, ASSIGNED, IN_PROGRESS, FIXED, VERIFIED, CLOSED)
+  - Fix documentation (V1 NEW FEATURE) with root cause analysis
+  - Bug comments and real-time discussions
+  - Retest request workflow with reassignment
   - Unique bug number generation
+  - Bug filtering and searching
 
-- **`developerService.js`**
-  - Developer-specific analytics
-  - Fix metrics and trends
-  - Assigned bug tracking
-  - Performance insights
+- **`developerService.js`** (200+ lines)
+  - Developer-specific analytics for fix patterns
+  - Fix metrics and productivity trends
+  - Assigned bug tracking and stats
+  - Performance insights per developer
 
 - **`commitParserService.js`**
-  - Auto-link commits to bugs
-  - Multiple pattern matching
-  - GitHub integration
+  - Auto-link commits to bugs via patterns
+  - Multiple regex pattern matching
+  - GitHub commit data parsing
+  - Integration with GitHub webhooks
 
 #### Analytics & Reporting (4)
-- **`analyticsService.js`**
-  - Execution trend analysis (8-week)
-  - Flaky test detection
-  - Bug trend tracking
-  - Execution speed metrics
-  - Bug age analysis
-  - Tester comparison
+- **`analyticsService.js`** (800+ lines)
+  - Execution trend analysis (8-week history)
+  - Flaky test detection and rate calculation
+  - Bug trend tracking and velocity
+  - Execution speed metrics per test
+  - Bug age analysis and SLA tracking
+  - Tester performance comparison
+  - Test coverage calculation
 
-- **`reportService.js`**
-  - Report generation
-  - Multiple export formats
-  - Scheduled reporting
+- **`reportService.js`** (400+ lines)
+  - Execution report generation with detailed metrics
+  - Tester performance reports
+  - Defect analysis with categorization
+  - CSV and PDF export formats
+  - Project-wide metrics aggregation
 
-- **`scheduledReportService.js`**
-  - Cron job scheduling
-  - Email digest generation
-  - Report distribution
+- **`scheduledReportService.js`** (300+ lines)
+  - Report scheduling with cron syntax
+  - Email delivery of scheduled reports
+  - Report template management
+  - Digest frequency configuration
 
-- **`searchIndexService.js`**
-  - Search index maintenance
-  - Full-text search optimization
+- **`searchIndexService.js`** (400+ lines)
+  - Full-text search index maintenance
+  - Search index creation for test cases
+  - Search index creation for bugs
+  - Search index creation for executions
+  - Index rebuild and optimization
 
-#### Communication (4)
-- **`notificationService.js`**
-  - Notification creation
-  - Smart delivery strategy
-  - User preferences
-  - Digest scheduling
+#### Communication (5)
+- **`notificationService.js`** (600+ lines)
+  - Notification creation and routing
+  - Smart delivery strategy based on user preferences
+  - User notification preferences management
+  - Digest scheduling for email batching
+  - Real-time vs. batched delivery options
 
-- **`notificationEmitter.js`**
-  - Real-time WebSocket emission
-  - Socket.IO room management
-  - Delivery tracking
+- **`notificationEmitter.js`** (1000+ lines)
+  - Real-time WebSocket emission via Socket.IO
+  - Socket.IO room management by project/type
+  - Event streaming for live updates
+  - Delivery confirmation and acknowledgment
 
-- **`channelService.js`**
+- **`channelService.js`** (600+ lines)
   - Channel creation and management
-  - Role-based auto-join
+  - Role-based auto-join (ADMIN, DEVELOPER, TESTER channels)
   - Universal channel setup
-  - Member management
+  - Member management and permissions
+  - Channel message moderation
 
-- **`chatAdminService.js`**
-  - User muting functionality
-  - Message deletion by admins
-  - Channel locking/disabling
-  - Moderation audit logs
+- **`chatAdminService.js`** (200+ lines)
+  - User muting functionality with duration
+  - Message deletion and hard-delete by admins
+  - Channel locking and disabling
+  - Moderation audit logging
+
+- **`digestService.js`**
+  - Email digest compilation and formatting
+  - Multiple notification batching
+  - Digest template rendering
+  - Schedule-based digest delivery
 
 #### File & Evidence Management (2)
-- **`evidenceService.js`**
-  - File upload to Cloudinary
+- **`evidenceService.js`** (300+ lines)
+  - File upload handling to Cloudinary
   - Size validation and optimization
-  - Evidence linking to executions
+  - Evidence linking to test executions
+  - Evidence gallery and viewer support
+  - Metadata tracking (upload time, uploader, etc.)
 
-- **`cloudinary.js`** - Utility (not service)
-  - Cloudinary API client
-  - Upload configuration
-  - URL generation
+- **`exportService.js`**
+  - Test case export to CSV/Excel/PDF
+  - Report export with formatting
+  - Bulk data export functionality
 
 #### Integrations (4)
-- **`webhookService.js`**
-  - Webhook creation
-  - Event trigger management
-  - Retry policies
+- **`webhookService.js`** (400+ lines)
+  - Webhook registration and management
+  - Event trigger configuration (TEST_EXECUTION, BUG_CREATED, etc.)
+  - Retry policies with exponential backoff
+  - Webhook delivery tracking and history
+  - Test webhook delivery
 
-- **`webhookHandlerService.js`**
-  - Webhook payload processing
-  - Event routing
+- **`webhookHandlerService.js`** (360+ lines)
+  - Webhook payload processing and validation
+  - Push event handling for GitHub
+  - Pull request event handling
+  - Commit data syncing
+  - Webhook event routing
 
-- **`githubService.js`**
-  - GitHub OAuth flow
-  - PR metadata fetching
-  - Commit linking
+- **`githubService.js`** (400+ lines)
+  - GitHub OAuth flow implementation
+  - Pull request metadata fetching
+  - Commit linking and parsing
+  - Repository integration
 
-- **`oauthService.js`**
-  - OAuth provider integration
-  - Google & GitHub setup
-  - Token exchange
+- **`searchService.js`** (350+ lines)
+  - Global search across test cases, bugs, executions
+  - Search with filters and advanced queries
+  - Search suggestions and autocomplete
+  - Recent searches tracking
 
-#### Infrastructure (4)
-- **`emailService.js`**
-  - Email template rendering
+#### Infrastructure & Admin (5)
+- **`emailService.js`** (300+ lines)
+  - Email template rendering with variables
   - Resend API integration
-  - Verification email sending
-  - Password reset emails
+  - Verification email workflow
+  - Password reset email sending
+  - Notification email dispatch
 
-- **`apiKeyService.js`**
-  - API key generation
-  - Key validation
-  - Scope checking
-  - Rotation functionality
+- **`apiKeyService.js`** (200+ lines)
+  - API key generation and management
+  - Key validation and scoping
+  - Rate limit configuration per key
+  - Key rotation functionality
 
-- **`cacheService.js`**
-  - Redis caching layer
-  - Cache invalidation
-  - Session storage
+- **`userSessionService.js`** (150+ lines)
+  - User session tracking and management
+  - Session details retrieval
+  - Session revocation (single and all)
+  - Session statistics per user
 
-- **`cronService.js`**
+- **`cronService.js`** (400+ lines)
   - Background job scheduling
   - node-cron integration
   - Job execution management
+  - Scheduled report execution
+  - Failed delivery retry jobs
 
-#### Admin Management (1)
-- **`adminProjectService.js`**
+- **`adminProjectService.js`** (250+ lines)
   - Project creation and management
   - User allocation to projects
   - Project-level role assignment
+  - Project member management
 
-#### Utilities & Helpers (5 in lib/)
+#### Utilities (5 in lib/)
+- **`auditService.js`** (400+ lines)
+  - Audit log creation for all operations
+  - Audit log retrieval and filtering
+  - Change tracking and comparison
+  - Admin audit log access
+
 - **`logger.js`** (293 lines)
-  - Structured JSON logging
+  - Structured JSON logging with Sentry integration
   - Log levels (info, warn, error, debug)
-  - Context preservation
+  - Context preservation across requests
+  - Request correlation IDs
 
 - **`socket.js`** (1000+ lines)
-  - Socket.IO server setup
-  - Room management
-  - Event handling
-  - Delivery tracking
-
-- **`prisma.js`**
-  - Singleton Prisma client
-  - Connection pooling
+  - Socket.IO server setup and configuration
+  - Room management by project and entity type
+  - Event handling and broadcasting
+  - Real-time delivery tracking
 
 - **`validation.js`**
-  - Input validation helpers
-  - Zod integration
+  - Input validation helpers with Zod
+  - Schema definitions for all endpoints
+  - Request body validation middleware
 
 - **`sanitization.js`**
   - HTML/SQL sanitization
   - XSS prevention
+  - User input cleaning
 
 ---
 
 ## Frontend Structure
 
-### Pages (38 total)
+### Pages (41+ total)
 
 **Core Pages:**
-- `Dashboard.jsx` - Main dashboard
-- `Home.jsx` - Landing page
-- `Login.jsx`, `Signup.jsx` - Authentication
-- `ProfilePage.jsx` - User profile
+- `Dashboard.jsx` - Main dashboard with KPIs
+- `Home.jsx` - Landing page for unauthenticated users
+- `Login.jsx`, `ResetPasswordModal.jsx` - Authentication UI
+- `Signup.jsx`, `VerifyEmail.jsx` - Registration workflow
+- `ProfilePage.jsx` - User profile with edit capability
 
 **Test Management:**
 - `ProjectTestCasesPage.jsx` - List and create test cases
-- `TestCaseDetailPage.jsx` - View/edit single test case
-- `TestSuiteDetailPage.jsx` - Suite management
-- `TestSuitesPage.jsx` - List suites
-- `TemplateManagementPage.jsx` - Manage templates
+- `TestCaseDetailPage.jsx` - View/edit single test case with version history
+- `TestSuiteDetailPage.jsx` - Suite management with test case reordering
+- `TestSuitesPage.jsx` - List test suites with hierarchy view
+- `TemplateManagementPage.jsx` - Manage test case templates
+- `TestPlanDetailPage.jsx` - View and manage test plans
+- `TestPlansPage.jsx` - List all test plans
 
 **Test Execution:**
 - `TestRunCreation.jsx` - Create new test run
-- `TestRunDetailPage.jsx` - View test run results
-- `TestExecution.jsx` - Main test execution UI
-- `TestExecutionSummary.jsx` - Execution results
+- `TestRunDetailPage.jsx` - View test run results and analytics
+- `TestExecution.jsx` - Main test execution UI with step-by-step navigation
+- `TestExecutionSummary.jsx` - Execution results and metrics
 
 **Bug Management:**
-- `BugsPage.jsx` - Bug listing with filters
-- `BugDetailsPage.jsx` - Detailed bug view
-- `BugCreationForm.jsx` - Create bug form
-- `EvidenceGalleryPage.jsx` - Evidence viewer
+- `BugsPage.jsx` - Bug listing with advanced filters
+- `BugDetailsPage.jsx` - Detailed bug view with comments
+- `BugCreationForm.jsx` - Inline bug creation form
+- `EvidenceGalleryPage.jsx` - Evidence/screenshot viewer
 
 **Analytics & Reporting:**
-- `AnalyticsDashboard.jsx` - Main analytics dashboard
+- `AnalyticsDashboard.jsx` - Main analytics with charts and trends
 - `ReportsPage.jsx` - Reports and exports
 - `ScheduledReportsPage.jsx` - Scheduled report management
+- `dashboards/` folder - Multiple analytical dashboards
 
 **Communication:**
-- `Chat.jsx` - Channel messaging interface
+- `Chat.jsx` - Main channel messaging interface
+- `NotificationsPage.jsx` - Notification center and history
 
 **Admin & Settings:**
-- `AdminPanelPage.jsx` - Admin controls
-- `AdminUserDetailPage.jsx` - User management
-- `SettingsPage.jsx` - User settings
-- `NotificationsPage.jsx` - Notification center
-- `AuditLogsPage.jsx` - Audit log viewer
+- `AdminPanelPage.jsx` - Admin controls and management
+- `AdminUserDetailPage.jsx` - User management interface
+- `SettingsPage.jsx` - User preferences and settings
+- `AuditLogsPage.jsx` - Audit log viewer for compliance
+- `MilestonesPage.jsx` - Milestone management
 
 **Integrations:**
-- `WebhooksPage.jsx` - Webhook management
+- `WebhooksPage.jsx` - Webhook management and testing
 - `IntegrationsPage.jsx` - Third-party integrations
 - `ApiKeysPage.jsx` - API key management
 - `OAuthCallback.jsx` - OAuth redirect handler
+- `SuiteRunDetailPage.jsx` - Test suite execution results
 
-### Components (65+ total)
+### Components (75+ total)
 
 **Forms & Modals:**
 - `BugCreationModal.jsx` - Bug creation dialog
-- `BugDetailsModal.jsx` - Bug details popup
-- `ChangePasswordModal.jsx` - Password change
-- `ForgotPasswordModal.jsx` - Password reset
-- `FixDocumentationModal.jsx` - Fix documentation form
+- `BugDetailsModal.jsx` - Bug details read-only popup
+- `ChangePasswordModal.jsx` - Password change dialog
+- `ForgotPasswordModal.jsx` - Password reset dialog
+- `FixDocumentationModal.jsx` - Fix documentation form with metadata
+- `MilestoneDetailsModal.jsx` - Milestone details popup
 
 **Test Management:**
-- `TestCaseManagement.jsx` - Comprehensive TC editor
+- `TestCaseManagement.jsx` - Comprehensive test case editor
 - `TestCaseDetailsView.jsx` - TC detail viewer
-- `TestCaseImportModal.jsx` - Bulk import
-- `BulkTestCaseOperations.jsx` - Batch operations
+- `TestCaseImportModal.jsx` - Bulk import with preview
+- `BulkTestCaseOperations.jsx` - Batch operations on multiple TCs
+- `TestCaseTemplateManagement.jsx` - Template editor
+- `TestCaseTemplateSelector.jsx` - Template selection for new TCs
 
 **Execution:**
-- `StepNavigator.jsx` - Step-by-step UI
-- `ActualResultInput.jsx` - Result input component
-- `ExecutionTimer.jsx` - Execution timer
-- `ExecutionTrendChart.jsx` - Chart visualization
+- `StepNavigator.jsx` - Step-by-step execution navigation
+- `ActualResultInput.jsx` - Result input with rich text
+- `ExecutionTimer.jsx` - Timer for test execution
+- `ExecutionTrendChart.jsx` - Chart visualization of trends
+- `TestExecutionComments.jsx` - Comments during execution
 
 **Chat & Collaboration:**
-- `ChatLayout.jsx` - Main chat UI
-- `ChatSidebar.jsx` - Channel list
-- `DirectMessageWindow.jsx` - DM interface
-- `CommentInput.jsx` - Comment box
-- `CommentThread.jsx` - Discussion thread
+- `ChatLayout.jsx` - Main chat UI structure
+- `ChatSidebar.jsx` - Channel and user list
+- `ChatWithSidebar.jsx` - Chat wrapper component
+- `DirectMessagesPanel.jsx` - DM list and management
+- `DirectMessageWindow.jsx` - DM conversation interface
+- `CommentInput.jsx` - Comment box component
+- `CommentThread.jsx` - Discussion thread viewer
 - `ChatAdminControls.jsx` - Moderation UI
+- `RealtimeDiscussionModal.jsx` - Real-time discussion modal
+- `OnlineUsersPanel.jsx` - Active users display
+
+**Defect Tracking:**
+- `BugDiscussion.jsx` - Bug comment thread
+- `BugsList.jsx` - Paginated bugs listing
+- `DefectAssignmentModal.jsx` - Bug assignment UI
+- `RequestRetestModal.jsx` - Retest request dialog
+- `FixDocumentationView.jsx` - View fix documentation
 
 **Analytics:**
-- Multiple chart components in `components/charts/`
-- `MetricsGrid.jsx` - KPI display
+- Multiple chart components in `components/charts/` folder
+- `MetricsGrid.jsx` - KPI display grid
+- `DeveloperMetricsPanel.jsx` - Developer statistics
+- `DeveloperReports.jsx` - Developer performance reports
+- `DeveloperNotifications.jsx` - Developer-specific alerts
+- `ExecutionTrendChart.jsx` - Execution trend visualization
 
-**Common:**
-- `DashboardLayout.jsx` - App shell
-- `ProjectSelector.jsx` - Project picker
-- `GlobalSearch.jsx` - Search interface
-- `ErrorBoundary.jsx` - Error handling
-- `LoadingState.jsx` - Skeleton loader
+**Admin & Moderation:**
+- `AdminAnnouncements.jsx` - System announcements
+- `AuditLogViewer.jsx` - Audit log display
+- `BackupManagement.jsx` - Backup controls
+- `ChannelStatusOverlay.jsx` - Channel status display
 
-### Hooks (Custom)
+**Common/UI:**
+- `DashboardLayout.jsx` - App shell and layout
+- `ProjectSelector.jsx` - Project picker dropdown
+- `GlobalSearch.jsx` - Global search interface
+- `ErrorBoundary.jsx` - Error handling wrapper
+- `NotificationCenter.jsx` - Notification management
+- `NotificationToast.jsx` - Toast notification display
+- `NotificationPreferences.jsx` - Notification settings
+- `MuteBanner.jsx` - Mute status banner
+- `ThemeToggle.jsx` - Dark/light mode toggle
+- `VirtualizedTable.jsx` - Virtualized list for performance
+- `LoginForm.jsx` - Login form component
+- `SignupForm.jsx` - Signup form component
+- `OAuthButtons.jsx` - OAuth provider buttons
+- `ProjectManagement.jsx` - Project CRUD operations
+- `AdvancedFiltersPanel.jsx` - Advanced filter controls
+- `SavedViewsDashboard.jsx` - Saved filter views
+- `WebhookManagement.jsx` - Webhook CRUD
+- `VersionHistoryModal.jsx` - Test case version history
+- `CommitSelector.jsx` - Git commit selector for bug fixes  
+- `EnhancedTestCaseManagement.jsx` - Advanced TC editor
+- `UserProfileService.jsx` - Helper for user data
+- plus utility and common UI components in `ui/` folder
 
-- **`useAuth.js`** - Authentication context
-- **`useProject.js`** - Project selection
-- **`useBug.js`** - Bug operations
-- **`useTestExecution.js`** - Execution state
+### Hooks (15+ custom hooks)
+
+- **`useAuth.js`** - Authentication context and login state
+- **`useProject.js`** - Project selection and context
+- **`useBug.js`** - Bug operations and state
+- **`useTestExecution.js`** - Test execution state management
+- **`useNotifications.js`** - Notification context and real-time updates
+- **`useChat.js`** - Chat and messaging state
+- **`useAnalytics.js`** - Analytics data fetching
+- **`usePagination.js`** - Pagination state management
+- **`useSearch.js`** - Global search functionality
+- **`useSocket.js`** - Socket.IO connection management
+- Plus additional utility hooks for forms, filters, and UI state
 
 ### State Management
 

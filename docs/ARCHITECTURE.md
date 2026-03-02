@@ -209,6 +209,105 @@ TestTrack Pro is a comprehensive software testing management platform built with
 5. Overall execution status calculated
 6. Failures can create Bugs
 
+## API Route Modules (27 Total)
+
+The backend exposes REST APIs organized by functional domains:
+
+| Route Module | Prefix | Purpose | Key Operations |
+|--------------|--------|---------|-----------------|
+| `auth.js` | `/api/auth` | Authentication & Authorization | Login, signup, refresh token, password reset, OAuth |
+| `tests.js` | `/api/tests` | Test case management | Create, read, update, delete, list, filter, search |
+| `testRuns.js` | `/api/test-runs` | Test execution runs | Create run, execute step, mark pass/fail, results |
+| `executions.js` | `/api/executions` | Execution details | Get execution, step results, duration tracking |
+| `testSuites.js` | `/api/test-suites` | Suite management | Hierarchy, test case mapping, suite execution |
+| `testPlans.js` | `/api/test-plans` | Test plan management | Plan creation, test assignment, execution |
+| `bugs.js` | `/api/bugs` | Bug/defect tracking | Create, assign, update status, add comments, fix documentation |
+| `chat.js` | `/api/chat` | Channel messaging | Send message, get history, search messages |
+| `directMessage.js` | `/api/direct-messages` | Direct messaging | Send DM, get conversation, real-time delivery |
+| `channels.js` | `/api/channels` | Channel management | Create, list, manage members, role-based auto-join |
+| `tester.js` | `/api/tester` | Tester-specific operations | Assigned tests, executed tests, personal metrics |
+| `developer.js` | `/api/developer` | Developer-specific operations | Assigned bugs, fix documentation, performance metrics |
+| `admin.js` | `/api/admin` | Admin operations | User management, project admin, role assignment |
+| `analytics.js` | `/api/analytics` | Analytics & reporting | Trends, metrics, flaky tests, developer analytics |
+| `projects.js` | `/api/projects` | Project management | Create, list, manage members, allocations |
+| `webhooks.js` | `/api/webhooks` | Webhook management | Create, test, retrieve deliveries, retry failed |
+| `github.js` | `/api/github` | GitHub integration | OAuth callback, commit data, PR info, sync data |
+| `notification.js` | `/api/notifications` | Notification management | Get notifications, preferences, mark read, delete |
+| `search.js` | `/api/search` | Global search | Search all resources, suggestions, recent searches |
+| `evidence.js` | `/api/evidence` | File evidence management | Upload, list, retrieve, associate with execution |
+| `apiKeys.js` | `/api/api-keys` | API key management | Generate, validate, revoke, scope management |
+| `health.js` | `/api/health` | Health check | System status, database health, cache health |
+| `backup.js` | `/api/backup` | Backup operations | Create backup, restore, list backups |
+| `userProfile.js` | `/api/user-profile` | User profile management | Get profile, update, statistics, settings |
+| `userSession.js` | `/api/user-sessions` | Session management | List sessions, revoke, session details |
+| `milestones.js` | `/api/milestones` | Milestone tracking | Create, list, update, associate with releases |
+| `scheduledReports.js` | `/api/scheduled-reports` | Scheduled reporting | Create, list, execute, email delivery |
+
+## Service Layer Architecture
+
+### Key Services
+
+**Authentication & Authorization** (3 services)
+- `authService.js`: User signup, login, token refresh, password reset
+- `userProfileService.js`: User profile data and settings
+- `rbac.js`: JWT verification, role-based middleware
+- `permissions.js`: Permission matrix (ADMIN, DEVELOPER, TESTER)
+
+**Business Logic Services** (5 services)
+- `testCaseService.js`: CRUD, versioning, soft-delete, templates, bulk operations
+- `testSuiteService.js`: Suite hierarchy, test case mapping, suite execution
+- `testPlanService.js`: Plan creation, test assignment, plan execution
+- `bugService.js`: Bug lifecycle, fix documentation, unique ID generation, comments
+- `testCaseTemplateService.js`: Reusable templates and template instantiation
+
+**Test Execution** (2 services)
+- `testSuiteExecutionService.js`: Suite run execution, metrics calculation, trends
+- `bulkTestCaseService.js`: Bulk import/export, batch operations
+
+**Analytics & Reporting** (4 services)
+- `analyticsService.js`: Trend analysis, flaky test detection, execution speed metrics, bug velocity
+- `reportService.js`: Report generation, export formats, tester performance
+- `scheduledReportService.js`: Automated report generation via node-cron
+- `searchIndexService.js`: Full-text search index maintenance and optimization
+
+**Developer Features** (2 services)
+- `developerService.js`: Developer analytics, fix documentation, bug assignment tracking
+- `commitParserService.js`: Auto-linking commits to bugs via regex patterns
+
+**Communication** (5 services)
+- `notificationService.js`: Creation, delivery, preferences, digest scheduling
+- `notificationEmitter.js`: Real-time WebSocket emission, delivery tracking
+- `channelService.js`: Chat channels, universal channel management, role-based auto-join
+- `chatAdminService.js`: Chat moderation, message deletion, user mutes
+- `digestService.js`: Scheduled digest email generation and distribution
+
+**Infrastructure Services** (10 services)
+- `emailService.js`: Email templates, verification, password reset, notification dispatch
+- `webhookService.js`: Webhook creation, event management, retry policies, delivery tracking
+- `webhookHandlerService.js`: Webhook payload processing and event routing
+- `githubService.js`: GitHub OAuth, commit linking, PR integration
+- `oauthService.js`: OAuth provider integration (Google, GitHub)
+- `apiKeyService.js`: API key generation, validation, scope management
+- `evidenceService.js`: File upload/storage via Cloudinary, optimization
+- `auditService.js`: Comprehensive audit logging for compliance
+- `cronService.js`: Job scheduling for background tasks
+- `userSessionService.js`: Session tracking and management
+
+**Admin Management** (1 service)
+- `adminProjectService.js`: Project creation, user allocation, role assignment
+
+### Service Architecture Pattern
+
+```javascript
+// Service layer pattern
+1. Validation: Input validation with Zod schemas
+2. Authorization: Permission checks via RBAC
+3. Business Logic: Core operation implementation
+4. Audit Logging: All changes logged via auditService
+5. Notifications: Events trigger notifications via notificationService
+6. WebSocket Events: Real-time updates via notificationEmitter
+```
+
 ###Service Layer Architecture
 
 ### Key Services
