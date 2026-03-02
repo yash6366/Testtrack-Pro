@@ -1,4 +1,8 @@
 {
-  "buildCommand": "npm --prefix apps/web run build",
-  "installCommand": "npm install"
+  "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter web build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "env": {
+    "VITE_API_URL": "@vite-api-url"
+  },
+  "regions": ["iad1"]
 }
