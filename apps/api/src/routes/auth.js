@@ -120,12 +120,6 @@ const logoutSchema = {
   tags: ['auth'],
   summary: 'Logout current session',
   description: 'Invalidate current JWT token',
-  body: {
-    type: 'object',
-    properties: {
-      refreshToken: { type: 'string' },
-    },
-  },
   response: {
     200: {
       description: 'Logged out successfully',
@@ -152,7 +146,9 @@ export async function authRoutes(fastify) {
       reply.code(201).send(result);
     } catch (error) {
       fastify.log.error(error);
-      reply.code(500).send({ error: error.message });
+      // Return 400 for user errors, 500 for system errors
+      const statusCode = error.message === 'User already exists' ? 400 : 500;
+      reply.code(statusCode).send({ error: error.message });
     }
   });
 
@@ -169,11 +165,15 @@ export async function authRoutes(fastify) {
   fastify.post('/api/auth/refresh', { schema: refreshSchema }, async (request, reply) => {
     try {
       const { refreshToken } = request.body;
+      if (!refreshToken) {
+        return reply.code(400).send({ error: 'Refresh token is required' });
+      }
       const result = await refreshSession(fastify, refreshToken, getClientContext(request));
       reply.code(200).send(result);
     } catch (error) {
       fastify.log.error(error);
-      reply.code(500).send({ error: error.message });
+      const statusCode = error.message.includes('Invalid') || error.message.includes('expired') ? 401 : 500;
+      reply.code(statusCode).send({ error: error.message });
     }
   });
 

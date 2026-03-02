@@ -1,7 +1,7 @@
 /**
  * QUERY CACHING SERVICE
  * 
- * Implements in-memory caching with TTL for frequently accessed data
+ * Implements Redis-based caching with in-memory fallback and TTL
  * Reduces database queries by caching:
  * - Test plans (3600s TTL)
  * - Test cases (1800s TTL)
@@ -9,13 +9,51 @@
  * - Users (7200s TTL)
  * 
  * Cache invalidation on mutations is handled automatically
+ * Falls back to in-memory cache when Redis is unavailable
  */
 
-import { logInfo, logWarn } from '../lib/logger.js';
+import { logInfo, logWarn, logError } from '../lib/logger.js';
+import Redis from 'ioredis';
 
-// Cache store with expiration
+// Redis client
+let redisClient = null;
+let isRedisAvailable = false;
+
+// In-memory fallback cache
 const cache = new Map();
 const cacheTimers = new Map();
+
+// Initialize Redis if URL is provided
+if (process.env.REDIS_URL) {
+  try {
+    redisClient = new Redis(process.env.REDIS_URL, {
+      maxRetriesPerRequest: 3,
+      enableReadyCheck: true,
+      retryStrategy(times) {
+        const delay = Math.min(times * 50, 2000);
+        return delay;
+      },
+    });
+
+    redisClient.on('connect', () => {
+      isRedisAvailable = true;
+      logInfo('Redis cache connected');
+    });
+
+    redisClient.on('error', (err) => {
+      isRedisAvailable = false;
+      logError('Redis cache error, falling back to in-memory:', err);
+    });
+
+    redisClient.on('close', () => {
+      isRedisAvailable = false;
+      logWarn('Redis cache disconnected, using in-memory cache');
+    });
+  } catch (error) {
+    logError('Failed to initialize Redis cache:', error);
+    redisClient = null;
+  }
+}
 
 // Configuration (in seconds)
 const CACHE_CONFIG = {
@@ -34,24 +72,42 @@ const CACHE_CONFIG = {
  * @returns {string} Cache key
  */
 function getCacheKey(entityType, id) {
-  return `${entityType}:${id}`;
+  return `testtrack:${entityType}:${id}`;
 }
 
 /**
  * Get value from cache if not expired
  * @param {string} entityType - Type of entity
  * @param {number|string} id - Entity ID
- * @returns {any|null} Cached value or null if expired/missing
+ * @returns {Promise<any|null>} Cached value or null if expired/missing
  */
-export function getCachedValue(entityType, id) {
+export async function getCachedValue(entityType, id) {
   const key = getCacheKey(entityType, id);
   
+  // Try Redis first if available
+  if (isRedisAvailable && redisClient) {
+    try {
+      const value = await redisClient.get(key);
+      if (value) {
+        logInfo(`Redis Cache HIT: ${key}`);
+        return JSON.parse(value);
+      }
+      logInfo(`Redis Cache MISS: ${key}`);
+      return null;
+    } catch (error) {
+      logError('Redis get error, falling back to in-memory:', error);
+      isRedisAvailable = false;
+      // Fall through to in-memory cache
+    }
+  }
+  
+  // Fallback to in-memory cache
   if (cache.has(key)) {
-    logInfo(`Cache HIT: ${key}`);
+    logInfo(`Memory Cache HIT: ${key}`);
     return cache.get(key);
   }
   
-  logInfo(`Cache MISS: ${key}`);
+  logInfo(`Memory Cache MISS: ${key}`);
   return null;
 }
 
@@ -62,10 +118,24 @@ export function getCachedValue(entityType, id) {
  * @param {any} value - Value to cache
  * @param {number} ttl - Time to live in seconds (optional, uses default)
  */
-export function setCachedValue(entityType, id, value, ttl = null) {
+export async function setCachedValue(entityType, id, value, ttl = null) {
   const key = getCacheKey(entityType, id);
   const cacheTTL = ttl || CACHE_CONFIG[entityType] || 3600;
   
+  // Try Redis first if available
+  if (isRedisAvailable && redisClient) {
+    try {
+      await redisClient.setex(key, cacheTTL, JSON.stringify(value));
+      logInfo(`Redis Cache SET: ${key} (TTL: ${cacheTTL}s)`);
+      return;
+    } catch (error) {
+      logError('Redis set error, falling back to in-memory:', error);
+      isRedisAvailable = false;
+      // Fall through to in-memory cache
+    }
+  }
+  
+  // Fallback to in-memory cache
   // Clear existing timer
   if (cacheTimers.has(key)) {
     clearTimeout(cacheTimers.get(key));
@@ -73,13 +143,13 @@ export function setCachedValue(entityType, id, value, ttl = null) {
   
   // Set new value
   cache.set(key, value);
-  logInfo(`Cache SET: ${key} (TTL: ${cacheTTL}s)`);
+  logInfo(`Memory Cache SET: ${key} (TTL: ${cacheTTL}s)`);
   
   // Set expiration timer
   const timer = setTimeout(() => {
     cache.delete(key);
     cacheTimers.delete(key);
-    logInfo(`Cache EXPIRED: ${key}`);
+    logInfo(`Memory Cache EXPIRED: ${key}`);
   }, cacheTTL * 1000);
   
   cacheTimers.set(key, timer);
@@ -90,16 +160,30 @@ export function setCachedValue(entityType, id, value, ttl = null) {
  * @param {string} entityType - Type of entity
  * @param {number|string} id - Entity ID
  */
-export function invalidateCache(entityType, id) {
+export async function invalidateCache(entityType, id) {
   const key = getCacheKey(entityType, id);
   
+  // Try Redis first if available
+  if (isRedisAvailable && redisClient) {
+    try {
+      await redisClient.del(key);
+      logInfo(`Redis Cache INVALIDATED: ${key}`);
+      return;
+    } catch (error) {
+      logError('Redis delete error, falling back to in-memory:', error);
+      isRedisAvailable = false;
+      // Fall through to in-memory cache
+    }
+  }
+  
+  // Fallback to in-memory cache
   if (cache.has(key)) {
     cache.delete(key);
     if (cacheTimers.has(key)) {
       clearTimeout(cacheTimers.get(key));
       cacheTimers.delete(key);
     }
-    logInfo(`Cache INVALIDATED: ${key}`);
+    logInfo(`Memory Cache INVALIDATED: ${key}`);
   }
 }
 
@@ -107,12 +191,31 @@ export function invalidateCache(entityType, id) {
  * Invalidate all cache entries of a type
  * @param {string} entityType - Type of entity (testPlan, user, etc.)
  */
-export function invalidateCacheByType(entityType) {
-  const pattern = `${entityType}:`;
+export async function invalidateCacheByType(entityType) {
+  const pattern = `testtrack:${entityType}:*`;
+  
+  // Try Redis first if available
+  if (isRedisAvailable && redisClient) {
+    try {
+      const keys = await redisClient.keys(pattern);
+      if (keys.length > 0) {
+        await redisClient.del(...keys);
+        logInfo(`Redis Cache INVALIDATED (${entityType}): ${keys.length} entries`);
+      }
+      return;
+    } catch (error) {
+      logError('Redis keys/delete error, falling back to in-memory:', error);
+      isRedisAvailable = false;
+      // Fall through to in-memory cache
+    }
+  }
+  
+  // Fallback to in-memory cache
+  const prefix = `testtrack:${entityType}:`;
   let count = 0;
   
   for (const key of cache.keys()) {
-    if (key.startsWith(pattern)) {
+    if (key.startsWith(prefix)) {
       cache.delete(key);
       if (cacheTimers.has(key)) {
         clearTimeout(cacheTimers.get(key));
@@ -122,7 +225,7 @@ export function invalidateCacheByType(entityType) {
     }
   }
   
-  logInfo(`Cache INVALIDATED (${entityType}): ${count} entries`);
+  logInfo(`Memory Cache INVALIDATED (${entityType}): ${count} entries`);
 }
 
 /**
@@ -173,7 +276,24 @@ export function getCacheStats() {
 /**
  * Clear all cache entries
  */
-export function clearAllCache() {
+export async function clearAllCache() {
+  // Try Redis first if available
+  if (isRedisAvailable && redisClient) {
+    try {
+      const keys = await redisClient.keys('testtrack:*');
+      if (keys.length > 0) {
+        await redisClient.del(...keys);
+        logInfo(`Redis Cache CLEARED: ${keys.length} entries removed`);
+      }
+      return;
+    } catch (error) {
+      logError('Redis clear error, falling back to in-memory:', error);
+      isRedisAvailable = false;
+      // Fall through to in-memory cache
+    }
+  }
+  
+  // Fallback to in-memory cache
   const size = cache.size;
   
   // Clear all timers
@@ -184,7 +304,17 @@ export function clearAllCache() {
   cache.clear();
   cacheTimers.clear();
   
-  logInfo(`Cache CLEARED: ${size} entries removed`);
+  logInfo(`Memory Cache CLEARED: ${size} entries removed`);
+}
+
+/**
+ * Disconnect Redis client on shutdown
+ */
+export async function disconnectCache() {
+  if (redisClient) {
+    await redisClient.quit();
+    logInfo('Redis cache disconnected');
+  }
 }
 
 /**
@@ -196,7 +326,7 @@ export function clearAllCache() {
  */
 export async function getOrFetchCached(entityType, id, fetchFn) {
   // Try cache first
-  const cached = getCachedValue(entityType, id);
+  const cached = await getCachedValue(entityType, id);
   if (cached !== null) {
     return cached;
   }
@@ -205,7 +335,7 @@ export async function getOrFetchCached(entityType, id, fetchFn) {
   const value = await fetchFn();
   
   if (value) {
-    setCachedValue(entityType, id, value);
+    await setCachedValue(entityType, id, value);
   }
   
   return value;
@@ -220,5 +350,7 @@ export default {
   getCacheStats,
   clearAllCache,
   getOrFetchCached,
+  disconnectCache,
   CACHE_CONFIG,
+  isRedisAvailable: () => isRedisAvailable,
 };

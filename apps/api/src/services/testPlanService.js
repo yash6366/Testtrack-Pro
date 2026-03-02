@@ -93,7 +93,7 @@ export async function getProjectTestPlans(projectId, filters = {}, pagination = 
 export async function getTestPlanById(testPlanId, projectId) {
   // Check cache first
   const cacheKey = `${testPlanId}:${projectId}`;
-  const cached = getCachedValue('testPlan', cacheKey);
+  const cached = await getCachedValue('testPlan', cacheKey);
   if (cached) {
     return cached;
   }
@@ -130,7 +130,7 @@ export async function getTestPlanById(testPlanId, projectId) {
   };
 
   // Cache the result
-  setCachedValue('testPlan', cacheKey, result);
+  await setCachedValue('testPlan', cacheKey, result);
 
   return result;
 }
@@ -163,7 +163,7 @@ export async function updateTestPlan(testPlanId, data, userId, projectId, permis
   if (status) updateData.status = status;
   // Invalidate cache after update
   const cacheKey = `${testPlanId}:${projectId}`;
-  invalidateCache('testPlan', cacheKey);
+  await invalidateCache('testPlan', cacheKey);
 
   if (startDate) updateData.startDate = new Date(startDate);
   if (endDate) updateData.endDate = new Date(endDate);
@@ -202,7 +202,7 @@ export async function deleteTestPlan(testPlanId, userId, projectId, permissionCo
 
   // Invalidate cache after deletion
   const cacheKey = `${testPlanId}:${projectId}`;
-  invalidateCache('testPlan', cacheKey);
+  await invalidateCache('testPlan', cacheKey);
 
   await logAuditAction(userId, 'TESTPLAN_DELETED', {
     resourceType: 'TESTPLAN',

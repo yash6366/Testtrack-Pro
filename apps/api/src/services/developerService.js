@@ -5,6 +5,7 @@
 
 import { getPrismaClient } from '../lib/prisma.js';
 import { logAuditAction } from './auditService.js';
+import { logError } from '../lib/logger.js';
 import { getBugHistory } from './bugService.js';
 
 const prisma = getPrismaClient();
@@ -159,7 +160,7 @@ export async function updateFixDocumentation(bugId, fixData, userId) {
         });
       } catch (error) {
         // Non-critical - log but don't fail
-        console.error(`Failed to log bug history for bug ${bugId}:`, error);
+        logError(`Failed to log bug history for bug ${bugId}:`, error);
       }
     };
     

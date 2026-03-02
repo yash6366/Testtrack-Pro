@@ -4,6 +4,7 @@
  */
 
 import { getPrismaClient } from '../lib/prisma.js';
+import { logInfo, logError } from '../lib/logger.js';
 import { jsPDF } from 'jspdf';
 import ExcelJS from 'exceljs';
 
@@ -321,7 +322,7 @@ export async function generateAnalyticsDashboardCSV(projectId) {
  */
 export async function generateExecutionPDF(testRunId) {
   try {
-    console.log(`[PDF Service] Generating PDF for test run ${testRunId}...`);
+    logInfo(`[PDF Service] Generating PDF for test run ${testRunId}...`);
     
     const report = await prisma.testRun.findUnique({
       where: { id: testRunId },
@@ -342,7 +343,7 @@ export async function generateExecutionPDF(testRunId) {
       throw new Error('Test run not found');
     }
     
-    console.log(`[PDF Service] Found test run: ${report.name}, executions: ${report.executions.length}`);
+    logInfo(`[PDF Service] Found test run: ${report.name}, executions: ${report.executions.length}`);
 
     const passed = report.executions.filter((e) => e.status === 'PASSED').length;
     const failed = report.executions.filter((e) => e.status === 'FAILED').length;
@@ -351,7 +352,7 @@ export async function generateExecutionPDF(testRunId) {
     const total = report.executions.length;
     const passRate = total > 0 ? ((passed / total) * 100).toFixed(2) : 0;
 
-    console.log(`[PDF Service] Creating jsPDF document...`);
+    logInfo(`[PDF Service] Creating jsPDF document...`);
     const doc = new jsPDF();
     let yPos = 20;
 
@@ -416,13 +417,13 @@ export async function generateExecutionPDF(testRunId) {
         });
     }
 
-    console.log(`[PDF Service] Generating ArrayBuffer output...`);
+    logInfo(`[PDF Service] Generating ArrayBuffer output...`);
     const arrayBuffer = doc.output('arraybuffer');
-    console.log(`[PDF Service] PDF generated successfully, size: ${arrayBuffer.byteLength} bytes`);
+    logInfo(`[PDF Service] PDF generated successfully, size: ${arrayBuffer.byteLength} bytes`);
     
     return arrayBuffer;
   } catch (error) {
-    console.error('[PDF Service] Error generating execution PDF:', error);
+    logError('[PDF Service] Error generating execution PDF:', error);
     throw error;
   }
 }
@@ -560,7 +561,7 @@ export async function generateExecutionExcel(testRunId) {
  */
 export async function generateTesterPerformancePDF(userId, weeks = 4) {
   try {
-    console.log(`[PDF Service] Generating performance PDF for user ${userId}, weeks: ${weeks}...`);
+    logInfo(`[PDF Service] Generating performance PDF for user ${userId}, weeks: ${weeks}...`);
     
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - (weeks * 7));
@@ -583,13 +584,13 @@ export async function generateTesterPerformancePDF(userId, weeks = 4) {
       throw new Error('User not found');
     }
     
-    console.log(`[PDF Service] Found user: ${user.name}, executions: ${executions.length}, bugs: ${bugs.length}`);
+    logInfo(`[PDF Service] Found user: ${user.name}, executions: ${executions.length}, bugs: ${bugs.length}`);
 
     const passed = executions.filter((e) => e.status === 'PASSED').length;
     const failed = executions.filter((e) => e.status === 'FAILED').length;
     const passRate = executions.length > 0 ? ((passed / executions.length) * 100).toFixed(2) : 0;
 
-    console.log(`[PDF Service] Creating jsPDF document...`);
+    logInfo(`[PDF Service] Creating jsPDF document...`);
     const doc = new jsPDF();
     let yPos = 20;
 
@@ -631,13 +632,13 @@ export async function generateTesterPerformancePDF(userId, weeks = 4) {
     const bugDetectionRate = executions.length > 0 ? ((bugs.length / executions.length) * 100).toFixed(2) : 0;
     doc.text(`Bug Detection Rate: ${bugDetectionRate}%`, 25, yPos);
 
-    console.log(`[PDF Service] Generating ArrayBuffer output...`);
+    logInfo(`[PDF Service] Generating ArrayBuffer output...`);
     const arrayBuffer = doc.output('arraybuffer');
-    console.log(`[PDF Service] PDF generated successfully, size: ${arrayBuffer.byteLength} bytes`);
+    logInfo(`[PDF Service] PDF generated successfully, size: ${arrayBuffer.byteLength} bytes`);
     
     return arrayBuffer;
   } catch (error) {
-    console.error('[PDF Service] Error generating performance PDF:', error);
+    logError('[PDF Service] Error generating performance PDF:', error);
     throw error;
   }
 }

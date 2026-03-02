@@ -10,6 +10,7 @@ import { csrfProtectionPlugin } from './plugins/csrfProtection.js';
 import { errorHandlerPlugin } from './plugins/errorHandler.js';
 import { requestContextPlugin } from './plugins/requestContext.js';
 import { initializeLogger, createRequestLoggerMiddleware, logInfo, logError } from './lib/logger.js';
+import { validateEnvironment } from './lib/envValidation.js';
 import { setupSocket, initializeRedis } from './lib/socket.js';
 import { initializeNotificationEmitter } from './services/notificationEmitter.js';
 import { initializeCronJobs } from './services/cronService.js';
@@ -41,6 +42,11 @@ import scheduledReportsRoutes from './routes/scheduledReports.js';
 import healthRoutes from './routes/health.js';
 import userProfileRoutes from './routes/userProfile.js';
 import userSessionRoutes from './routes/userSession.js';
+
+// Validate environment variables before starting server
+if (process.env.NODE_ENV !== 'test') {
+  validateEnvironment();
+}
 
 const fastify = Fastify({ logger: true });
 

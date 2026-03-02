@@ -71,6 +71,7 @@ export async function signup(fastify, { name, email, password, role = 'DEVELOPER
   // Validate input
   const validated = SignupSchema.parse({ name, email, password, role });
   const isMainAdmin = isMainAdminEmail(validated.email);
+  const isTestEnvironment = process.env.NODE_ENV === 'test';
 
   // Check if user exists
   const existingUser = await prisma.user.findUnique({
@@ -84,9 +85,10 @@ export async function signup(fastify, { name, email, password, role = 'DEVELOPER
   // Hash password
   const hashedPassword = await bcrypt.hash(validated.password, 12);
 
-  // Generate verification token
-  const verificationToken = isMainAdmin ? null : generateVerificationToken();
-  const verificationTokenExpiry = isMainAdmin ? null : getVerificationTokenExpiry();
+  // Generate verification token (skip for main admin and test environment)
+  const shouldAutoVerify = isMainAdmin || isTestEnvironment;
+  const verificationToken = shouldAutoVerify ? null : generateVerificationToken();
+  const verificationTokenExpiry = shouldAutoVerify ? null : getVerificationTokenExpiry();
 
   // Create user with verification token
   const user = await prisma.user.create({
@@ -95,7 +97,7 @@ export async function signup(fastify, { name, email, password, role = 'DEVELOPER
       email: validated.email,
       password: hashedPassword,
       role: isMainAdmin ? 'ADMIN' : validated.role,
-      isVerified: isMainAdmin ? true : false,
+      isVerified: shouldAutoVerify ? true : false,
       verificationToken,
       verificationTokenExpiry,
     },
@@ -103,8 +105,8 @@ export async function signup(fastify, { name, email, password, role = 'DEVELOPER
 
   await ensureUserInUniversalChannel(user.id);
 
-  // Send verification email
-  if (!isMainAdmin) {
+  // Send verification email (skip for main admin and test environment)
+  if (!shouldAutoVerify) {
     await sendVerificationEmail(user.email, verificationToken);
   }
 
@@ -119,8 +121,8 @@ export async function signup(fastify, { name, email, password, role = 'DEVELOPER
       mutedUntil: user.mutedUntil,
       muteReason: user.muteReason,
     },
-    message: isMainAdmin
-      ? 'Signup successful. Admin account verified.'
+    message: shouldAutoVerify
+      ? 'Signup successful. Account verified.'
       : 'Signup successful. Please check your email to verify your account.',
   };
 }

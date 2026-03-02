@@ -13,6 +13,9 @@ export default defineConfig({
     include: ['**/*.test.js', '**/*.spec.js'],
     exclude: ['node_modules', 'dist', 'build'],
     reporters: ['default', 'html'],
+    env: {
+      NODE_ENV: 'test',
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

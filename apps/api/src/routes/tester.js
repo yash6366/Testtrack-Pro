@@ -6,7 +6,7 @@
 import { getPrismaClient } from '../lib/prisma.js';
 import { createAuthGuards } from '../lib/rbac.js';
 import { requirePermission } from '../lib/policy.js';
-import { logError } from '../lib/logger.js';
+import { logError, logInfo } from '../lib/logger.js';
 import { logAuditAction } from '../services/auditService.js';
 import {
   generateExecutionReport,
@@ -1044,7 +1044,7 @@ export async function testerRoutes(fastify) {
     async (request, reply) => {
       try {
         const { runId } = request.params;
-        console.log(`[PDF Export] Generating PDF for test run ${runId}...`);
+        logInfo(`[PDF Export] Generating PDF for test run ${runId}...`);
         
         const pdf = await generateExecutionPDF(Number(runId));
         
@@ -1052,20 +1052,20 @@ export async function testerRoutes(fastify) {
           throw new Error('PDF generation returned empty result');
         }
         
-        console.log(`[PDF Export] PDF generated successfully, size: ${pdf.byteLength || pdf.length} bytes`);
+        logInfo(`[PDF Export] PDF generated successfully, size: ${pdf.byteLength || pdf.length} bytes`);
         
         const buffer = Buffer.from(pdf);
-        console.log(`[PDF Export] Sending PDF buffer of ${buffer.length} bytes...`);
+        logInfo(`[PDF Export] Sending PDF buffer of ${buffer.length} bytes...`);
 
         reply
           .header('Content-Type', 'application/pdf')
           .header('Content-Disposition', `attachment; filename="test-run-${runId}.pdf"`)
           .send(buffer);
           
-        console.log(`[PDF Export] PDF sent successfully for test run ${runId}`);
+        logInfo(`[PDF Export] PDF sent successfully for test run ${runId}`);
       } catch (error) {
         logError('Error exporting test run to PDF:', error);
-        console.error('[PDF Export] Error details:', {
+        logError('[PDF Export] Error details:', {
           message: error.message,
           stack: error.stack,
           runId: request.params.runId
@@ -1146,7 +1146,7 @@ export async function testerRoutes(fastify) {
         }
 
         const weeks = request.query.weeks ? Number(request.query.weeks) : 4;
-        console.log(`[PDF Export] Generating performance PDF for user ${userId}, weeks: ${weeks}...`);
+        logInfo(`[PDF Export] Generating performance PDF for user ${userId}, weeks: ${weeks}...`);
         
         const pdf = await generateTesterPerformancePDF(userId, weeks);
         
@@ -1154,7 +1154,7 @@ export async function testerRoutes(fastify) {
           throw new Error('PDF generation returned empty result');
         }
         
-        console.log(`[PDF Export] Performance PDF generated successfully, size: ${pdf.byteLength || pdf.length} bytes`);
+        logInfo(`[PDF Export] Performance PDF generated successfully, size: ${pdf.byteLength || pdf.length} bytes`);
         
         const buffer = Buffer.from(pdf);
 
@@ -1163,10 +1163,10 @@ export async function testerRoutes(fastify) {
           .header('Content-Disposition', `attachment; filename="tester-performance-${userId}.pdf"`)
           .send(buffer);
           
-        console.log(`[PDF Export] Performance PDF sent successfully for user ${userId}`);
+        logInfo(`[PDF Export] Performance PDF sent successfully for user ${userId}`);
       } catch (error) {
         logError('Error exporting performance report to PDF:', error);
-        console.error('[PDF Export] Error details:', {
+        logError('[PDF Export] Error details:', {
           message: error.message,
           stack: error.stack,
           userId: request.query.userId || request.user.id
