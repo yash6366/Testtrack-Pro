@@ -52,14 +52,6 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Deploy API to Railway (staging)
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: |
-          npm install -g @railway/cli
-          cd apps/api
-          railway up --service ${{ secrets.RAILWAY_STAGING_SERVICE_ID }} --environment staging
-
       - name: Deploy web to Vercel (staging)
         uses: amondnet/vercel-action@v25
         with:
