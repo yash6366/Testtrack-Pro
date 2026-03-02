@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import MetricsGrid from '@/components/MetricsGrid';
 import ProjectManagement from '@/components/ProjectManagement';
 import ChatAdminControls from '@/components/ChatAdminControls';
+import BackupManagement from '@/components/BackupManagement';
 import { apiClient } from '@/lib/apiClient';
 import { logError } from '@/lib/errorLogger';
 
@@ -690,26 +691,7 @@ export default function AdminDashboard() {
 
       {/* Backup & Data Tab */}
       {activeTab === 'backups' && (
-        <div className="tt-card mb-8">
-          <div className="px-6 py-4 border-b border-[var(--border)]">
-            <h3 className="text-lg font-semibold">Backup & Data Control</h3>
-            <p className="text-sm text-[var(--muted)]">Manage backups, restores, and data retention</p>
-          </div>
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div className="tt-card-soft p-4">
-              <p className="font-semibold">Manual Backups</p>
-              <p className="text-[var(--muted)] mt-1">Trigger and track backup jobs</p>
-            </div>
-            <div className="tt-card-soft p-4">
-              <p className="font-semibold">Restore Controls</p>
-              <p className="text-[var(--muted)] mt-1">Manage restore points and recovery</p>
-            </div>
-            <div className="tt-card-soft p-4">
-              <p className="font-semibold">Data Retention</p>
-              <p className="text-[var(--muted)] mt-1">Purge or recover soft-deleted records</p>
-            </div>
-          </div>
-        </div>
+        <BackupManagement />
       )}
 
       {/* Reporting & Analytics Tab */}

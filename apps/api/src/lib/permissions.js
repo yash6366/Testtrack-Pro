@@ -643,7 +643,7 @@ export const PERMISSIONS = {
   // ============================================
   // BACKUP & RECOVERY (ADMIN-ONLY)
   // ============================================
-  'backup:trigger': {
+  'system:backup:create': {
     description: 'Trigger database backups',
     roles: {
       [ROLES.ADMIN]: true,
@@ -651,7 +651,31 @@ export const PERMISSIONS = {
       [ROLES.TESTER]: false,
     },
   },
-  'backup:restore': {
+  'system:backup:read': {
+    description: 'View backup history and status',
+    roles: {
+      [ROLES.ADMIN]: true,
+      [ROLES.DEVELOPER]: false,
+      [ROLES.TESTER]: false,
+    },
+  },
+  'system:backup:download': {
+    description: 'Download backup files',
+    roles: {
+      [ROLES.ADMIN]: true,
+      [ROLES.DEVELOPER]: false,
+      [ROLES.TESTER]: false,
+    },
+  },
+  'system:backup:delete': {
+    description: 'Delete backup files',
+    roles: {
+      [ROLES.ADMIN]: true,
+      [ROLES.DEVELOPER]: false,
+      [ROLES.TESTER]: false,
+    },
+  },
+  'system:backup:restore': {
     description: 'Restore from backups (CRITICAL)',
     roles: {
       [ROLES.ADMIN]: true,
@@ -659,8 +683,24 @@ export const PERMISSIONS = {
       [ROLES.TESTER]: false,
     },
   },
+  'backup:trigger': {
+    description: 'Trigger database backups (DEPRECATED - use system:backup:create)',
+    roles: {
+      [ROLES.ADMIN]: true,
+      [ROLES.DEVELOPER]: false,
+      [ROLES.TESTER]: false,
+    },
+  },
+  'backup:restore': {
+    description: 'Restore from backups (DEPRECATED - use system:backup:restore)',
+    roles: {
+      [ROLES.ADMIN]: true,
+      [ROLES.DEVELOPER]: false,
+      [ROLES.TESTER]: false,
+    },
+  },
   'backup:monitor': {
-    description: 'Monitor backup status',
+    description: 'Monitor backup status (DEPRECATED - use system:backup:read)',
     roles: {
       [ROLES.ADMIN]: true,
       [ROLES.DEVELOPER]: false,

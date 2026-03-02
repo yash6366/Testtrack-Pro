@@ -39,6 +39,7 @@ import testPlanRoutes from './routes/testPlans.js';
 import apiKeyRoutes from './routes/apiKeys.js';
 import githubRoutes from './routes/github.js';
 import scheduledReportsRoutes from './routes/scheduledReports.js';
+import backupRoutes from './routes/backup.js';
 import healthRoutes from './routes/health.js';
 import userProfileRoutes from './routes/userProfile.js';
 import userSessionRoutes from './routes/userSession.js';
@@ -113,6 +114,7 @@ fastify.register(testPlanRoutes);
 fastify.register(apiKeyRoutes);
 fastify.register(githubRoutes);
 fastify.register(scheduledReportsRoutes);
+fastify.register(backupRoutes, { prefix: '/api/admin/backup' });
 
 // Start server
 const start = async () => {

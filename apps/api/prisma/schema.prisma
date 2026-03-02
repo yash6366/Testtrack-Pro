@@ -1090,3 +1090,35 @@ model ChatAuditLog {
   @@index([targetId])
   @@index([targetType])
 }
+
+model BackupHistory {
+  id              Int       @id @default(autoincrement())
+  filename        String    @unique
+  filepath        String?
+  filesize        BigInt?
+  type            String    @default("MANUAL")
+  status          String    @default("IN_PROGRESS")
+  environment     String    @default("production")
+  triggeredBy     Int?
+  s3Key           String?
+  s3Bucket        String?
+  compressionType String    @default("gzip")
+  databaseName    String
+  databaseHost    String?
+  errorMessage    String?
+  metadata        Json?
+  retentionDays   Int       @default(30)
+  expiresAt       DateTime?
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+  restoredAt      DateTime?
+  restoredBy      Int?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status])
+  @@index([type])
+  @@index([triggeredBy])
+  @@index([createdAt])
+  @@index([expiresAt])
+}
