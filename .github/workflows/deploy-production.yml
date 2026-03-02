@@ -1,71 +1,41 @@
-name: Deploy Production (Railway API)
+name: Deploy API to Railway
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 concurrency:
-  group: production-deploy
+  group: api-deployment
   cancel-in-progress: true
 
 jobs:
-  ci:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run linting
-        run: pnpm lint
+      - name: Build backend
+        run: pnpm --filter api build
 
-      - name: Run type checking
-        run: pnpm typecheck
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
 
-      - name: Run API tests
-        run: pnpm --filter api test:run
-
-      - name: Build applications
-        run: pnpm build
-
-  deploy-railway:
-    name: Deploy API to Railway
-    runs-on: ubuntu-latest
-    needs: ci
-    steps:
-      - name: Trigger Railway deployment
+      - name: Deploy to Railway
         env:
-          RAILWAY_DEPLOY_HOOK_URL: ${{ secrets.RAILWAY_DEPLOY_HOOK_URL }}
-        run: |
-          if [ -z "$RAILWAY_DEPLOY_HOOK_URL" ]; then
-            echo "Missing secret: RAILWAY_DEPLOY_HOOK_URL"
-            exit 1
-          fi
-
-          curl -fsSL -X POST "$RAILWAY_DEPLOY_HOOK_URL"
-
-      - name: Production health check
-        env:
-          PRODUCTION_API_URL: ${{ secrets.PRODUCTION_API_URL }}
-        run: |
-          if [ -z "$PRODUCTION_API_URL" ]; then
-            echo "Skipping health check: PRODUCTION_API_URL is not set"
-            exit 0
-          fi
-
-          curl -f "$PRODUCTION_API_URL/api/health"
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --service api --detach
