@@ -1,6 +1,6 @@
 {
-  "installCommand": "pnpm install --filter web...",
-  "buildCommand": "pnpm run build",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
   "rewrites": [
     {
       "source": "/(.*)",
