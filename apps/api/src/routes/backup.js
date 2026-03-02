@@ -3,7 +3,8 @@
  * Endpoints for backup management (trigger, list, download, delete)
  */
 
-import { requireAuth, requirePermission } from '../lib/rbac.js';
+import { createAuthGuards } from '../lib/rbac.js';
+import { requirePermission } from '../lib/policy.js';
 import {
   triggerBackup,
   getBackupList,
@@ -18,6 +19,8 @@ import {
  * @param {FastifyInstance} fastify
  */
 export default async function backupRoutes(fastify) {
+  const { requireAuth } = createAuthGuards(fastify);
+
   // Trigger manual backup
   fastify.post(
     '/trigger',
