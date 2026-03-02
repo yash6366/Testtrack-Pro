@@ -2,13 +2,25 @@
 # TestTrack Pro - API Dockerfile
 # =============================================================================
 # Multi-stage build for optimized production image
+# 
+# Security Note: Update base image regularly to patch vulnerabilities
+# Run: docker scan <image> to check for vulnerabilities
+# This image uses the latest Node.js 20 LTS on Alpine for minimal attack surface
 
 # Stage 1: Base dependencies
-FROM node:20-alpine AS base
+FROM node:20.11.1-alpine3.20 AS base
 WORKDIR /app
 
+# Apply security updates
+RUN apk upgrade --no-cache --available && \
+  apk add --no-cache \
+    dumb-init \
+    libcrypto3 \
+    libssl3 && \
+  rm -rf /var/cache/apk/* /tmp/*
+
 # Install pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@latest
 
 # Copy workspace configuration
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
@@ -39,15 +51,21 @@ RUN cd apps/api && pnpm exec prisma generate
 RUN pnpm prune --prod
 
 # Stage 4: Production
-FROM node:20-alpine AS production
+FROM node:20.11.1-alpine3.20 AS production
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Apply latest security updates and install minimal dependencies
+RUN apk upgrade --no-cache --available && \
+  apk add --no-cache \
+    dumb-init \
+    libcrypto3 \
+    libssl3 && \
+  rm -rf /var/cache/apk/* /tmp/* /root/.npm
 
-# Create non-root user
+# Create non-root user with restricted permissions
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+  adduser -S nodejs -u 1001 -G nodejs && \
+  chown -R nodejs:nodejs /app
 
 # Copy built application from build stage
 COPY --from=build --chown=nodejs:nodejs /app/node_modules ./node_modules

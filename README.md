@@ -1,5 +1,7 @@
 # TestTrack Pro - Full-Stack Monorepo
 
+> **Doc sync note (2026-03-02):** This README was reviewed against current root/app package scripts and workspace layout.
+
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-org/testtrack-pro/actions)
 [![Test Coverage](https://img.shields.io/badge/coverage-70%25-brightgreen)](./)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
@@ -187,7 +189,7 @@ testtrack-pro/
    ```
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:3001
-   - API Docs: http://localhost:3001/documentation
+   - API Docs: http://localhost:3001/docs
 
 ### Production Deployment
 
@@ -290,7 +292,7 @@ pnpm --filter api start    # Production
 - **Security**: Helmet.js, CSRF protection, rate limiting, input validation
 
 ### Testing & QA
-- **Jest** - Backend unit testing (70%+ coverage)
+- **Vitest** - Backend unit/integration testing (`apps/api`)
 - **Vitest** - Frontend unit testing (70%+ coverage)
 - **React Testing Library** - Component testing
 - **Coverage Reports** - LCOV formatted reports
@@ -430,14 +432,15 @@ Complete documentation for users, developers, and operators:
 
 | Command | Description |
 |---------|------------|
-| `pnpm dev` | Start all apps in dev mode (frontend + backend) |
-| `pnpm build` | Build all apps for production |
-| `pnpm test` | Run all tests (backend + frontend) |
-| `pnpm test:watch` | Run tests in watch mode |
-| `pnpm test:coverage` | Generate coverage reports |
-| `pnpm lint` | Lint all code (ESLint) |
-| `pnpm lint:fix` | Lint and fix code automatically |
-| `pnpm clean` | Clean artifacts and node_modules |
+| `pnpm dev` | Start all workspaces in development mode |
+| `pnpm build` | Build all workspaces for production |
+| `pnpm lint` | Run lint checks across workspaces |
+| `pnpm typecheck` | Run TypeScript type checks where configured |
+| `pnpm clean` | Clean workspace artifacts |
+| `pnpm test:e2e` | Run Playwright end-to-end tests |
+| `pnpm test:e2e:ui` | Run Playwright in UI mode |
+| `pnpm test:e2e:headed` | Run Playwright in headed mode |
+| `pnpm test:e2e:debug` | Run Playwright in debug mode |
 
 ## � Deployment
 

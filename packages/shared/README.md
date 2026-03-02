@@ -1,4 +1,6 @@
-# @testtrack/shared
+# @shared/types
+
+> **Doc sync note (2026-03-02):** Package name and usage guidance are aligned with `packages/shared/package.json`.
 
 Shared TypeScript types, utilities, and constants used across TestTrack Pro monorepo.
 
@@ -28,7 +30,7 @@ pnpm install
 
 ```javascript
 // Import shared types
-import type { User, TestCase, Bug } from '@testtrack/shared';
+import type { User, TestCase, Bug } from '@shared/types';
 
 // Use in your code
 function getUserById(id: number): User {
@@ -40,7 +42,7 @@ function getUserById(id: number): User {
 
 ```typescript
 // Import shared types
-import type { TestCaseStatus, BugSeverity } from '@testtrack/shared';
+import type { TestCaseStatus, BugSeverity } from '@shared/types';
 
 // Use in components
 interface Props {
@@ -191,7 +193,7 @@ export const STATUS_COLORS = {
 ### Validation
 
 ```typescript
-import { isValidEmail, isValidPassword } from '@testtrack/shared';
+import { isValidEmail, isValidPassword } from '@shared/types';
 
 if (!isValidEmail(email)) {
   throw new Error('Invalid email format');
@@ -201,7 +203,7 @@ if (!isValidEmail(email)) {
 ### Formatting
 
 ```typescript
-import { formatDate, formatDuration } from '@testtrack/shared';
+import { formatDate, formatDuration } from '@shared/types';
 
 const formattedDate = formatDate(new Date());
 const duration = formatDuration(milliseconds);

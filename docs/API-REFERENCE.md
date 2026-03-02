@@ -1,6 +1,8 @@
 # TestTrack Pro - API Reference
 
-Complete REST API documentation. For interactive API exploration, visit `/documentation` after starting the server.
+> **Doc sync note (2026-03-02):** Reviewed against current API route modules and Fastify runtime configuration. Swagger UI at `/docs` is the authoritative interactive reference.
+
+Complete REST API documentation. For interactive API exploration, visit `/docs` after starting the server.
 
 ## Authentication
 

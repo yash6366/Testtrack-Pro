@@ -1,5 +1,7 @@
 # TestTrack Pro - API Error Codes
 
+> **Doc sync note (2026-03-02):** Error payload conventions in this file are aligned with the global error handler plugin in `apps/api/src/plugins/errorHandler.js`.
+
 Complete reference for all API error responses, status codes, and error handling.
 
 ## Error Response Format
@@ -8,15 +10,13 @@ All API errors follow a consistent JSON structure:
 
 ```json
 {
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Human-readable error message",
-    "statusCode": 400,
-    "details": {
-      "field": "additional context",
-      "value": "invalid value"
-    }
-  }
+  "error": "Validation Failed",
+  "code": "VALIDATION_ERROR",
+  "message": "Human-readable error message",
+  "details": {
+    "field": "additional context"
+  },
+  "requestId": "req-123"
 }
 ```
 

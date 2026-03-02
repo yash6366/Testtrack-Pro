@@ -1,5 +1,7 @@
 # Contributing Guide
 
+> **Doc sync note (2026-03-02):** Commands in this file are aligned to scripts currently present in root and workspace package manifests.
+
 Guidelines for contributing to TestTrack Pro.
 
 ## Code of Conduct
@@ -227,11 +229,7 @@ function TestItem({ test, onSelect }) {
 - **Quotes**: Single quotes in JS, double in JSX attributes
 - **Semicolons**: Always use (except in special cases)
 
-Auto-format with Prettier:
-
-```bash
-pnpm format
-```
+Auto-format with Prettier via editor integration (no root `pnpm format` script is currently defined).
 
 ### Linting
 
@@ -240,7 +238,7 @@ pnpm format
 pnpm lint
 
 # Fix automatically
-pnpm lint:fix
+pnpm lint
 ```
 
 ## Testing Requirements
@@ -256,17 +254,17 @@ Must include:
 Example test file:
 
 ```javascript
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { YourService } from '../yourService.js';
 
-jest.mock('../../lib/prisma.js');
+vi.mock('../../lib/prisma.js');
 
 describe('YourService', () => {
   let service;
 
   beforeEach(() => {
     service = new YourService();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should perform expected operation', async () => {

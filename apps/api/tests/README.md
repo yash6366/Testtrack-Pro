@@ -1,5 +1,7 @@
 # TestTrack Pro - Test Suite
 
+> **Doc sync note (2026-03-02):** Test command references reviewed against current Vitest scripts in `apps/api/package.json`.
+
 This directory contains tests for the TestTrack Pro API.
 
 ## Overview

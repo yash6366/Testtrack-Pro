@@ -1,5 +1,7 @@
 # TestTrack Pro - Web Frontend
 
+> **Doc sync note (2026-03-02):** Build/runtime command guidance is aligned to `apps/web/package.json` scripts.
+
 The React-based frontend application for TestTrack Pro test management platform.
 
 ## Overview
@@ -385,14 +387,9 @@ module.exports = {
 ### Unit Tests
 
 ```bash
-# Run all tests
-pnpm test
-
-# Run in watch mode
-pnpm test:watch
-
-# Generate coverage
-pnpm test:coverage
+# No unit-test scripts are currently defined in apps/web/package.json
+# Run workspace E2E tests from repository root instead:
+pnpm test:e2e
 ```
 
 ### Writing Tests

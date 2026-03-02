@@ -235,7 +235,7 @@ test.describe('Security', () => {
     
     // Verify no script execution (page should still be functional)
     const hasAlert = await page.evaluate(() => {
-      return typeof window.alert === 'function';
+      return typeof (window as any).alert === 'function';
     });
     expect(hasAlert).toBe(true); // Alert not hijacked
   });

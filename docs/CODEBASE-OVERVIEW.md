@@ -1,5 +1,7 @@
 # TestTrack Pro - Codebase Overview
 
+> **Doc sync note (2026-03-02):** Reviewed against current monorepo structure (`apps/*`, `packages/*`) and active test/documentation layout.
+
 Comprehensive analysis and structure guide for developers working on TestTrack Pro.
 
 **Document Version**: 1.0  

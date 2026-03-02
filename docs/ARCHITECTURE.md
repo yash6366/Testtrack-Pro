@@ -1,5 +1,7 @@
 # TestTrack Pro - System Architecture
 
+> **Doc sync note (2026-03-02):** Reviewed against current workspace packages, runtime scripts, and route/plugin registration in `apps/api/src/server.js`.
+
 ## Overview
 
 TestTrack Pro is a comprehensive software testing management platform built with a modern, production-ready monorepo architecture. The system is organized around **projects** as the primary organizational unit, with multiple users collaborating through role-based access control (ADMIN, DEVELOPER, TESTER).
@@ -31,7 +33,7 @@ TestTrack Pro is a comprehensive software testing management platform built with
 - **File Storage**: Cloudinary
 - **Email**: Resend
 - **Job Scheduling**: node-cron
-- **Testing**: Jest
+- **Testing**: Vitest (API package) + Playwright (E2E)
 - **Monitoring**: Sentry
 
 ### Infrastructure

@@ -1,5 +1,7 @@
 # Scripts Directory
 
+> **Doc sync note (2026-03-02):** Script inventory reviewed against current files in `scripts/` and `scripts/dev/`.
+
 Utility scripts for development, maintenance, and deployment.
 
 ## Structure

@@ -1,0 +1,38 @@
+# Trivy Vulnerability Ignore File
+# =============================================================================
+# Document acceptable security risks that have been reviewed and deemed low impact
+# 
+# Format: CVE-ID # Justification
+# Review this file monthly and remove entries when patches are available
+
+# Alpine Package CVEs - Review Weekly
+# -------------------------------------
+# Note: Some CVEs may be false positives or affect unused features
+# Always verify with: trivy image --severity HIGH,CRITICAL <image>
+
+# Example entries (remove after verification):
+# CVE-2024-XXXXX # Low severity, affects unused curl feature, no exploit available
+# CVE-2024-XXXXX # False positive, not applicable to our Node.js usage
+
+# OpenSSL CVEs
+# ------------
+# We explicitly install latest libcrypto3 and libssl3 in Dockerfiles
+# Any remaining CVEs should be documented here with mitigation notes
+
+# Node.js CVEs  
+# ------------
+# Using Node.js 20.11.1 LTS with security patches
+# Document any CVEs from upstream Node.js that are accepted
+
+# npm/pnpm CVEs
+# -------------
+# Production images don't include npm/pnpm, only node binary
+# Development stage CVEs are not deployed to production
+
+# =============================================================================
+# IMPORTANT: Do not add CVEs here without:
+# 1. Verifying the CVE applies to our usage
+# 2. Documenting why it's acceptable or mitigated
+# 3. Adding a review date and owner
+# 4. Getting security team approval for HIGH/CRITICAL CVEs
+# =============================================================================

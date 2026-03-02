@@ -1,5 +1,7 @@
 # Development Guide
 
+> **Doc sync note (2026-03-02):** Local workflow commands are aligned to currently available `pnpm` scripts for root, `api`, and `web` packages.
+
 This guide covers setting up your local development environment and common development workflows.
 
 ## Prerequisites
@@ -26,8 +28,8 @@ pnpm install
 # Start all dev servers (API + Web)
 pnpm dev
 
-# Run tests
-pnpm test
+# Run E2E tests from repo root
+pnpm test:e2e
 
 # Lint code
 pnpm lint
@@ -211,7 +213,7 @@ redis-server
 
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:3001
-- API Docs: http://localhost:3001/documentation
+- API Docs: http://localhost:3001/docs
 - Health Check: http://localhost:3001/health
 
 ## Development Workflows
@@ -567,37 +569,32 @@ This returns:
 #### Run Tests
 
 ```bash
-# Run all tests
-pnpm test
+# Run end-to-end tests (workspace root)
+pnpm test:e2e
 
-# Run backend tests
+# Run backend tests (apps/api)
 cd apps/api
 pnpm test
-
-# Run frontend tests
-cd apps/web
-pnpm test
-
-# Run tests in watch mode
-pnpm test:watch
-
-# Run tests with coverage
+pnpm test:run
 pnpm test:coverage
+
+# Frontend note
+# apps/web currently has no dedicated unit-test scripts in package.json
 ```
 
 #### Write a Backend Test
 
 ```javascript
 // apps/api/src/services/tests/customFieldService.test.js
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CustomFieldService } from '../customFieldService.js';
 
-jest.mock('../../lib/prisma.js', () => ({
+vi.mock('../../lib/prisma.js', () => ({
   __esModule: true,
   default: {
     customField: {
-      create: jest.fn(),
-      findMany: jest.fn(),
+      create: vi.fn(),
+      findMany: vi.fn(),
     },
   },
 }));
@@ -607,7 +604,7 @@ describe('CustomFieldService', () => {
 
   beforeEach(() => {
     service = new CustomFieldService();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should create custom field', async () => {
@@ -716,7 +713,7 @@ SELECT * FROM users;
 pnpm lint
 
 # Lint and fix
-pnpm lint:fix
+pnpm lint
 
 # Lint specific workspace
 cd apps/api
@@ -726,8 +723,8 @@ pnpm lint
 #### Formatting
 
 ```bash
-# Format with Prettier (if configured)
-pnpm format
+# No root formatting script is currently defined.
+# Use editor/Prettier integration directly if needed.
 ```
 
 ### Analytics Features (V1)

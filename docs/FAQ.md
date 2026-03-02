@@ -1,5 +1,7 @@
 # TestTrack Pro - Frequently Asked Questions (FAQ)
 
+> **Doc sync note (2026-03-02):** Answers have been reviewed for alignment with the currently implemented API and workspace scripts.
+
 Common questions and answers about TestTrack Pro.
 
 ## Table of Contents

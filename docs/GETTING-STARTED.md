@@ -1,5 +1,7 @@
 # Getting Started with TestTrack Pro
 
+> **Doc sync note (2026-03-02):** Quickstart steps are aligned to the active monorepo commands and current local-development workflow.
+
 Welcome to TestTrack Pro! This guide will help you get started with our test management platform in just a few minutes.
 
 ## What is TestTrack Pro?

@@ -1,5 +1,7 @@
 # End-to-End Testing Framework
 
+> **Doc sync note (2026-03-02):** Test inventory and command examples reviewed against current Playwright specs in `tests/e2e`.
+
 ## Overview
 
 This directory contains end-to-end (E2E) tests for TestTrack Pro using Playwright.
@@ -41,7 +43,7 @@ tests/
 │   ├── auth.spec.ts           # Authentication flows
 │   ├── test-execution.spec.ts  # Test execution workflow
 │   ├── bug-workflow.spec.ts    # Bug management workflow
-│   └── test-case-crud.spec.ts  # Test case CRUD operations
+│   └── (no additional spec currently committed)
 ├── fixtures/
 │   └── test-data.ts            # Shared test data
 └── helpers/

@@ -1,5 +1,7 @@
 # OAuth Integration Guide
 
+> **Doc sync note (2026-03-02):** OAuth endpoint details reviewed against `apps/api/src/routes/auth.js` (Google/GitHub callback routes are GET handlers).
+
 This guide covers setting up OAuth 2.0 authentication with Google and GitHub providers in TestTrack Pro V1+.
 
 The OAuth integration allows users to sign up and log in using their Google or GitHub accounts. The system:
@@ -141,7 +143,7 @@ Response:
 
 **Google OAuth Callback**
 ```
-POST /api/auth/oauth/google/callback
+GET /api/auth/oauth/google/callback
 
 Body:
 {
@@ -167,7 +169,7 @@ Response:
 
 **GitHub OAuth Callback**
 ```
-POST /api/auth/oauth/github/callback
+GET /api/auth/oauth/github/callback
 
 Body:
 {

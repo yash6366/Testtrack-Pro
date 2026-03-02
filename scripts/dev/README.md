@@ -1,5 +1,7 @@
 # Development Utility Scripts
 
+> **Doc sync note (2026-03-02):** Usage examples reviewed against script locations and API workspace expectations.
+
 This directory contains utility scripts for development and database management.
 
 ## Scripts

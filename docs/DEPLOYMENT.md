@@ -1,5 +1,7 @@
 # TestTrack Pro - Production Deployment Guide
 
+> **Doc sync note (2026-03-02):** Deployment guidance reviewed against current Docker, Railway, and monorepo build scripts in this repository.
+
 ## Table of Contents
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
@@ -664,7 +666,7 @@ docker-compose exec postgres pg_dump -U testtrack testtrack_prod > backup.sql
 
 ### Performance Tuning
 
-See [PERFORMANCE.md](PERFORMANCE.md) for detailed performance optimization guide.
+See [PRODUCTION-READINESS-AUDIT.md](../PRODUCTION-READINESS-AUDIT.md) for related production hardening and readiness notes.
 
 ---
 

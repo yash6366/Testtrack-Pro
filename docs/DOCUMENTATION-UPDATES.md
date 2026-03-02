@@ -1,5 +1,7 @@
 # Documentation Updates Summary
 
+> **Doc sync note (2026-03-02):** This summary now tracks the latest codebase-aligned documentation pass and should be treated as a living changelog.
+
 **Date**: February 24, 2026  
 **Status**: ✅ Complete  
 **Total Documentation Lines Added/Updated**: 2000+
@@ -215,22 +217,22 @@
 ## Access Documentation
 
 ### For Developers
-Start here: [CODEBASE-OVERVIEW.md](./docs/CODEBASE-OVERVIEW.md)
+Start here: [CODEBASE-OVERVIEW.md](./CODEBASE-OVERVIEW.md)
 
 ### For Setup
-Start here: [DEVELOPMENT.md](./docs/DEVELOPMENT.md)
+Start here: [DEVELOPMENT.md](./DEVELOPMENT.md)
 
 ### For Features
-Start here: [FEATURES.md](./docs/FEATURES.md)
+Start here: [FEATURES.md](./FEATURES.md)
 
 ### For API Integration
-Start here: [API-REFERENCE.md](./docs/API-REFERENCE.md)
+Start here: [API-REFERENCE.md](./API-REFERENCE.md)
 
 ### For System Design
-Start here: [ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+Start here: [ARCHITECTURE.md](./ARCHITECTURE.md)
 
 ### For Troubleshooting
-Start here: [FAQ.md](./docs/FAQ.md)
+Start here: [FAQ.md](./FAQ.md)
 
 ---
 

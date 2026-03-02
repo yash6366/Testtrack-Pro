@@ -1,5 +1,7 @@
 # TestTrack Pro - API Server
 
+> **Doc sync note (2026-03-02):** Commands and endpoint notes were reviewed against current Fastify route registration and `apps/api/package.json` scripts.
+
 The backend REST API server for TestTrack Pro, built with Fastify, Prisma, and PostgreSQL.
 
 ## Overview
@@ -23,7 +25,7 @@ This is a high-performance Node.js backend that handles:
 - **Authentication**: JWT + bcrypt
 - **File Storage**: Cloudinary
 - **Email**: Resend
-- **Testing**: Jest
+- **Testing**: Vitest
 - **Monitoring**: Sentry
 
 ## Project Structure
@@ -67,7 +69,7 @@ apps/api/
 ├── coverage/                 # Test coverage reports
 ├── .env                      # Environment variables
 ├── package.json
-└── jest.config.js           # Jest configuration
+└── vitest.config.js         # Vitest configuration
 ```
 
 ## Environment Variables
@@ -266,7 +268,7 @@ Run the test suite:
 pnpm test
 
 # Run tests in watch mode
-pnpm test:watch
+pnpm test
 
 # Generate coverage report
 pnpm test:coverage

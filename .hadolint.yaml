@@ -1,0 +1,13 @@
+# Hadolint configuration for Dockerfile linting
+# This helps catch security and best practice issues
+
+ignored:
+  # Allow pinning to major versions for auto-updates
+  - DL3018  # Pin versions in apk add (we use latest for security patches)
+  
+failure-threshold: warning
+
+trustedRegistries:
+  - docker.io
+  - gcr.io
+  - ghcr.io

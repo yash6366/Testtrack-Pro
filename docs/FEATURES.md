@@ -1,5 +1,7 @@
 # TestTrack Pro - Features Guide
 
+> **Doc sync note (2026-03-02):** Feature descriptions have been reviewed against current backend route modules and frontend package dependencies.
+
 Comprehensive guide to all features and capabilities of TestTrack Pro V1
 
 ## Table of Contents
