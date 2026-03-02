@@ -1,9 +1,14 @@
-name: Production CI
+name: Deploy Production (Railway API)
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
 
 jobs:
   ci:
@@ -30,10 +35,37 @@ jobs:
         run: pnpm lint
 
       - name: Run type checking
-        run: pnpm type-check
+        run: pnpm typecheck
 
-      - name: Run tests
-        run: pnpm test
+      - name: Run API tests
+        run: pnpm --filter api test:run
 
       - name: Build applications
         run: pnpm build
+
+  deploy-railway:
+    name: Deploy API to Railway
+    runs-on: ubuntu-latest
+    needs: ci
+    steps:
+      - name: Trigger Railway deployment
+        env:
+          RAILWAY_DEPLOY_HOOK_URL: ${{ secrets.RAILWAY_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RAILWAY_DEPLOY_HOOK_URL" ]; then
+            echo "Missing secret: RAILWAY_DEPLOY_HOOK_URL"
+            exit 1
+          fi
+
+          curl -fsSL -X POST "$RAILWAY_DEPLOY_HOOK_URL"
+
+      - name: Production health check
+        env:
+          PRODUCTION_API_URL: ${{ secrets.PRODUCTION_API_URL }}
+        run: |
+          if [ -z "$PRODUCTION_API_URL" ]; then
+            echo "Skipping health check: PRODUCTION_API_URL is not set"
+            exit 0
+          fi
+
+          curl -f "$PRODUCTION_API_URL/api/health"
