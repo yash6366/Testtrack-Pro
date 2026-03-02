@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks';
 import BackButton from '@/components/ui/BackButton';
+import { API_BASE_URL } from '@/lib/runtimeConfig';
 
 export default function OAuthCallback() {
   const navigate = useNavigate();
@@ -9,8 +10,6 @@ export default function OAuthCallback() {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
     const handleCallback = async () => {

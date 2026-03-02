@@ -8,6 +8,7 @@ import { getPrismaClient } from '../lib/prisma.js';
 import { Resend } from 'resend';
 import { convertTz } from '../lib/timezone.js';
 import { logInfo, logError } from '../lib/logger.js';
+import { FRONTEND_URL } from '../lib/runtimeConfig.js';
 
 const prisma = getPrismaClient();
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -260,7 +261,7 @@ export async function sendDigestEmail(digestData) {
  * Generate digest HTML
  */
 function generateDigestHtml(user, frequencyLabel, frequencyText, grouped, totalCount, unreadCount) {
-  const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const baseUrl = FRONTEND_URL;
 
   const notificationsHtml = Object.entries(grouped)
     .map(([type, items]) => {

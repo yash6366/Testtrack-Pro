@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth, useSocket } from '@/hooks';
 import { logError } from '@/lib/errorLogger';
+import { API_BASE_URL } from '@/lib/runtimeConfig';
 
 const ChatContext = createContext();
 
@@ -32,7 +33,7 @@ export function ChatProvider({ children }) {
   const joinedChannelsRef = useRef(new Set());
   const activeChannelRef = useRef(null);
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const apiUrl = API_BASE_URL;
 
   /**
    * Load all conversations for the current user

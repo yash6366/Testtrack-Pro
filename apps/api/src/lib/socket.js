@@ -6,6 +6,7 @@ import { getPrismaClient } from './prisma.js';
 import { verifyTokenAndLoadUser } from './rbac.js';
 import { createNotification, getNotificationPreferences, isWithinQuietHours } from '../services/notificationService.js';
 import { logWarn } from './logger.js';
+import { FRONTEND_URL, DEV_FRONTEND_ORIGINS } from './runtimeConfig.js';
 
 let redisClient = null;
 let redisAdapter = null; // For Socket.IO scaling
@@ -109,8 +110,8 @@ export function setupSocket(fastifyServer) {
   const io = new Server(fastifyServer.server, {
     cors: {
       origin: [
-        process.env.FRONTEND_URL,
-        'http://localhost:5173',
+        FRONTEND_URL,
+        ...DEV_FRONTEND_ORIGINS,
       ],
       credentials: true,
     },

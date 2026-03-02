@@ -1,5 +1,6 @@
 import { io } from 'socket.io-client';
 import { logError, logInfo, logWarning } from './errorLogger';
+import { API_BASE_URL } from './runtimeConfig';
 
 let socket = null;
 
@@ -15,7 +16,7 @@ export function connectSocket(token, userId, userRole) {
     return socket;
   }
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const apiUrl = API_BASE_URL;
 
   socket = io(apiUrl, {
     auth: {
@@ -556,7 +557,7 @@ export function onPinnedMessage(callback) {
  */
 export async function sendReaction(messageId, emoji, action = 'add') {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/chat/messages/${messageId}/reactions`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat/messages/${messageId}/reactions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -584,7 +585,7 @@ export async function sendReaction(messageId, emoji, action = 'add') {
  */
 export async function sendReply(messageId, channelId, body) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/chat/messages/${messageId}/reply`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat/messages/${messageId}/reply`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -610,7 +611,7 @@ export async function sendReply(messageId, channelId, body) {
  */
 export async function getReactions(messageId) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/chat/messages/${messageId}/reactions`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat/messages/${messageId}/reactions`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
@@ -633,7 +634,7 @@ export async function getReactions(messageId) {
  */
 export async function getPinnedMessages(channelId) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/chat/channels/${channelId}/pinned`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat/channels/${channelId}/pinned`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
@@ -656,7 +657,7 @@ export async function getPinnedMessages(channelId) {
  */
 export async function pinMessage(messageId) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/chat/messages/${messageId}/pin`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat/messages/${messageId}/pin`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -680,7 +681,7 @@ export async function pinMessage(messageId) {
  */
 export async function unpinMessage(messageId) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/chat/messages/${messageId}/pin`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat/messages/${messageId}/pin`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -704,7 +705,7 @@ export async function unpinMessage(messageId) {
  */
 export async function getChannelMembers(channelId) {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/chat/channels/${channelId}/members`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat/channels/${channelId}/members`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },

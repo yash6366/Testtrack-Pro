@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks';
+import { API_BASE_URL } from '@/lib/runtimeConfig';
 
 export default function OAuthButtons() {
   const navigate = useNavigate();
   const { setAuthToken: setToken } = useAuth();
   const [loading, setLoading] = useState(null);
   const [error, setError] = useState('');
-
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   const handleOAuthRedirect = async (provider) => {
     try {

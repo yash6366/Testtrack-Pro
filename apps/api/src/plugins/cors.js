@@ -1,4 +1,5 @@
 import cors from '@fastify/cors';
+import { FRONTEND_URL, DEV_FRONTEND_ORIGINS } from '../lib/runtimeConfig.js';
 
 export async function setupCors(fastify) {
   const normalizeOrigin = (value) => value.trim().replace(/\/+$/, '');
@@ -11,7 +12,7 @@ export async function setupCors(fastify) {
   };
 
   const allowList = new Set(
-    [process.env.FRONTEND_URL, 'http://localhost:5173', 'http://localhost:5174']
+    [FRONTEND_URL, ...DEV_FRONTEND_ORIGINS]
       .filter(Boolean)
       .map(normalizeOrigin),
   );

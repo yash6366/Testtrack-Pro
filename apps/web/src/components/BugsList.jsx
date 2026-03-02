@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/lib/apiClient';
+import { X } from 'lucide-react';
 
 export default function BugsList({ 
   onBugSelect, 
@@ -17,6 +18,7 @@ export default function BugsList({
   });
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
+  const [total, setTotal] = useState(0);
 
   
   // Fetch bugs on mount and when filters change
@@ -41,6 +43,7 @@ export default function BugsList({
 
       const data = await apiClient.get(`/api/developer/bugs/assigned?${queryParams}`);
       setBugs(data.bugs || []);
+      setTotal(data.total || 0);
       setError(null);
     } catch (err) {
       setError(err.message || 'Failed to fetch bugs');
@@ -60,11 +63,26 @@ export default function BugsList({
     setPage(1);
   };
 
+  const hasActiveFilters = Object.values(filters).some(v => v !== '');
+
+  const clearFilters = () => {
+    setFilters({
+      status: '',
+      priority: '',
+      severity: '',
+      search: '',
+    });
+    setPage(1);
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       'NEW': 'bg-blue-500/10 text-blue-600 dark:text-blue-300',
+      'OPEN': 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-300',
       'IN_PROGRESS': 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-300',
       'FIXED': 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300',
+      'VERIFIED': 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-200',
+      'CLOSED': 'bg-gray-500/10 text-gray-600 dark:text-gray-300',
       'WONTFIX': 'bg-gray-500/10 text-gray-600 dark:text-gray-300',
       'DUPLICATE': 'bg-purple-500/10 text-purple-600 dark:text-purple-300',
     };
@@ -74,11 +92,25 @@ export default function BugsList({
   const getSeverityColor = (severity) => {
     const colors = {
       'CRITICAL': 'text-red-600 dark:text-red-300 font-bold',
+      'MAJOR': 'text-orange-600 dark:text-orange-300 font-semibold',
+      'MINOR': 'text-yellow-600 dark:text-yellow-300',
+      'TRIVIAL': 'text-green-600 dark:text-green-300',
+    };
+    return colors[severity] || 'text-gray-600';
+  };
+
+  const getPriorityColor = (priority) => {
+    const colors = {
+      'P0': 'text-red-600 dark:text-red-300 font-bold',
+      'P1': 'text-orange-600 dark:text-orange-300 font-semibold',
+      'P2': 'text-yellow-600 dark:text-yellow-300',
+      'P3': 'text-green-600 dark:text-green-300',
+      'CRITICAL': 'text-red-600 dark:text-red-300 font-bold',
       'HIGH': 'text-orange-600 dark:text-orange-300 font-semibold',
       'MEDIUM': 'text-yellow-600 dark:text-yellow-300',
       'LOW': 'text-green-600 dark:text-green-300',
     };
-    return colors[severity] || 'text-gray-600';
+    return colors[priority] || 'text-gray-600';
   };
 
   return (
@@ -88,7 +120,7 @@ export default function BugsList({
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Assigned Bugs</h3>
           <span className="text-sm text-[var(--muted)] bg-[var(--bg-elevated)] px-3 py-1 rounded-full">
-            {bugs.length} bugs
+            {total} bugs total
           </span>
         </div>
 
@@ -105,7 +137,7 @@ export default function BugsList({
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3 mb-3">
           <select
             value={filters.status}
             onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -113,9 +145,11 @@ export default function BugsList({
           >
             <option value="">All Status</option>
             <option value="NEW">New</option>
+            <option value="OPEN">Open</option>
             <option value="IN_PROGRESS">In Progress</option>
             <option value="FIXED">Fixed</option>
-            <option value="WONTFIX">Won't Fix</option>
+            <option value="VERIFIED">Verified</option>
+            <option value="CLOSED">Closed</option>
           </select>
 
           <select
@@ -124,10 +158,10 @@ export default function BugsList({
             className="px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">All Priority</option>
-            <option value="CRITICAL">Critical</option>
-            <option value="HIGH">High</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="LOW">Low</option>
+            <option value="P0">P0 - Critical</option>
+            <option value="P1">P1 - High</option>
+            <option value="P2">P2 - Medium</option>
+            <option value="P3">P3 - Low</option>
           </select>
 
           <select
@@ -137,11 +171,22 @@ export default function BugsList({
           >
             <option value="">All Severity</option>
             <option value="CRITICAL">Critical</option>
-            <option value="HIGH">High</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="LOW">Low</option>
+            <option value="MAJOR">Major</option>
+            <option value="MINOR">Minor</option>
+            <option value="TRIVIAL">Trivial</option>
           </select>
         </div>
+
+        {/* Clear Filters Button */}
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            className="flex items-center gap-1 px-3 py-1 text-xs text-[var(--muted)] hover:text-[var(--foreground)] transition"
+          >
+            <X className="h-3 w-3" />
+            Clear filters
+          </button>
+        )}
       </div>
 
       {/* Bug List */}
@@ -156,7 +201,7 @@ export default function BugsList({
           </div>
         ) : bugs.length === 0 ? (
           <div className="px-6 py-8 text-center text-[var(--muted)]">
-            No bugs found
+            No bugs found {hasActiveFilters && '- try adjusting your filters'}
           </div>
         ) : (
           bugs.map((bug) => (
@@ -167,16 +212,23 @@ export default function BugsList({
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <span className="text-xs font-mono bg-[var(--bg-elevated)] px-2 py-1 rounded text-[var(--muted-strong)]">
                       {bug.bugNumber}
                     </span>
                     <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(bug.status)}`}>
                       {bug.status.replace(/_/g, ' ')}
                     </span>
-                    <span className={`text-xs font-semibold ${getSeverityColor(bug.severity)}`}>
-                      {bug.severity}
-                    </span>
+                    {bug.priority && (
+                      <span className={`text-xs font-semibold ${getPriorityColor(bug.priority)}`}>
+                        {bug.priority}
+                      </span>
+                    )}
+                    {bug.severity && (
+                      <span className={`text-xs font-semibold ${getSeverityColor(bug.severity)}`}>
+                        {bug.severity}
+                      </span>
+                    )}
                   </div>
                   <h4 className="font-semibold text-sm mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                     {bug.title}
@@ -185,24 +237,12 @@ export default function BugsList({
                     {bug.description}
                   </p>
                 </div>
-
-                <div className="flex gap-2 ml-4">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Will implement quick actions
-                    }}
-                    className="px-3 py-1 text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-500/20 rounded transition opacity-0 group-hover:opacity-100"
-                  >
-                    Details
-                  </button>
-                </div>
               </div>
 
               <div className="flex items-center justify-between text-xs text-[var(--muted)]">
                 <div className="flex gap-4">
-                  {bug.sourceTestCase && (
-                    <span>Test Case: {bug.sourceTestCase.name}</span>
+                  {bug.testCase && (
+                    <span>Test: {bug.testCase.name}</span>
                   )}
                   <span>{bug.comments?.length || 0} comments</span>
                 </div>
@@ -223,10 +263,12 @@ export default function BugsList({
           >
             Previous
           </button>
-          <span className="text-sm text-[var(--muted)]">Page {page}</span>
+          <span className="text-sm text-[var(--muted)]">
+            Page {page} of {Math.ceil(total / pageSize)}
+          </span>
           <button
             onClick={() => setPage(p => p + 1)}
-            disabled={bugs.length < pageSize}
+            disabled={page * pageSize >= total}
             className="px-3 py-1 text-sm bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated-hover)] disabled:opacity-50 rounded transition"
           >
             Next

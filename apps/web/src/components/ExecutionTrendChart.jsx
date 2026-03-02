@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/runtimeConfig';
 
 const ExecutionTrendChart = ({ testCaseId }) => {
   const [trendData, setTrendData] = useState(null);
@@ -19,7 +20,7 @@ const ExecutionTrendChart = ({ testCaseId }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/test-cases/${testCaseId}/execution-trend?limit=${limit}`,
+        `${API_BASE_URL}/api/test-cases/${testCaseId}/execution-trend?limit=${limit}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { apiClient } from '../lib/apiClient';
 import { logError } from '../lib/errorLogger';
+import { API_BASE_URL } from '../lib/runtimeConfig';
 import { useProject } from '../hooks/useProject';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingState from '@/components/common/LoadingState';
@@ -115,8 +116,7 @@ export default function ReportsPage() {
   const handleExport = async (runId, format) => {
     try {
       console.log(`[Export] Starting ${format} export for run ${runId}...`);
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const url = `${apiBaseUrl}/api/test-runs/${runId}/export/${format}`;
+      const url = `${API_BASE_URL}/api/test-runs/${runId}/export/${format}`;
       console.log(`[Export] Fetching from: ${url}`);
       
       const response = await fetch(url, {
@@ -158,8 +158,7 @@ export default function ReportsPage() {
   const handleExportPerformance = async (format) => {
     try {
       console.log(`[Performance Export] Starting ${format} export...`);
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const url = `${apiBaseUrl}/api/tester/reports/performance/${format}`;
+      const url = `${API_BASE_URL}/api/tester/reports/performance/${format}`;
       console.log(`[Performance Export] Fetching from: ${url}`);
       
       const response = await fetch(url, {

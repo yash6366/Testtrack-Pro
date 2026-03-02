@@ -1,11 +1,12 @@
 import { Resend } from 'resend';
 import crypto from 'crypto';
 import { logError } from '../lib/logger.js';
+import { FRONTEND_URL } from '../lib/runtimeConfig.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendVerificationEmail(email, verificationToken) {
-  const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
+  const verificationUrl = `${FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
   try {
     const response = await resend.emails.send({
@@ -54,7 +55,7 @@ export function getVerificationTokenExpiry() {
  * Send password reset email
  */
 export async function sendPasswordResetEmail(email, name, resetToken) {
-  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
+  const resetUrl = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
 
   try {
     const response = await resend.emails.send({
@@ -94,7 +95,7 @@ export async function sendPasswordResetEmail(email, name, resetToken) {
  * Send account locked notification email
  */
 export async function sendAccountLockedEmail(email, name, lockoutDurationMinutes) {
-  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/forgot-password`;
+  const resetUrl = `${FRONTEND_URL}/forgot-password`;
 
   try {
     const response = await resend.emails.send({
@@ -137,7 +138,7 @@ export async function sendAccountLockedEmail(email, name, lockoutDurationMinutes
  * Send password changed confirmation email
  */
 export async function sendPasswordChangedEmail(email, name) {
-  const supportUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/support`;
+  const supportUrl = `${FRONTEND_URL}/support`;
 
   try {
     const response = await resend.emails.send({
@@ -179,7 +180,7 @@ export async function sendPasswordChangedEmail(email, name) {
  * Send bug created notification email
  */
 export async function sendBugCreatedEmail(recipientEmail, bugData, reporterName) {
-  const bugUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/bugs/${bugData.id}`;
+  const bugUrl = `${FRONTEND_URL}/bugs/${bugData.id}`;
 
   try {
     const response = await resend.emails.send({
@@ -236,7 +237,7 @@ export async function sendBugCreatedEmail(recipientEmail, bugData, reporterName)
           <div style="padding: 15px; background: #f0f0f0; border-radius: 0 0 8px 8px; font-size: 12px; color: #666; text-align: center;">
             <p style="margin: 0;">You received this email because a new bug was reported in your project.</p>
             <p style="margin: 5px 0 0 0;">
-              <a href="${process.env.FRONTEND_URL}/notifications/preferences" style="color: #667eea; text-decoration: none;">Manage preferences</a>
+              <a href="${FRONTEND_URL}/notifications/preferences" style="color: #667eea; text-decoration: none;">Manage preferences</a>
             </p>
           </div>
         </div>
@@ -254,7 +255,7 @@ export async function sendBugCreatedEmail(recipientEmail, bugData, reporterName)
  * Send bug assigned notification email
  */
 export async function sendBugAssignedEmail(recipientEmail, bugData, assignerName) {
-  const bugUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/bugs/${bugData.id}`;
+  const bugUrl = `${FRONTEND_URL}/bugs/${bugData.id}`;
 
   try {
     const response = await resend.emails.send({
@@ -322,7 +323,7 @@ export async function sendBugAssignedEmail(recipientEmail, bugData, assignerName
  * Send bug status changed notification email
  */
 export async function sendBugStatusChangedEmail(recipientEmail, bugData, oldStatus, newStatus, changedByName) {
-  const bugUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/bugs/${bugData.id}`;
+  const bugUrl = `${FRONTEND_URL}/bugs/${bugData.id}`;
 
   try {
     const response = await resend.emails.send({

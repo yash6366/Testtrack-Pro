@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/runtimeConfig';
 
 const ChangePasswordModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -58,7 +59,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/change-password`,
+        `${API_BASE_URL}/api/auth/change-password`,
         {
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword,

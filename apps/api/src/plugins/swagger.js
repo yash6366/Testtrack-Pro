@@ -1,5 +1,6 @@
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import { WEBHOOK_BASE_URL, API_DOCS_PRODUCTION_URL } from '../lib/runtimeConfig.js';
 
 export async function setupSwagger(fastify) {
   // Register Swagger plugin
@@ -20,11 +21,11 @@ export async function setupSwagger(fastify) {
       },
       servers: [
         {
-          url: 'http://localhost:3001',
+          url: WEBHOOK_BASE_URL,
           description: 'Development server',
         },
         {
-          url: 'https://api.testtrackpro.com',
+          url: API_DOCS_PRODUCTION_URL,
           description: 'Production server',
         },
       ],

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth, useSocket } from '@/hooks';
 import { useChat } from '@/context/ChatContext';
+import { API_BASE_URL } from '@/lib/runtimeConfig';
 
 /**
  * DirectMessagesPanel - Sidebar showing DM conversations
@@ -33,7 +34,7 @@ export default function DirectMessagesPanel({ onSelectConversation }) {
         setContactsLoading(true);
         setContactsError('');
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/dm/contacts`, {
+        const response = await fetch(`${API_BASE_URL}/api/dm/contacts`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

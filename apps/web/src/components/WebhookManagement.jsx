@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/runtimeConfig';
 
 const WebhookManagement = ({ project }) => {
   const [webhooks, setWebhooks] = useState([]);
@@ -21,7 +22,7 @@ const WebhookManagement = ({ project }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/projects/${project.id}/webhooks`,
+        `${API_BASE_URL}/api/projects/${project.id}/webhooks`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -40,7 +41,7 @@ const WebhookManagement = ({ project }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.delete(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/projects/${project.id}/webhooks/${webhookId}`,
+        `${API_BASE_URL}/api/projects/${project.id}/webhooks/${webhookId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -55,7 +56,7 @@ const WebhookManagement = ({ project }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.patch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/projects/${project.id}/webhooks/${webhookId}`,
+        `${API_BASE_URL}/api/projects/${project.id}/webhooks/${webhookId}`,
         { isActive: !isActive },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -71,7 +72,7 @@ const WebhookManagement = ({ project }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/projects/${project.id}/webhooks/${webhookId}/test`,
+        `${API_BASE_URL}/api/projects/${project.id}/webhooks/${webhookId}/test`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -284,7 +285,7 @@ function CreateWebhookModal({ project, onClose, onSuccess }) {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/projects/${project.id}/webhooks`,
+        `${API_BASE_URL}/api/projects/${project.id}/webhooks`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -414,7 +415,7 @@ function DeliveriesModal({ webhook, project, onClose }) {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/projects/${project.id}/webhooks/${webhook.id}/deliveries`,
+        `${API_BASE_URL}/api/projects/${project.id}/webhooks/${webhook.id}/deliveries`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

@@ -22,6 +22,7 @@ import {
 } from '../services/githubService.js';
 import { handlePushEvent, handlePullRequestEvent, handleWebhookTest, syncGitHubData } from '../services/webhookHandlerService.js';
 import { getPrismaClient } from '../lib/prisma.js';
+import { WEBHOOK_BASE_URL } from '../lib/runtimeConfig.js';
 
 const { requireAuth, requireProjectRole } = createAuthGuards();
 const prisma = getPrismaClient();
@@ -29,7 +30,6 @@ const prisma = getPrismaClient();
 // GitHub OAuth configuration (these should come from env)
 const GITHUB_CLIENT_ID = process.env.GITHUB_OAUTH_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_OAUTH_CLIENT_SECRET;
-const WEBHOOK_BASE_URL = process.env.WEBHOOK_BASE_URL || 'https://api.testtrack.pro';
 
 async function githubRoutes(fastify) {
   /**

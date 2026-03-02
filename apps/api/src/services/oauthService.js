@@ -5,6 +5,7 @@
 
 import { getPrismaClient } from '../lib/prisma.js';
 import crypto from 'crypto';
+import { WEBHOOK_BASE_URL } from '../lib/runtimeConfig.js';
 
 const prisma = getPrismaClient();
 
@@ -14,7 +15,6 @@ const GOOGLE_OAUTH_CLIENT_ID = process.env.GOOGLE_OAUTH_CLIENT_ID;
 const GOOGLE_OAUTH_CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
 const GITHUB_OAUTH_CLIENT_ID = process.env.GITHUB_OAUTH_CLIENT_ID;
 const GITHUB_OAUTH_CLIENT_SECRET = process.env.GITHUB_OAUTH_CLIENT_SECRET;
-const WEBHOOK_BASE_URL = process.env.WEBHOOK_BASE_URL || 'http://localhost:3001';
 
 /**
  * Generate Google OAuth authorization URL

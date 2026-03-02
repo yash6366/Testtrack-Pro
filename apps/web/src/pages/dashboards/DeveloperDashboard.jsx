@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks';
 import DashboardLayout from '@/components/DashboardLayout';
 import MetricsGrid from '@/components/MetricsGrid';
+import DeveloperMetricsPanel from '@/components/DeveloperMetricsPanel';
 import BugsList from '@/components/BugsList';
 import BugDetailsModal from '@/components/BugDetailsModal';
 import RequestRetestModal from '@/components/RequestRetestModal';
@@ -70,6 +71,11 @@ export default function DeveloperDashboard() {
       {/* Content based on tab */}
       {!showReports ? (
         <>
+          {/* Performance Metrics */}
+          <div className="mb-8">
+            <DeveloperMetricsPanel />
+          </div>
+
           {/* Bug Management */}
           <div className="grid grid-cols-1 gap-6 mb-8">
             <BugsList
@@ -79,7 +85,7 @@ export default function DeveloperDashboard() {
             />
           </div>
 
-          {/* Developer Info Card */}
+          {/* Developer Info & Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="tt-card p-6">
               <h3 className="text-lg font-semibold mb-4">Developer Information</h3>
@@ -102,12 +108,12 @@ export default function DeveloperDashboard() {
             </div>
 
             <div className="tt-card p-6">
-              <h3 className="text-lg font-semibold mb-4">Bug Management Tips</h3>
+              <h3 className="text-lg font-semibold mb-4">Best Practices</h3>
               <ul className="space-y-2 text-sm text-[var(--muted)]">
-                <li>✓ Click on a bug to view detailed information</li>
-                <li>✓ Use filters to find bugs by status or priority</li>
-                <li>✓ Update fix documentation when resolving bugs</li>
-                <li>✓ Request retest when you mark a bug as Fixed</li>
+                <li>✓ Document all fixes with root cause analysis</li>
+                <li>✓ Link commits to bugs for traceability</li>
+                <li>✓ Request retest when marking as Fixed</li>
+                <li>✓ Keep fix notes clear and detailed</li>
               </ul>
             </div>
 
@@ -115,27 +121,11 @@ export default function DeveloperDashboard() {
               <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <button
-                  onClick={() => {
-                    // Filter to show only "IN_PROGRESS" bugs
-                  }}
-                  className="w-full px-4 py-2 bg-yellow-500/10 text-yellow-600 dark:text-yellow-300 rounded hover:bg-yellow-500/20 transition text-sm font-medium"
-                >
-                  View In Progress
-                </button>
-                <button
-                  onClick={() => {
-                    // Filter to show only "NEW" bugs
-                  }}
-                  className="w-full px-4 py-2 bg-blue-500/10 text-blue-600 dark:text-blue-300 rounded hover:bg-blue-500/20 transition text-sm font-medium"
-                >
-                  View New Bugs
-                </button>
-                <button
                   onClick={() => setShowReports(true)}
                   className="w-full px-4 py-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 rounded hover:bg-indigo-500/20 transition text-sm font-medium flex items-center justify-center gap-2"
                 >
                   <BarChart3 className="h-4 w-4" />
-                  View Reports
+                  View Analytics
                 </button>
               </div>
             </div>

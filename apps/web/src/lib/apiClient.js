@@ -1,9 +1,10 @@
 import { logWarning } from './errorLogger';
+import { API_BASE_URL as RUNTIME_API_BASE_URL } from './runtimeConfig';
 
 const normalizeBaseUrl = (value) => String(value || '').replace(/\/+$/, '');
 const normalizeEndpoint = (value) => (String(value || '').startsWith('/') ? String(value || '') : `/${String(value || '')}`);
 
-const API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_API_URL || 'http://localhost:3001');
+const API_BASE_URL = normalizeBaseUrl(RUNTIME_API_BASE_URL);
 const isDevelopment = import.meta.env.DEV;
 
 class ApiClient {

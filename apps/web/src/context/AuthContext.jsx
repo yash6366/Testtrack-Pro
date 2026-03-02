@@ -1,10 +1,9 @@
 import { createContext, useState, useCallback, useEffect } from 'react';
 import { logWarning } from '../lib/errorLogger';
+import { API_BASE_URL } from '../lib/runtimeConfig';
 
 export const AuthContext = createContext(null);
 
-const normalizeBaseUrl = (value) => String(value || '').replace(/\/+$/, '');
-const API_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_API_URL || 'http://localhost:3001');
 const joinApiUrl = (path) => {
   const normalizedPath = String(path || '').replace(/^\/+/, '');
   return `${API_BASE_URL}/${normalizedPath}`;

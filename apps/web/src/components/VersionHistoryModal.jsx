@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/runtimeConfig';
 
 const VersionHistoryModal = ({ isOpen, onClose, testCaseId, project }) => {
   const [versions, setVersions] = useState([]);
@@ -21,7 +22,7 @@ const VersionHistoryModal = ({ isOpen, onClose, testCaseId, project }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/projects/${project.id}/test-cases/${testCaseId}/versions`,
+        `${API_BASE_URL}/api/projects/${project.id}/test-cases/${testCaseId}/versions`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -53,7 +54,7 @@ const VersionHistoryModal = ({ isOpen, onClose, testCaseId, project }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/projects/${project.id}/test-cases/${testCaseId}/versions/compare?v1=${selectedVersions[0]}&v2=${selectedVersions[1]}`,
+        `${API_BASE_URL}/api/projects/${project.id}/test-cases/${testCaseId}/versions/compare?v1=${selectedVersions[0]}&v2=${selectedVersions[1]}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

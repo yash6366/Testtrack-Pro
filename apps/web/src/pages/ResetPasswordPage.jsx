@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import BackButton from '@/components/ui/BackButton';
+import { API_BASE_URL } from '@/lib/runtimeConfig';
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -67,7 +68,7 @@ const ResetPasswordPage = () => {
     setError('');
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/reset-password`, {
+      await axios.post(`${API_BASE_URL}/api/auth/reset-password`, {
         token,
         newPassword: formData.newPassword,
       });
