@@ -147,7 +147,6 @@ testtrack-pro/
 ### Infrastructure
 - **pnpm workspaces** + **Turbo** for monorepo orchestration
 - **GitHub Actions** ready for CI/CD
-- **Docker** containerization support
 - **Structured JSON logging** for production observability
 
 ### Prerequisites
@@ -193,7 +192,7 @@ testtrack-pro/
 
 ### Production Deployment
 
-For production deployment options (Docker, VPS, Cloud platforms), refer to the deployment guides in your hosting provider's documentation.
+TestTrack Pro is optimized for native platform deployment on Railway, Render, and Vercel. See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for complete setup instructions.
 
 ## ✅ Production Readiness
 
@@ -300,8 +299,8 @@ pnpm --filter api start    # Production
 ### Build & Deployment
 - **Turborepo** - Monorepo task orchestration
 - **pnpm** - Package manager with workspaces
-- **Docker** - Containerization (Dockerfiles included)
 - **GitHub Actions** - CI/CD automated backup workflows
+- **Railway/Render/Vercel** - Native platform deployment
 
 ## 🔐 Authentication Flow
 
@@ -483,14 +482,14 @@ VITE_SOCKET_URL=https://yourdomain.com
 
 ### Deployment Options
 
-For production deployment, refer to your hosting provider's documentation:
-- **Docker**: Use `Dockerfile` in each app (build from root with `docker build -f apps/api/Dockerfile .`)
-- **Cloud Platforms**: 
-  - **Vercel/Netlify**: Frontend only, backend on separate service
-  - **Railway/Render**: Full-stack deployment with PostgreSQL
-  - **AWS/Azure/GCP**: VM with Docker or managed database services
+TestTrack Pro supports native platform deployment (no Docker required):
+- **Railway**: Full-stack deployment with automatic scaling
+- **Render**: Native Node.js hosting with PostgreSQL
+- **Vercel**: Frontend only, backend on Railway/Render
+- **AWS/Azure/GCP**: Managed services (App Service, Cloud Run, etc.)
 - **VPS**: Ubuntu/Debian with Nginx, PostgreSQL, Redis, and PM2/systemd
-- **Docker Compose**: Production-ready composition with all services
+
+See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed setup guides.
 
 ## 📖 Learning Resources
 
