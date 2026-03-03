@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import helmet from '@fastify/helmet';
+import multipart from '@fastify/multipart';
 import { setupCors } from './plugins/cors.js';
 import { setupJwt } from './plugins/jwt.js';
 import { setupHelmet } from './plugins/helmet.js';
@@ -75,6 +76,13 @@ await fastify.register(async (fastify) => {
 await setupCors(fastify);
 await setupJwt(fastify);
 await setupHelmet(fastify);
+
+// Register multipart support for file uploads
+await fastify.register(multipart, {
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB max file size
+  },
+});
 
 // HTTPS enforcement and security headers
 await fastify.register(httpsEnforcementPlugin);

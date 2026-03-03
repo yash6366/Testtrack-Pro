@@ -134,10 +134,10 @@ export default function DashboardLayout({
               </Link>
             )}
             <NotificationCenter />
-            <div className="text-right">
+            <Link to="/profile" className="text-right hover:opacity-80 transition-opacity">
               <p className="text-xs text-[var(--muted)]">Welcome back</p>
               <p className="text-sm font-semibold">{user.name}</p>
-            </div>
+            </Link>
             <ThemeToggle />
             <button
               onClick={onLogout}

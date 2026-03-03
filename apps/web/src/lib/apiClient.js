@@ -143,6 +143,60 @@ class ApiClient {
       ...(hasData && { body: JSON.stringify(data) }),
     });
   }
+
+  async upload(endpoint, formData, options = {}) {
+    const url = `${this.baseURL}${normalizeEndpoint(endpoint)}`;
+    const token = localStorage.getItem('token');
+
+    const headers = {
+      ...options.headers,
+    };
+
+    // Don't set Content-Type for FormData - browser will set it with boundary
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    let response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData,
+        ...options,
+      });
+    } catch (networkError) {
+      const error = new Error('Network error: Unable to connect to server');
+      error.status = 0;
+      throw error;
+    }
+
+    if (!response.ok) {
+      let errorBody;
+      try {
+        errorBody = await response.json();
+      } catch {
+        errorBody = { message: response.statusText || 'Upload failed' };
+      }
+      
+      const errorMessage = errorBody.error || errorBody.message || 'Upload failed';
+      const error = new Error(errorMessage);
+      error.status = response.status;
+      error.body = errorBody;
+      throw error;
+    }
+
+    const text = await response.text();
+    if (!text || text.trim() === '') {
+      return {};
+    }
+    
+    try {
+      return JSON.parse(text);
+    } catch {
+      return {};
+    }
+  }
 }
 
 export const apiClient = new ApiClient();
