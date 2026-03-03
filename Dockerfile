@@ -32,7 +32,7 @@ EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
-    CMD node -e "require('http').get('http://localhost:3001/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+    CMD node -e "require('http').get('http://localhost:3001/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
 # Start API with migrations
-CMD ["sh", "-c", "pnpm --filter api run db:migrate && pnpm --filter api start"]
+CMD ["pnpm", "--filter", "api", "start"]

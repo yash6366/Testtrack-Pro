@@ -19,7 +19,13 @@ export async function httpsEnforcementPlugin(fastify, options) {
     return;
   }
 
+  const healthPaths = ['/health', '/api/health', '/api/health/live', '/api/health/ready', '/api/health/status', '/api/health/metrics'];
+
   fastify.addHook('onRequest', async (request, reply) => {
+    if (healthPaths.some(path => request.url === path || request.url.startsWith(`${path}?`))) {
+      return;
+    }
+
     // Check if request is already using HTTPS
     const isHttps = isSecureRequest(request);
 
