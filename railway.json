@@ -9,5 +9,8 @@
     "restartPolicyWindowSeconds": 600,
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 30
+  },
+  "environment": {
+    "NIXPACKS_PKGR": "pnpm"
   }
 }
