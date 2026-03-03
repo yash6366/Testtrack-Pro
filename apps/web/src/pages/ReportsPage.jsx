@@ -9,6 +9,27 @@ import EmptyState from '@/components/common/EmptyState';
 import LoadingState from '@/components/common/LoadingState';
 import { FolderKanban } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
+
+const EXECUTION_COLORS = {
+  PASSED: '#22c55e',
+  FAILED: '#ef4444',
+  BLOCKED: '#f59e0b',
+  SKIPPED: '#6b7280',
+  IN_PROGRESS: '#3b82f6',
+};
 
 export default function ReportsPage() {
   const navigate = useNavigate();
@@ -371,7 +392,7 @@ export default function ReportsPage() {
                   {/* Summary */}
                   <div>
                     <h3 className="font-semibold mb-3">Summary</h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded">
                         <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
                         <div className="text-2xl font-bold">{report.summary.totalTestCases}</div>
@@ -389,13 +410,80 @@ export default function ReportsPage() {
                         <div className="text-2xl font-bold text-blue-600">{report.summary.passRate}%</div>
                       </div>
                     </div>
+
+                    {/* Summary Pie Chart */}
+                    {report.summary.totalTestCases > 0 && (
+                      <ResponsiveContainer width="100%" height={200}>
+                        <PieChart>
+                          <Pie
+                            data={[
+                              { name: 'Passed', value: report.summary.passed, fill: '#22c55e' },
+                              { name: 'Failed', value: report.summary.failed, fill: '#ef4444' },
+                              ...(report.summary.blocked ? [{ name: 'Blocked', value: report.summary.blocked, fill: '#f59e0b' }] : []),
+                              ...(report.summary.skipped ? [{ name: 'Skipped', value: report.summary.skipped, fill: '#6b7280' }] : []),
+                            ].filter(item => item.value > 0)}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={40}
+                            outerRadius={70}
+                            paddingAngle={2}
+                            dataKey="value"
+                          >
+                            {[
+                              { fill: '#22c55e' },
+                              { fill: '#ef4444' },
+                              { fill: '#f59e0b' },
+                              { fill: '#6b7280' },
+                            ].map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: 'var(--surface-2, #f9fafb)',
+                              border: '1px solid var(--border, #e5e7eb)',
+                              borderRadius: '8px',
+                            }}
+                          />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    )}
                   </div>
 
                   {/* Test Type Breakdown */}
                   {report.breakdown?.byType && Object.keys(report.breakdown.byType).length > 0 && (
                     <div>
                       <h3 className="font-semibold mb-3">Execution by Test Type</h3>
-                      <div className="space-y-2">
+                      
+                      {/* Test Type Bar Chart */}
+                      <ResponsiveContainer width="100%" height={180}>
+                        <BarChart
+                          data={Object.entries(report.breakdown.byType).map(([type, stats]) => ({
+                            name: type,
+                            passed: stats.passed,
+                            failed: stats.total - stats.passed,
+                          }))}
+                          margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border, #e5e7eb)" />
+                          <XAxis dataKey="name" tick={{ fill: 'var(--muted, #6b7280)', fontSize: 11 }} />
+                          <YAxis tick={{ fill: 'var(--muted, #6b7280)' }} />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: 'var(--surface-2, #f9fafb)',
+                              border: '1px solid var(--border, #e5e7eb)',
+                              borderRadius: '8px',
+                            }}
+                          />
+                          <Legend />
+                          <Bar dataKey="passed" stackId="a" fill="#22c55e" name="Passed" radius={[0, 0, 0, 0]} />
+                          <Bar dataKey="failed" stackId="a" fill="#ef4444" name="Failed" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+
+                      {/* Test Type List */}
+                      <div className="space-y-2 mt-3">
                         {Object.entries(report.breakdown.byType).map(([type, stats]) => (
                           <div key={type} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
                             <span className="font-medium">{type}</span>
@@ -498,7 +586,7 @@ export default function ReportsPage() {
                   {/* Metrics */}
                   <div>
                     <h3 className="font-semibold mb-3">Execution Metrics</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                       <div className="p-4 bg-blue-50 dark:bg-blue-900 rounded">
                         <div className="text-sm text-blue-600">Total Executions</div>
                         <div className="text-2xl font-bold text-blue-600">{performanceReport?.metrics?.totalExecutions ?? 0}</div>
@@ -516,17 +604,99 @@ export default function ReportsPage() {
                         <div className="text-2xl font-bold">{performanceReport?.metrics?.avgExecutionTimeSeconds ? Math.round(performanceReport.metrics.avgExecutionTimeSeconds) : 0}</div>
                       </div>
                     </div>
+
+                    {/* Metrics Bar Chart - Always show */}
+                    <div className="mt-4">
+                      <h4 className="text-sm font-medium mb-3 text-gray-600 dark:text-gray-400">Metrics Overview</h4>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <BarChart
+                          data={[
+                            { name: 'Total Executions', value: performanceReport?.metrics?.totalExecutions ?? 0, fill: '#3b82f6' },
+                            { name: 'Test Cases Created', value: performanceReport?.metrics?.testCasesCreated ?? 0, fill: '#a855f7' },
+                            { name: 'Bugs Reported', value: performanceReport?.metrics?.bugsReported ?? 0, fill: '#f97316' },
+                          ]}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border, #e5e7eb)" />
+                          <XAxis dataKey="name" tick={{ fill: 'var(--muted, #6b7280)', fontSize: 12 }} />
+                          <YAxis tick={{ fill: 'var(--muted, #6b7280)' }} />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: 'var(--surface-2, #f9fafb)',
+                              border: '1px solid var(--border, #e5e7eb)',
+                              borderRadius: '8px',
+                            }}
+                          />
+                          <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                            {[
+                              { fill: '#3b82f6' },
+                              { fill: '#a855f7' },
+                              { fill: '#f97316' },
+                            ].map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
 
                   {/* Execution Breakdown */}
-                  {performanceReport.executionBreakdown && (
+                  {performanceReport.executionBreakdown && Object.keys(performanceReport.executionBreakdown).length > 0 && (
                     <div>
                       <h3 className="font-semibold mb-3">Execution Breakdown</h3>
+                      
+                      {/* Pie Chart */}
+                      <div className="mb-4">
+                        <ResponsiveContainer width="100%" height={280}>
+                          <PieChart>
+                            <Pie
+                              data={Object.entries(performanceReport.executionBreakdown)
+                                .filter(([, count]) => count > 0)
+                                .map(([status, count]) => ({
+                                  name: status,
+                                  value: count,
+                                  fill: EXECUTION_COLORS[status] || '#6b7280',
+                                }))}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={100}
+                              paddingAngle={2}
+                              dataKey="value"
+                              label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                              labelLine={false}
+                            >
+                              {Object.entries(performanceReport.executionBreakdown)
+                                .filter(([, count]) => count > 0)
+                                .map(([status], index) => (
+                                  <Cell key={`cell-${index}`} fill={EXECUTION_COLORS[status] || '#6b7280'} />
+                                ))}
+                            </Pie>
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: 'var(--surface-2, #f9fafb)',
+                                border: '1px solid var(--border, #e5e7eb)',
+                                borderRadius: '8px',
+                              }}
+                            />
+                            <Legend />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* Status List */}
                       <div className="space-y-2">
                         {Object.entries(performanceReport.executionBreakdown).map(([status, count]) => (
                           <div key={status} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                            <span className="font-medium">{status}</span>
-                            <span className="text-sm">{count}</span>
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: EXECUTION_COLORS[status] || '#6b7280' }}
+                              />
+                              <span className="font-medium">{status}</span>
+                            </div>
+                            <span className="text-sm font-semibold">{count}</span>
                           </div>
                         ))}
                       </div>

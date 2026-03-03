@@ -7,13 +7,43 @@ import {
   Download,
   TrendingUp,
   FileText,
-  Calendar,
   Activity,
   Clock,
   AlertCircle,
   CheckCircle2,
   Target,
 } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  LineChart,
+  Line,
+} from 'recharts';
+
+const STATUS_COLORS = {
+  NEW: '#3b82f6',
+  IN_PROGRESS: '#eab308',
+  FIXED: '#22c55e',
+  AWAITING_VERIFICATION: '#a855f7',
+  VERIFIED_FIXED: '#10b981',
+  REOPENED: '#ef4444',
+  CLOSED: '#6b7280',
+};
+const PRIORITY_COLORS = {
+  CRITICAL: '#ef4444',
+  HIGH: '#f97316',
+  MEDIUM: '#eab308',
+  LOW: '#3b82f6',
+};
 
 export default function DeveloperReports() {
   const { token } = useAuth();
@@ -168,34 +198,83 @@ export default function DeveloperReports() {
 
       {/* Performance Metrics Cards */}
       {performanceReport && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard
-            icon={<Target className="h-5 w-5" />}
-            label="Total Assigned"
-            value={performanceReport.metrics.summary.totalAssigned}
-            color="blue"
-          />
-          <MetricCard
-            icon={<CheckCircle2 className="h-5 w-5" />}
-            label="Resolved Bugs"
-            value={performanceReport.metrics.summary.resolved}
-            color="green"
-            subtitle={`${performanceReport.metrics.summary.resolutionRate}% rate`}
-          />
-          <MetricCard
-            icon={<Clock className="h-5 w-5" />}
-            label="Avg Resolution Time"
-            value={`${performanceReport.metrics.summary.avgResolutionTimeHours.toFixed(1)}h`}
-            color="purple"
-          />
-          <MetricCard
-            icon={<AlertCircle className="h-5 w-5" />}
-            label="Reopened"
-            value={performanceReport.metrics.summary.reopened}
-            color="red"
-            subtitle={`${performanceReport.metrics.summary.reopenRate}% rate`}
-          />
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <MetricCard
+              icon={<Target className="h-5 w-5" />}
+              label="Total Assigned"
+              value={performanceReport.metrics.summary.totalAssigned}
+              color="blue"
+            />
+            <MetricCard
+              icon={<CheckCircle2 className="h-5 w-5" />}
+              label="Resolved Bugs"
+              value={performanceReport.metrics.summary.resolved}
+              color="green"
+              subtitle={`${performanceReport.metrics.summary.resolutionRate}% rate`}
+            />
+            <MetricCard
+              icon={<Clock className="h-5 w-5" />}
+              label="Avg Resolution Time"
+              value={`${performanceReport.metrics.summary.avgResolutionTimeHours.toFixed(1)}h`}
+              color="purple"
+            />
+            <MetricCard
+              icon={<AlertCircle className="h-5 w-5" />}
+              label="Reopened"
+              value={performanceReport.metrics.summary.reopened}
+              color="red"
+              subtitle={`${performanceReport.metrics.summary.reopenRate}% rate`}
+            />
+          </div>
+
+          {/* Performance Overview Chart */}
+          <div className="tt-card p-6">
+            <h3 className="text-lg font-semibold mb-4">Performance Overview</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={[
+                  {
+                    name: 'Total Assigned',
+                    value: performanceReport.metrics.summary.totalAssigned,
+                    fill: '#6366f1',
+                  },
+                  {
+                    name: 'Resolved',
+                    value: performanceReport.metrics.summary.resolved,
+                    fill: '#22c55e',
+                  },
+                  {
+                    name: 'Reopened',
+                    value: performanceReport.metrics.summary.reopened,
+                    fill: '#ef4444',
+                  },
+                ]}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="name" tick={{ fill: 'var(--muted)' }} />
+                <YAxis tick={{ fill: 'var(--muted)' }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--surface-2)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                  }}
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {[
+                    { name: 'Total Assigned', fill: '#6366f1' },
+                    { name: 'Resolved', fill: '#22c55e' },
+                    { name: 'Reopened', fill: '#ef4444' },
+                  ].map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </>
       )}
 
       {/* Export Actions */}
@@ -234,44 +313,92 @@ export default function DeveloperReports() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="tt-card p-6">
             <h3 className="text-lg font-semibold mb-4">Status Distribution</h3>
-            <div className="space-y-3">
-              {Object.entries(performanceReport.metrics.breakdown.byStatus).map(
-                ([status, count]) => (
-                  <div key={status}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="capitalize">{status.toLowerCase().replace(/_/g, ' ')}</span>
-                      <span className="font-medium">{count}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${getStatusColor(status)}`}
-                        style={{
-                          width: `${
-                            (count / performanceReport.metrics.summary.totalAssigned) * 100
-                          }%`,
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                ),
-              )}
-            </div>
+            {performanceReport.metrics.summary.totalAssigned > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={Object.entries(performanceReport.metrics.breakdown.byStatus)
+                      .filter(([, count]) => count > 0)
+                      .map(([status, count]) => ({
+                        name: status.toLowerCase().replace(/_/g, ' '),
+                        value: count,
+                        fill: STATUS_COLORS[status] || '#6b7280',
+                      }))}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    labelLine={false}
+                  >
+                    {Object.entries(performanceReport.metrics.breakdown.byStatus)
+                      .filter(([, count]) => count > 0)
+                      .map(([status], index) => (
+                        <Cell key={`cell-${index}`} fill={STATUS_COLORS[status] || '#6b7280'} />
+                      ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'var(--surface-2)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                    }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-64 text-[var(--muted)]">
+                No data available
+              </div>
+            )}
           </div>
 
           <div className="tt-card p-6">
             <h3 className="text-lg font-semibold mb-4">Priority Distribution</h3>
-            <div className="space-y-3">
-              {Object.entries(performanceReport.metrics.breakdown.byPriority).map(
-                ([priority, count]) => (
-                  <div key={priority} className="flex justify-between items-center">
-                    <span className="capitalize text-sm">{priority.toLowerCase()}</span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(priority)}`}>
-                      {count}
-                    </span>
-                  </div>
-                ),
-              )}
-            </div>
+            {performanceReport.metrics.summary.totalAssigned > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={Object.entries(performanceReport.metrics.breakdown.byPriority)
+                      .filter(([, count]) => count > 0)
+                      .map(([priority, count]) => ({
+                        name: priority.toLowerCase(),
+                        value: count,
+                        fill: PRIORITY_COLORS[priority] || '#6b7280',
+                      }))}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    labelLine={false}
+                  >
+                    {Object.entries(performanceReport.metrics.breakdown.byPriority)
+                      .filter(([, count]) => count > 0)
+                      .map(([priority], index) => (
+                        <Cell key={`cell-${index}`} fill={PRIORITY_COLORS[priority] || '#6b7280'} />
+                      ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'var(--surface-2)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                    }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-64 text-[var(--muted)]">
+                No data available
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -282,48 +409,80 @@ export default function DeveloperReports() {
           {/* Weekly Trends */}
           <div className="tt-card p-6">
             <h3 className="text-lg font-semibold mb-4">Weekly Trends</h3>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {bugAnalytics.weeklyTrends.map((week) => (
-                <div key={week.week} className="flex items-center gap-3 text-sm">
-                  <span className="text-[var(--muted)] w-24">{week.week}</span>
-                  <div className="flex-1 flex gap-2">
-                    <div className="flex items-center gap-1">
-                      <span className="text-blue-500">↑</span>
-                      <span>{week.assigned} assigned</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-green-500">✓</span>
-                      <span>{week.resolved} resolved</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {bugAnalytics.weeklyTrends && bugAnalytics.weeklyTrends.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart
+                  data={bugAnalytics.weeklyTrends}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="week" tick={{ fill: 'var(--muted)', fontSize: 12 }} />
+                  <YAxis tick={{ fill: 'var(--muted)' }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'var(--surface-2)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                    }}
+                  />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="assigned"
+                    stroke="#6366f1"
+                    strokeWidth={2}
+                    dot={{ fill: '#6366f1', strokeWidth: 2 }}
+                    name="Assigned"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="resolved"
+                    stroke="#22c55e"
+                    strokeWidth={2}
+                    dot={{ fill: '#22c55e', strokeWidth: 2 }}
+                    name="Resolved"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-64 text-[var(--muted)]">
+                No trend data available
+              </div>
+            )}
           </div>
 
           {/* Resolution Time Distribution */}
           <div className="tt-card p-6">
             <h3 className="text-lg font-semibold mb-4">Resolution Time Distribution</h3>
-            <div className="space-y-3">
-              {Object.entries(bugAnalytics.resolutionTimeAnalysis.buckets).map(
-                ([bucket, count]) => (
-                  <div key={bucket}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>{bucket}</span>
-                      <span className="font-medium">{count} bugs</span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div
-                        className="h-2 rounded-full bg-indigo-500"
-                        style={{
-                          width: `${(count / bugAnalytics.totalBugs) * 100}%`,
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                ),
-              )}
-            </div>
+            {bugAnalytics.resolutionTimeAnalysis && Object.keys(bugAnalytics.resolutionTimeAnalysis.buckets).length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart
+                  data={Object.entries(bugAnalytics.resolutionTimeAnalysis.buckets).map(
+                    ([bucket, count]) => ({
+                      name: bucket,
+                      bugs: count,
+                    })
+                  )}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="name" tick={{ fill: 'var(--muted)', fontSize: 11 }} />
+                  <YAxis tick={{ fill: 'var(--muted)' }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'var(--surface-2)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                    }}
+                  />
+                  <Bar dataKey="bugs" fill="#6366f1" radius={[4, 4, 0, 0]} name="Bugs" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-64 text-[var(--muted)]">
+                No resolution time data available
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -405,27 +564,4 @@ function ExportButton({ label, description, onClick, disabled, icon }) {
       <p className="text-xs text-[var(--muted)] text-left">{description}</p>
     </button>
   );
-}
-
-function getStatusColor(status) {
-  const colors = {
-    NEW: 'bg-blue-500',
-    IN_PROGRESS: 'bg-yellow-500',
-    FIXED: 'bg-green-500',
-    AWAITING_VERIFICATION: 'bg-purple-500',
-    VERIFIED_FIXED: 'bg-emerald-500',
-    REOPENED: 'bg-red-500',
-    CLOSED: 'bg-gray-500',
-  };
-  return colors[status] || 'bg-gray-500';
-}
-
-function getPriorityColor(priority) {
-  const colors = {
-    CRITICAL: 'bg-red-500/10 text-red-600 dark:text-red-400',
-    HIGH: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
-    MEDIUM: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
-    LOW: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  };
-  return colors[priority] || 'bg-gray-500/10 text-gray-600 dark:text-gray-400';
 }

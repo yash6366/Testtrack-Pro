@@ -4,6 +4,19 @@ import { useAuth } from '@/hooks';
 import { apiClient } from '@/lib/apiClient';
 import DashboardLayout from '@/components/DashboardLayout';
 import MetricsGrid from '@/components/MetricsGrid';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
 
 export default function TesterDashboard() {
   const navigate = useNavigate();
@@ -24,6 +37,7 @@ export default function TesterDashboard() {
   };
 
   const [recentTests, setRecentTests] = useState([]);
+  const [rawMetrics, setRawMetrics] = useState(null);
   const [testMetrics, setTestMetrics] = useState([
     { label: 'Total Tests', value: '0', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-300' },
     { label: 'Passed', value: '0', color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300' },
@@ -48,6 +62,14 @@ export default function TesterDashboard() {
         }
 
         const metrics = overview?.metrics || {};
+
+        // Store raw metrics for charts
+        setRawMetrics({
+          totalExecutions: metrics.totalExecutions ?? 0,
+          passedExecutions: metrics.passedExecutions ?? 0,
+          failedExecutions: metrics.failedExecutions ?? 0,
+          passRate: Number(metrics.passRate ?? 0),
+        });
 
         setTestMetrics([
           {
@@ -140,6 +162,84 @@ export default function TesterDashboard() {
       )}
 
       <MetricsGrid metrics={testMetrics} />
+
+      {/* Charts Section */}
+      {rawMetrics && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Test Results Pie Chart */}
+          <div className="tt-card p-6">
+            <h3 className="text-lg font-semibold mb-4">Test Results Distribution</h3>
+            {rawMetrics.totalExecutions > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Passed', value: rawMetrics.passedExecutions, fill: '#22c55e' },
+                      { name: 'Failed', value: rawMetrics.failedExecutions, fill: '#ef4444' },
+                    ].filter(item => item.value > 0)}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    labelLine={false}
+                  >
+                    <Cell fill="#22c55e" />
+                    <Cell fill="#ef4444" />
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'var(--surface-2, #1f2937)',
+                      border: '1px solid var(--border, #374151)',
+                      borderRadius: '8px',
+                      color: 'var(--foreground, #f9fafb)',
+                    }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[250px] text-[var(--muted)]">
+                No test data available yet
+              </div>
+            )}
+          </div>
+
+          {/* Metrics Bar Chart */}
+          <div className="tt-card p-6">
+            <h3 className="text-lg font-semibold mb-4">Metrics Overview</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart
+                data={[
+                  { name: 'Total Tests', value: rawMetrics.totalExecutions, fill: '#3b82f6' },
+                  { name: 'Passed', value: rawMetrics.passedExecutions, fill: '#22c55e' },
+                  { name: 'Failed', value: rawMetrics.failedExecutions, fill: '#ef4444' },
+                ]}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border, #374151)" />
+                <XAxis dataKey="name" tick={{ fill: 'var(--muted, #9ca3af)', fontSize: 12 }} />
+                <YAxis tick={{ fill: 'var(--muted, #9ca3af)' }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--surface-2, #1f2937)',
+                    border: '1px solid var(--border, #374151)',
+                    borderRadius: '8px',
+                    color: 'var(--foreground, #f9fafb)',
+                  }}
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  <Cell fill="#3b82f6" />
+                  <Cell fill="#22c55e" />
+                  <Cell fill="#ef4444" />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       <div className="tt-card mb-8">
         <div className="px-6 py-4 border-b border-[var(--border)]">
