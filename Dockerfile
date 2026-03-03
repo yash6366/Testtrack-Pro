@@ -13,9 +13,8 @@ COPY . .
 # Install dependencies with pnpm (handles workspace:* protocol)
 RUN pnpm install || pnpm install --no-frozen-lockfile
 
-# Generate Prisma client and run migrations
-RUN pnpm --filter api run db:generate && \
-    pnpm --filter api run db:migrate
+# Generate Prisma client only (migrations run at runtime)
+RUN pnpm --filter api run db:generate
 
 # Production stage
 FROM node:20-alpine
@@ -35,5 +34,5 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://localhost:3001/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
-# Start API
-CMD ["pnpm", "--filter", "api", "start"]
+# Start API with migrations
+CMD ["sh", "-c", "pnpm --filter api run db:migrate && pnpm --filter api start"]
