@@ -1,4 +1,5 @@
 import '@/styles/index.css';
+import '@/lib/i18n'; // Initialize i18n
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import * as Sentry from '@sentry/react';

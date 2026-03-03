@@ -131,8 +131,13 @@ class ApiClient {
     });
   }
 
-  delete(endpoint, options) {
-    return this.#request(endpoint, { ...options, method: 'DELETE' });
+  delete(endpoint, data, options) {
+    const hasData = data !== undefined && data !== null;
+    return this.#request(endpoint, {
+      ...options,
+      method: 'DELETE',
+      ...(hasData && { body: JSON.stringify(data) }),
+    });
   }
 
   patch(endpoint, data, options) {
