@@ -3,11 +3,10 @@
     "builder": "dockerfile"
   },
   "deploy": {
-    "startCommand": "pnpm --filter api start",
     "restartPolicyMaxRetries": 5,
     "restartPolicyWindowSeconds": 600,
     "healthcheckPath": "/api/health",
-    "healthcheckTimeout": 30
+    "healthcheckTimeout": 120
   },
   "environment": {
     "NODE_ENV": "production"
