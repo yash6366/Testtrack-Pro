@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MessageCircle } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import ProjectSelector from '@/components/ProjectSelector';
@@ -13,11 +13,30 @@ export default function DashboardLayout({
   onLogout,
   children,
 }) {
+  const navigate = useNavigate();
   const { projects, loading: projectsLoading } = useProject();
   const isTester = String(user?.role || '').toUpperCase() === 'TESTER';
   const isDeveloper = String(user?.role || '').toUpperCase() === 'DEVELOPER';
   const isAdmin = String(user?.role || '').toUpperCase() === 'ADMIN';
   const showProjectSelector = projectsLoading || projects.length > 1;
+
+  const handleExecuteNewTest = () => {
+    const projectId = localStorage.getItem('selectedProjectId');
+    if (!projectId) {
+      navigate('/dashboard');
+      return;
+    }
+    navigate(`/projects/${projectId}/test-runs/create`);
+  };
+
+  const handleViewTestCases = () => {
+    const projectId = localStorage.getItem('selectedProjectId');
+    if (!projectId) {
+      alert('Please select a project first');
+      return;
+    }
+    navigate(`/projects/${projectId}/test-cases`);
+  };
   
   const navLinks = [
     { to: '/reports', label: 'Reports' },
@@ -50,16 +69,57 @@ export default function DashboardLayout({
               <p className="text-xs text-[var(--muted)]">{dashboardLabel}</p>
             </div>
           </div>
-          <div className="flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
+          <div className="flex items-center gap-4">
+            {isTester ? (
+              <>
+                <button
+                  onClick={handleExecuteNewTest}
+                  className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Create New Test
+                </button>
+                <Link
+                  to="/reports"
+                  className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Reports
+                </Link>
+                <button
+                  onClick={handleViewTestCases}
+                  className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  View Test Cases
+                </button>
+                <Link
+                  to="/test-suites"
+                  className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Test Suites
+                </Link>
+                <Link
+                  to="/bugs"
+                  className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Bugs
+                </Link>
+                <Link
+                  to="/chat"
+                  className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Chat
+                </Link>
+              </>
+            ) : (
+              navLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))
+            )}
           </div>
           <div className="flex items-center gap-4">
             {showProjectSelector && <ProjectSelector />}

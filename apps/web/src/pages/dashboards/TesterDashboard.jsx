@@ -22,15 +22,6 @@ export default function TesterDashboard() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const handleCreateTestRun = () => {
-    const projectId = localStorage.getItem('selectedProjectId');
-    if (!projectId) {
-      navigate('/dashboard');
-      return;
-    }
-    navigate(`/projects/${projectId}/test-runs/create`);
-  };
-
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -296,38 +287,7 @@ export default function TesterDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="tt-card p-6">
-          <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-          <div className="space-y-3">
-            <button 
-              onClick={handleCreateTestRun}
-              className="tt-btn tt-btn-primary w-full py-2 text-sm"
-            >
-              Execute New Test
-            </button>
-            <button 
-              onClick={() => navigate('/reports')}
-              className="tt-btn tt-btn-outline w-full py-2 text-sm"
-            >
-              View Reports & Analytics
-            </button>
-            <button 
-              onClick={() => {
-                const projectId = localStorage.getItem('selectedProjectId');
-                if (!projectId) {
-                  alert('Please select a project first');
-                  return;
-                }
-                navigate(`/projects/${projectId}/test-cases`);
-              }}
-              className="tt-btn tt-btn-outline w-full py-2 text-sm"
-            >
-              View Test Cases
-            </button>
-          </div>
-        </div>
-
+      <div className="max-w-md">
         <div className="tt-card p-6">
           <h3 className="text-lg font-semibold mb-4">User Information</h3>
           <div className="space-y-3 text-sm">
