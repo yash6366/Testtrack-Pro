@@ -11,7 +11,7 @@ WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/ ./packages/
-COPY prisma/ ./prisma/
+COPY apps/api/prisma/ ./apps/api/prisma/
 
 # Install dependencies with pnpm (handles workspace:* protocol)
 # If lock file doesn't exist, create one
