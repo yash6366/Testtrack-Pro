@@ -107,12 +107,45 @@ export function setupSocket(fastifyServer) {
   // Use Fastify's logger
   logger = fastifyServer.log;
 
+  // CORS origin validation - allows Vercel deployments + configured origins
+  const socketCorsOrigin = (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    try {
+      const url = new URL(origin);
+      const hostname = url.hostname.toLowerCase();
+
+      // Allow all Vercel deployments
+      if (hostname.endsWith('.vercel.app')) {
+        callback(null, true);
+        return;
+      }
+
+      // Allow configured frontend URL
+      if (origin === FRONTEND_URL || DEV_FRONTEND_ORIGINS.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      // Allow localhost with any port
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('Not allowed by CORS'), false);
+    } catch {
+      callback(new Error('Invalid origin'), false);
+    }
+  };
+
   const io = new Server(fastifyServer.server, {
     cors: {
-      origin: [
-        FRONTEND_URL,
-        ...DEV_FRONTEND_ORIGINS,
-      ],
+      origin: socketCorsOrigin,
       credentials: true,
     },
     transports: ['websocket', 'polling'],
