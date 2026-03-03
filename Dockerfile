@@ -7,19 +7,11 @@ RUN npm install -g pnpm@8.15.4
 # Set working directory
 WORKDIR /app
 
-# Copy package files first
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
-COPY apps/api/package.json ./apps/api/
-COPY apps/api/scripts/ ./apps/api/scripts/
-COPY packages/ ./packages/
-COPY apps/api/prisma/ ./apps/api/prisma/
+# Copy everything first to avoid path issues
+COPY . .
 
 # Install dependencies with pnpm (handles workspace:* protocol)
-# If lock file doesn't exist, create one
 RUN pnpm install || pnpm install --no-frozen-lockfile
-
-# Copy rest of the files
-COPY . .
 
 # Generate Prisma client and run migrations
 RUN pnpm --filter api run db:generate && \
