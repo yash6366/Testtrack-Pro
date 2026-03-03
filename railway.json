@@ -12,5 +12,6 @@
   },
   "environment": {
     "NIXPACKS_PKGR": "pnpm"
-  }
+  },
+  "configFile": "nixpacks.toml"
 }
