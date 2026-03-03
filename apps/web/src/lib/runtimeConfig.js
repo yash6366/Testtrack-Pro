@@ -3,7 +3,7 @@ const normalizeBaseUrl = (value) =>
 
 function getApiBaseUrl() {
   const url =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    import.meta.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
   return normalizeBaseUrl(url);
 }
 
