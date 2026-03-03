@@ -16,8 +16,8 @@ RUN pnpm install || pnpm install --no-frozen-lockfile
 # Copy source code
 COPY . .
 
-# Generate Prisma client and run migrations
-RUN pnpm run db:generate && pnpm run db:migrate
+# Generate Prisma client only (migrations run at startup)
+RUN pnpm run db:generate
 
 # Production stage
 FROM node:20-alpine
@@ -30,6 +30,9 @@ WORKDIR /app
 # Copy from builder
 COPY --from=builder /app .
 
+# Make startup script executable
+RUN chmod +x start.sh 2>/dev/null || true
+
 # Expose port
 EXPOSE 3001
 
@@ -37,5 +40,5 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://localhost:3001/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
-# Start API
-CMD ["pnpm", "start"]
+# Start API - use startup script for better initialization handling
+CMD ["sh", "-c", "test -f start.sh && sh start.sh || pnpm start"]

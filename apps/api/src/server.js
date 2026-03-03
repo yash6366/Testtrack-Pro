@@ -40,13 +40,18 @@ import apiKeyRoutes from './routes/apiKeys.js';
 import githubRoutes from './routes/github.js';
 import scheduledReportsRoutes from './routes/scheduledReports.js';
 import backupRoutes from './routes/backup.js';
-import healthRoutes from './routes/health.js';
+import healthRoutes, { setServerInitStatus } from './routes/health.js';
 import userProfileRoutes from './routes/userProfile.js';
 import userSessionRoutes from './routes/userSession.js';
 
-// Validate environment variables before starting server
+// Validate environment variables before starting server (non-fatal in production)
 if (process.env.NODE_ENV !== 'test') {
-  validateEnvironment();
+  const isValid = validateEnvironment(false); // Don't throw, just warn
+  if (!isValid && process.env.NODE_ENV !== 'production') {
+    // Only exit in dev if validation fails
+    console.error('Environment validation failed in development mode. Exiting.');
+    process.exit(1);
+  }
 }
 
 const fastify = Fastify({ logger: true });
@@ -85,7 +90,7 @@ if (enableSwagger) {
   await setupSwagger(fastify);
 }
 
-// Register health check routes
+// Register health check routes FIRST (critical for Railway/K8s health checks)
 fastify.register(healthRoutes);
 
 // Register routes
@@ -116,36 +121,63 @@ fastify.register(githubRoutes);
 fastify.register(scheduledReportsRoutes);
 fastify.register(backupRoutes, { prefix: '/api/admin/backup' });
 
+// Track initialization status for health checks
+let initializationComplete = false;
+let initializationError = null;
+
 // Start server
 const start = async () => {
   try {
-    // Ensure Prisma is connected before using it
-    await ensurePrismaConnected();
-    logInfo('Database connection established');
-    
-    // Initialize role-based channels
-    await initializeRoleChannels();
-    logInfo('Role-based channels initialized');
-    
-    await ensureAllUsersInUniversalChannel();
     const port = process.env.PORT || 3001;
+    
+    // START LISTENING IMMEDIATELY - Critical for health checks
     await fastify.listen({ port, host: '0.0.0.0' });
-    fastify.log.info(`Server running on port ${port}`);
-
-    // Setup Socket.IO after server is listening
-    const io = setupSocket(fastify);
-    fastify.log.info('Socket.IO initialized');
+    fastify.log.info(`Server listening on port ${port} - health checks available`);
     
-    // Initialize notification emitter
-    initializeNotificationEmitter(io);
-    fastify.log.info('Notification emitter initialized');
-
-    // Initialize cron jobs for background processing
-    initializeCronJobs();
-    fastify.log.info('Cron jobs initialized');
+    // Background initialization - happens AFTER server is listening
+    // This prevents Railway health check timeouts
+    setImmediate(async () => {
+      try {
+        fastify.log.info('Starting background initialization...');
+        
+        // Ensure Prisma is connected
+        await ensurePrismaConnected();
+        fastify.log.info('✓ Database connection established');
+        
+        // Initialize role-based channels
+        await initializeRoleChannels();
+        fastify.log.info('✓ Role-based channels initialized');
+        
+        // Ensure all users in universal channel
+        await ensureAllUsersInUniversalChannel();
+        fastify.log.info('✓ Universal channel synchronized');
+        
+        // Setup Socket.IO
+        const io = setupSocket(fastify);
+        fastify.log.info('✓ Socket.IO initialized');
+        
+        // Initialize notification emitter
+        initializeNotificationEmitter(io);
+        fastify.log.info('✓ Notification emitter initialized');
+        
+        // Initialize cron jobs for background processing
+        initializeCronJobs();
+        fastify.log.info('✓ Cron jobs initialized');
+        
+        // Store io on fastify for access in routes
+        fastify.io = io;
+        
+        initializationComplete = true;
+        setServerInitStatus(true); // Update health check status
+        fastify.log.info('🚀 Full initialization complete - all systems operational');
+      } catch (err) {
+        initializationError = err;
+        setServerInitStatus(false, err); // Update health check with error
+        fastify.log.error({ err }, '❌ Background initialization failed - server running in degraded mode');
+        // Don't exit - server can still serve health checks and some endpoints
+      }
+    });
     
-    // Store io on fastify for access in routes
-    fastify.io = io;
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
@@ -153,3 +185,6 @@ const start = async () => {
 };
 
 start();
+
+// Export initialization status for health checks
+export { initializationComplete, initializationError };

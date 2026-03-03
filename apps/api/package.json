@@ -10,7 +10,7 @@
     "db:migrate": "node scripts/migrate-with-baseline.js",
     "db:push": "prisma db push --accept-data-loss",
     "db:generate": "prisma generate",
-    "prestart": "pnpm run db:generate && pnpm run db:migrate",
+    "db:setup": "pnpm run db:generate && pnpm run db:migrate",
     "lint": "eslint .",
     "test": "vitest",
     "test:run": "vitest run",

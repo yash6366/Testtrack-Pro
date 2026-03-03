@@ -27,6 +27,9 @@ WORKDIR /app
 # Copy from builder
 COPY --from=builder /app .
 
+# Make startup script executable
+RUN chmod +x apps/api/start.sh 2>/dev/null || true
+
 # Expose port
 EXPOSE 3001
 
@@ -34,5 +37,5 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
     CMD node -e "require('http').get('http://localhost:3001/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
-# Start API with migrations
-CMD ["pnpm", "--filter", "api", "start"]
+# Start API - use startup script for better initialization handling
+CMD ["sh", "-c", "cd apps/api && (test -f start.sh && sh start.sh || pnpm start)"]

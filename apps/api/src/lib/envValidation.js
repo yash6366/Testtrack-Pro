@@ -51,9 +51,10 @@ const recommendedEnvVars = {
 
 /**
  * Validate that required environment variables are set
- * @throws {Error} If any required environment variable is missing
+ * @param {boolean} throwOnError - Whether to throw or just warn
+ * @throws {Error} If any required environment variable is missing and throwOnError is true
  */
-export function validateRequiredEnvVars() {
+export function validateRequiredEnvVars(throwOnError = true) {
   const missingVars = [];
   
   for (const [varName, description] of Object.entries(requiredEnvVars)) {
@@ -67,9 +68,15 @@ export function validateRequiredEnvVars() {
       .map(v => `  - ${v.name}: ${v.description}`)
       .join('\n')}\n\nPlease check your .env file or environment configuration.`;
     
-    logError('Environment validation failed', new Error(errorMessage));
-    throw new Error(errorMessage);
+    if (throwOnError) {
+      logError('Environment validation failed', new Error(errorMessage));
+      throw new Error(errorMessage);
+    } else {
+      console.warn('⚠️ ', errorMessage);
+      return false;
+    }
   }
+  return true;
 }
 
 /**
@@ -151,18 +158,29 @@ export function validateEnvVarFormats() {
 
 /**
  * Run all environment variable validations
+ * @param {boolean} throwOnError - Whether to throw or just warn on errors
  */
-export function validateEnvironment() {
+export function validateEnvironment(throwOnError = true) {
   console.log('🔍 Validating environment variables...');
   
   try {
-    validateRequiredEnvVars();
+    const hasRequired = validateRequiredEnvVars(throwOnError);
     validateEnvVarFormats();
     warnMissingRecommendedEnvVars();
     
-    console.log('✅ Environment validation passed\n');
+    if (hasRequired) {
+      console.log('✅ Environment validation passed\n');
+    } else {
+      console.warn('⚠️  Environment validation completed with warnings\n');
+    }
+    return hasRequired;
   } catch (error) {
-    console.error('❌ Environment validation failed\n');
-    throw error;
+    if (throwOnError) {
+      console.error('❌ Environment validation failed\n');
+      throw error;
+    } else {
+      console.warn('⚠️  Environment validation failed, continuing anyway\n');
+      return false;
+    }
   }
 }

@@ -6,18 +6,30 @@
 import { systemQueryRaw } from '../lib/prisma.js';
 import { getRedisClient } from '../lib/socket.js';
 
+// Track server initialization status (set by server.js)
+let serverInitComplete = false;
+let serverInitError = null;
+
+// Export setter for server.js to call
+export function setServerInitStatus(complete, error = null) {
+  serverInitComplete = complete;
+  serverInitError = error;
+}
+
 /**
  * Health check routes
  */
 export async function healthRoutes(fastify) {
   /**
    * Basic health check - returns OK if service is running
+   * This endpoint ALWAYS returns 200 if the HTTP server is alive
+   * Railway uses this for health checks - must be fast and reliable
    */
   fastify.get('/health', {
     schema: {
       tags: ['health'],
       summary: 'Basic health check',
-      description: 'Returns OK if service is running',
+      description: 'Returns OK if service is running (always 200 if server is alive)',
       response: {
         200: {
           description: 'Service is healthy',
@@ -25,6 +37,7 @@ export async function healthRoutes(fastify) {
           properties: {
             status: { type: 'string' },
             timestamp: { type: 'string' },
+            initialized: { type: 'boolean' },
           },
         },
       },
@@ -33,6 +46,7 @@ export async function healthRoutes(fastify) {
     return {
       status: 'healthy',
       timestamp: new Date().toISOString(),
+      initialized: serverInitComplete,
     };
   });
 
