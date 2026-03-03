@@ -1,10 +1,10 @@
-const normalizeBaseUrl = (value) => String(value || '').trim().replace(/\/+$/, '');
+const normalizeBaseUrl = (value) =>
+  String(value || '').trim().replace(/\/+$/, '');
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-
-export function getApiBaseUrl() {
-  return normalizeBaseUrl(API_URL);
+function getApiBaseUrl() {
+  const url =
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  return normalizeBaseUrl(url);
 }
 
 export const API_BASE_URL = getApiBaseUrl();
