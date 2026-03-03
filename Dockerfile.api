@@ -1,5 +1,5 @@
 # Build stage - API only (when Root Directory is apps/api)
-FROM node:20-alpine AS builder
+FROM node:20.11.1-alpine AS builder
 
 # Install pnpm
 RUN npm install -g pnpm@8.15.4
@@ -20,7 +20,7 @@ COPY . .
 RUN pnpm run db:generate
 
 # Production stage
-FROM node:20-alpine
+FROM node:20.11.1-alpine
 
 # Install pnpm
 RUN npm install -g pnpm@8.15.4

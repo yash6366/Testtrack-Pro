@@ -1,8 +1,8 @@
 # Build stage
 FROM node:20-slim AS builder
 
-# Install OpenSSL (required for Prisma)
-RUN apt-get update && apt-get install -y openssl
+# Install OpenSSL + CA certs
+RUN apt-get update && apt-get install -y openssl ca-certificates
 
 # Install pnpm
 RUN npm install -g pnpm@8.15.4
@@ -20,10 +20,8 @@ RUN pnpm --filter api run db:generate
 # Production stage
 FROM node:20-slim
 
-# Install OpenSSL again in runtime image
-RUN apt-get update && apt-get install -y openssl
+RUN apt-get update && apt-get install -y openssl ca-certificates
 
-# Install pnpm
 RUN npm install -g pnpm@8.15.4
 
 WORKDIR /app
