@@ -6,8 +6,7 @@
     "restartPolicyMaxRetries": 5,
     "restartPolicyWindowSeconds": 600,
     "healthcheckPath": "/health",
-    "healthcheckTimeout": 300,
-    "startCommand": "cd apps/api && sh start.sh"
+    "healthcheckTimeout": 300
   },
   "environment": {
     "NODE_ENV": "production"
