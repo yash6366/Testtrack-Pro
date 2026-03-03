@@ -1,4 +1,0 @@
-# Nixpacks configuration for pnpm support
-[meta]
-# Force pnpm as the package manager
-pkgManagers = ["pnpm"]
