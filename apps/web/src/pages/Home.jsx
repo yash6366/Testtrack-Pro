@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Home() {
   return (
@@ -16,7 +15,6 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <Link
               to="/login"
               className="tt-btn tt-btn-outline px-4 py-2 text-sm"

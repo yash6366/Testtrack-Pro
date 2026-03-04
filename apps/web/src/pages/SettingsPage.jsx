@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/hooks';
+import { useAuth, useTheme } from '@/hooks';
 import DashboardLayout from '@/components/DashboardLayout';
 import { apiClient } from '@/lib/apiClient';
 import { Settings, Bell, Lock, Palette, Globe, Trash2, Eye, EyeOff, AlertTriangle } from 'lucide-react';
@@ -20,9 +20,10 @@ export default function SettingsPage() {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [weeklyReports, setWeeklyReports] = useState(false);
 
-  // Theme settings state
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  // Theme settings - use the global theme context
+  const { theme, setTheme } = useTheme();
   const [language, setLanguage] = useState(localStorage.getItem('language') || i18n.language || 'en');
+  const [fontStyle, setFontStyle] = useState(localStorage.getItem('fontStyle') || 'default');
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -74,15 +75,25 @@ export default function SettingsPage() {
   };
 
   const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
+    // Handle 'auto' by checking system preference
+    if (newTheme === 'auto') {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setTheme(prefersDark ? 'dark' : 'light');
+    } else {
+      setTheme(newTheme);
+    }
   };
 
   const handleLanguageChange = (newLanguage) => {
     setLanguage(newLanguage);
     localStorage.setItem('language', newLanguage);
     i18n.changeLanguage(newLanguage);
+  };
+
+  const handleFontStyleChange = (newFontStyle) => {
+    setFontStyle(newFontStyle);
+    localStorage.setItem('fontStyle', newFontStyle);
+    document.documentElement.setAttribute('data-font', newFontStyle);
   };
 
   const handleChangePassword = async () => {
@@ -332,6 +343,36 @@ export default function SettingsPage() {
                           }`}
                         >
                           <div className="text-center">{themeOption.label}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-3">{t('settings.fontStyle')}</label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {[
+                        { value: 'default', label: t('settings.fontDefault'), sample: 'IBM Plex Sans' },
+                        { value: 'inter', label: 'Inter', sample: 'Inter' },
+                        { value: 'roboto', label: 'Roboto', sample: 'Roboto' },
+                        { value: 'openSans', label: 'Open Sans', sample: 'Open Sans' },
+                        { value: 'nunito', label: 'Nunito', sample: 'Nunito' },
+                        { value: 'poppins', label: 'Poppins', sample: 'Poppins' },
+                        { value: 'lato', label: 'Lato', sample: 'Lato' },
+                        { value: 'montserrat', label: 'Montserrat', sample: 'Montserrat' },
+                        { value: 'sourceSans', label: 'Source Sans', sample: 'Source Sans 3' },
+                      ].map((fontOption) => (
+                        <button
+                          key={fontOption.value}
+                          onClick={() => handleFontStyleChange(fontOption.value)}
+                          className={`p-4 rounded-lg border-2 transition ${
+                            fontStyle === fontOption.value
+                              ? 'border-[var(--primary)] bg-[var(--primary)]/10'
+                              : 'border-[var(--border)] hover:border-[var(--primary)]/50'
+                          }`}
+                          style={{ fontFamily: fontOption.sample }}
+                        >
+                          <div className="text-center">{fontOption.label}</div>
                         </button>
                       ))}
                     </div>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Lato:wght@400;700&family=Montserrat:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -47,6 +47,52 @@
     border-color: var(--border);
   }
 
+  /* Font Style Variants */
+  [data-font="default"] {
+    --font-sans: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
+    --font-display: 'Space Grotesk', 'Segoe UI', Arial, sans-serif;
+  }
+
+  [data-font="inter"] {
+    --font-sans: 'Inter', 'Segoe UI', Arial, sans-serif;
+    --font-display: 'Inter', 'Segoe UI', Arial, sans-serif;
+  }
+
+  [data-font="roboto"] {
+    --font-sans: 'Roboto', 'Segoe UI', Arial, sans-serif;
+    --font-display: 'Roboto', 'Segoe UI', Arial, sans-serif;
+  }
+
+  [data-font="openSans"] {
+    --font-sans: 'Open Sans', 'Segoe UI', Arial, sans-serif;
+    --font-display: 'Open Sans', 'Segoe UI', Arial, sans-serif;
+  }
+
+  [data-font="nunito"] {
+    --font-sans: 'Nunito', 'Segoe UI', Arial, sans-serif;
+    --font-display: 'Nunito', 'Segoe UI', Arial, sans-serif;
+  }
+
+  [data-font="poppins"] {
+    --font-sans: 'Poppins', 'Segoe UI', Arial, sans-serif;
+    --font-display: 'Poppins', 'Segoe UI', Arial, sans-serif;
+  }
+
+  [data-font="lato"] {
+    --font-sans: 'Lato', 'Segoe UI', Arial, sans-serif;
+    --font-display: 'Lato', 'Segoe UI', Arial, sans-serif;
+  }
+
+  [data-font="montserrat"] {
+    --font-sans: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+    --font-display: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  }
+
+  [data-font="sourceSans"] {
+    --font-sans: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+    --font-display: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+  }
+
   body {
     margin: 0;
     font-family: var(--font-sans);
@@ -55,7 +101,7 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, font-family 0.2s ease;
     background-image:
       radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 42%),
       radial-gradient(circle at 30% 10%, rgba(79, 70, 229, 0.08), transparent 38%),

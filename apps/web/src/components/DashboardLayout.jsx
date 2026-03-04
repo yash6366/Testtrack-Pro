@@ -1,6 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { MessageCircle } from 'lucide-react';
-import ThemeToggle from '@/components/ThemeToggle';
 import ProjectSelector from '@/components/ProjectSelector';
 import NotificationCenter from '@/components/NotificationCenter';
 import { useProject } from '@/hooks';
@@ -138,7 +137,6 @@ export default function DashboardLayout({
               <p className="text-xs text-[var(--muted)]">Welcome back</p>
               <p className="text-sm font-semibold">{user.name}</p>
             </Link>
-            <ThemeToggle />
             <button
               onClick={onLogout}
               className="tt-btn tt-btn-danger px-4 py-2 text-sm"

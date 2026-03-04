@@ -5,6 +5,10 @@ import ReactDOM from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import App from './App';
 
+// Initialize font style from localStorage
+const savedFontStyle = localStorage.getItem('fontStyle') || 'default';
+document.documentElement.setAttribute('data-font', savedFontStyle);
+
 // Initialize Sentry for error tracking
 if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({

@@ -111,6 +111,8 @@ const resources = {
         light: 'Light',
         dark: 'Dark',
         auto: 'Auto',
+        fontStyle: 'Font Style',
+        fontDefault: 'Default',
         
         // Security
         updatePassword: 'Update Password',
@@ -333,6 +335,8 @@ const resources = {
         light: 'Claro',
         dark: 'Oscuro',
         auto: 'Automático',
+        fontStyle: 'Estilo de Fuente',
+        fontDefault: 'Predeterminado',
         
         // Security
         updatePassword: 'Actualizar Contraseña',
@@ -555,6 +559,8 @@ const resources = {
         light: 'Clair',
         dark: 'Sombre',
         auto: 'Automatique',
+        fontStyle: 'Style de Police',
+        fontDefault: 'Par Défaut',
         
         // Security
         updatePassword: 'Mettre à jour le mot de passe',
@@ -777,6 +783,8 @@ const resources = {
         light: 'Hell',
         dark: 'Dunkel',
         auto: 'Automatisch',
+        fontStyle: 'Schriftstil',
+        fontDefault: 'Standard',
         
         // Security
         updatePassword: 'Passwort aktualisieren',
@@ -999,6 +1007,8 @@ const resources = {
         light: 'Ljust',
         dark: 'Mörkt',
         auto: 'Automatiskt',
+        fontStyle: 'Teckensnitt',
+        fontDefault: 'Standard',
         
         // Security
         updatePassword: 'Uppdatera lösenord',
