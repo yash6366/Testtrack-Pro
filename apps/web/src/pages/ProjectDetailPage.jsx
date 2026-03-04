@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks';
+import { useProject } from '@/hooks';
 import DashboardLayout from '@/components/DashboardLayout';
 import { apiClient } from '@/lib/apiClient';
 import { 
@@ -16,10 +17,18 @@ export default function ProjectDetailPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { setActiveProjectId } = useProject();
   const [project, setProject] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Sync projectId to context and localStorage when viewing project detail
+  useEffect(() => {
+    if (projectId) {
+      setActiveProjectId(projectId);
+    }
+  }, [projectId, setActiveProjectId]);
 
   useEffect(() => {
     let isMounted = true;
@@ -205,7 +214,7 @@ export default function ProjectDetailPage() {
         </button>
 
         <button
-          onClick={() => navigate('/test-suites')}
+          onClick={() => navigate(`/test-suites?projectId=${projectId}`)}
           className="tt-card p-6 text-left hover:shadow-lg transition group"
         >
           <div className="flex items-center gap-3 mb-3">
@@ -235,7 +244,7 @@ export default function ProjectDetailPage() {
         </button>
 
         <button
-          onClick={() => navigate('/bugs')}
+          onClick={() => navigate(`/bugs?projectId=${projectId}`)}
           className="tt-card p-6 text-left hover:shadow-lg transition group"
         >
           <div className="flex items-center gap-3 mb-3">

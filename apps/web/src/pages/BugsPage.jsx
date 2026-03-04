@@ -137,7 +137,7 @@ export default function BugsPage() {
           <h1 className="text-3xl font-bold text-[var(--foreground)]">Bug Management</h1>
           {user?.role === 'TESTER' && (
             <button
-              onClick={() => navigate('/bugs/create')}
+              onClick={() => navigate(`/bugs/create?projectId=${projectId}`)}
               className="tt-btn tt-btn-primary"
             >
               + Report Bug

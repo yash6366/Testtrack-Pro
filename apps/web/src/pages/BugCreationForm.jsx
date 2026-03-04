@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiClient } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import BackButton from '@/components/ui/BackButton';
@@ -9,6 +9,8 @@ import BackButton from '@/components/ui/BackButton';
  */
 export default function BugCreationForm({ executionId = null, testCaseId = null, onSuccess = null, onCancel = null }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const urlProjectId = useMemo(() => searchParams.get('projectId'), [searchParams]);
   const { user } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -19,7 +21,7 @@ export default function BugCreationForm({ executionId = null, testCaseId = null,
     environment: 'PRODUCTION',
     reproducibility: 'ALWAYS',
     affectedVersion: '',
-    projectId: localStorage.getItem('selectedProjectId') || '',
+    projectId: urlProjectId || localStorage.getItem('selectedProjectId') || '',
     sourceExecutionId: executionId,
     sourceTestCaseId: testCaseId ? String(testCaseId) : '',
   });
@@ -97,7 +99,7 @@ export default function BugCreationForm({ executionId = null, testCaseId = null,
       <div className="max-w-2xl mx-auto">
         <div>
           <div className="mb-4">
-            <BackButton label="Back to Bugs" fallback="/bugs" />
+            <BackButton label="Back to Bugs" fallback={`/bugs?projectId=${formData.projectId}`} />
           </div>
           <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2">
             Report Bug
@@ -308,7 +310,7 @@ export default function BugCreationForm({ executionId = null, testCaseId = null,
               </button>
               <BackButton
                 label="Cancel"
-                fallback="/bugs"
+                fallback={`/bugs?projectId=${formData.projectId}`}
                 className="flex-1 tt-btn tt-btn-outline disabled:opacity-50"
               />
             </div>

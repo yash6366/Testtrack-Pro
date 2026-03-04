@@ -82,7 +82,7 @@ export default function TestSuiteCreatePage() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <BackButton label="Back to Test Suites" fallback="/test-suites" />
+        <BackButton label="Back to Test Suites" fallback={`/test-suites?projectId=${projectId}`} />
         <h1 className="text-2xl font-bold mt-2">Create Test Suite</h1>
         <p className="text-gray-600 dark:text-gray-400">
           Create a new test suite for project {projectId}
@@ -173,7 +173,7 @@ export default function TestSuiteCreatePage() {
           </button>
           <button
             type="button"
-            onClick={() => navigate('/test-suites')}
+            onClick={() => navigate(`/test-suites?projectId=${projectId}`)}
             className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded"
           >
             Cancel
