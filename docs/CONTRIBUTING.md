@@ -1,6 +1,6 @@
 # Contributing Guide
 
-> **Doc sync note (2026-03-02):** Commands in this file are aligned to scripts currently present in root and workspace package manifests.
+> **Doc sync note (2026-03-04):** Updated with new feature contribution guidelines.
 
 Guidelines for contributing to TestTrack Pro.
 

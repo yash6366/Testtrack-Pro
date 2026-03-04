@@ -1,6 +1,6 @@
 # TestTrack Pro - Features Guide
 
-> **Doc sync note (2026-03-02):** Feature descriptions have been reviewed against current backend route modules and frontend package dependencies.
+> **Doc sync note (2026-03-04):** Updated with Webhooks, Direct Messaging, Bug History, and Chat Enhancement features.
 
 Comprehensive guide to all features and capabilities of TestTrack Pro V1
 
@@ -17,6 +17,9 @@ Comprehensive guide to all features and capabilities of TestTrack Pro V1
 9. [Admin Features](#admin-features)
 10. [Search & Filtering](#search--filtering)
 11. [Integrations](#integrations)
+12. [Webhooks (NEW)](#webhooks-new)
+13. [Direct Messaging (NEW)](#direct-messaging-new)
+14. [Bug History Tracking (NEW)](#bug-history-tracking-new)
 
 ---
 
@@ -451,6 +454,10 @@ Action: Review test for environmental dependencies
 - Universal channel (all users)
 - Unread indicators
 - Message search
+- **@Mentions**: Tag users in messages (NEW)
+- **Emoji Reactions**: React to messages with emojis (NEW)
+- **Threaded Replies**: Reply to specific messages (NEW)
+- **Pinned Messages**: Pin important messages in channels (NEW)
 
 ### Activity Feed
 
@@ -866,6 +873,199 @@ Action: Review test for environmental dependencies
 - 🎯 Test impact analysis
 - 🔍 Visual regression testing
 - 🌐 Multi-language support
+
+---
+
+## Webhooks (NEW)
+
+### Overview
+
+Webhooks enable real-time integration with external systems by sending HTTP POST requests when events occur in TestTrack Pro. Configure webhooks per project to trigger automated workflows, notifications, or data synchronization.
+
+### Supported Events
+
+| Event | Description |
+|-------|-------------|
+| `TEST_CREATED` | New test case created |
+| `TEST_UPDATED` | Test case modified |
+| `TEST_DELETED` | Test case deleted |
+| `BUG_CREATED` | New bug reported |
+| `BUG_UPDATED` | Bug details modified |
+| `BUG_STATUS_CHANGED` | Bug status transition |
+| `BUG_ASSIGNED` | Bug assigned to developer |
+| `EXECUTION_COMPLETED` | Test execution finished (pass) |
+| `EXECUTION_FAILED` | Test execution failed |
+| `SUITE_COMPLETED` | Test suite run completed |
+| `SUITE_FAILED` | Test suite run failed |
+
+### Webhook Configuration
+
+1. Navigate to **Project Settings** → **Webhooks**
+2. Click **+ Add Webhook**
+3. Configure:
+   - **Name**: Descriptive webhook name
+   - **URL**: HTTPS endpoint to receive events
+   - **Events**: Select events to subscribe to
+   - **Secret**: Auto-generated HMAC signature secret
+   - **Description**: Optional notes
+4. Click **Create**
+
+### Security Features
+
+- **HMAC Signatures**: All payloads are signed with your webhook secret
+- **HTTPS Required**: Only secure endpoints accepted
+- **Auto-disable**: Webhooks disabled after 10 consecutive failures
+- **Retry Logic**: Failed deliveries retried at 1min, 5min, 15min intervals
+
+### Webhook Payload Example
+
+```json
+{
+  "event": "BUG_STATUS_CHANGED",
+  "timestamp": "2026-03-04T10:30:00Z",
+  "data": {
+    "bugId": 123,
+    "bugNumber": "PROJ-042",
+    "title": "Login button not responsive",
+    "oldStatus": "IN_PROGRESS",
+    "newStatus": "FIXED",
+    "changedBy": {
+      "id": 5,
+      "name": "John Developer",
+      "email": "john@example.com"
+    }
+  },
+  "project": {
+    "id": 1,
+    "name": "Web Application"
+  }
+}
+```
+
+### Delivery Management
+
+- **View Deliveries**: See all webhook delivery attempts
+- **Retry Failed**: Manually retry failed deliveries
+- **Test Webhook**: Send test payload to verify endpoint
+- **Delivery Logs**: Full audit trail of all deliveries
+
+---
+
+## Direct Messaging (NEW)
+
+### Overview
+
+Direct messaging enables private, one-on-one communication between team members without cluttering project channels. Perfect for quick questions, private discussions, or sensitive conversations.
+
+### Features
+
+**Conversations:**
+- Private messaging between any two users
+- Conversation list with unread counts
+- Last message preview
+- Contact search and filtering
+
+**Message Features:**
+- Real-time delivery via WebSocket
+- Read receipts (message marked as read)
+- Emoji reactions (👍 ❤️ 😄 etc.)
+- Threaded replies to specific messages
+- Message history (unlimited)
+
+### Usage
+
+1. Click **Messages** in the sidebar (or bell icon → DMs)
+2. Select a contact or start new conversation
+3. Type message and press Enter to send
+4. Click emoji icon to add reactions
+5. Click reply icon to start a thread
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/dm/contacts` | List all available contacts |
+| GET | `/api/dm/conversations` | List your conversations |
+| GET | `/api/dm/:userId/messages` | Get messages with a user |
+| POST | `/api/dm/send` | Send a direct message |
+| POST | `/api/dm/:messageId/reaction` | Add reaction to message |
+| DELETE | `/api/dm/:messageId/reaction/:emoji` | Remove reaction |
+
+### Notifications
+
+- Real-time toast notification for new DMs
+- Unread count badge in navigation
+- Optional email notification for offline users
+- Respects quiet hours preferences
+
+---
+
+## Bug History Tracking (NEW)
+
+### Overview
+
+Bug History provides a complete audit trail of all changes made to bugs over their lifecycle. Every modification is logged with who made the change, what changed, and when.
+
+### Tracked Changes
+
+All modifications to the following fields are automatically logged:
+- **Status**: NEW → ASSIGNED → IN_PROGRESS → FIXED → VERIFIED → CLOSED
+- **Severity**: CRITICAL, MAJOR, MINOR, TRIVIAL
+- **Priority**: P0 through P4
+- **Assignee**: Bug assignment changes
+- **Fix Documentation**: Fix strategy, root cause, commit info
+
+### History Entry Structure
+
+Each history entry contains:
+- **Field Name**: Which field was changed
+- **Old Value**: Previous value (or null if new)
+- **New Value**: Updated value
+- **Changed By**: User who made the change
+- **Changed At**: Timestamp of change
+- **Change Note**: Optional note explaining the change
+
+### Viewing Bug History
+
+1. Open any bug detail page
+2. Click the **History** tab
+3. View chronological list of all changes
+4. Filter by field type or date range
+5. Export history for auditing
+
+### API Access
+
+```
+GET /api/bugs/:bugId/history
+```
+
+Response:
+```json
+{
+  "history": [
+    {
+      "id": 456,
+      "field": "status",
+      "oldValue": "IN_PROGRESS",
+      "newValue": "FIXED",
+      "changedBy": {
+        "id": 5,
+        "name": "John Developer",
+        "email": "john@example.com"
+      },
+      "changedAt": "2026-03-04T14:22:00Z",
+      "changeNote": "Fixed in commit abc123"
+    }
+  ]
+}
+```
+
+### Use Cases
+
+- **Audit Compliance**: Track who changed what and when
+- **Dispute Resolution**: Verify historical bug state
+- **Process Improvement**: Analyze bug lifecycle patterns
+- **Knowledge Base**: Understand fix patterns for similar issues
 
 ---
 

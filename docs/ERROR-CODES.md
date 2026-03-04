@@ -1,6 +1,6 @@
 # TestTrack Pro - API Error Codes
 
-> **Doc sync note (2026-03-02):** Error payload conventions in this file are aligned with the global error handler plugin in `apps/api/src/plugins/errorHandler.js`.
+> **Doc sync note (2026-03-04):** Error codes updated. Webhook and Direct Messaging error codes included.
 
 Complete reference for all API error responses, status codes, and error handling.
 

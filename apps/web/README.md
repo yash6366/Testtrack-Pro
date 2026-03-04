@@ -1,6 +1,6 @@
 # TestTrack Pro - Web Frontend
 
-> **Doc sync note (2026-03-02):** Build/runtime command guidance is aligned to `apps/web/package.json` scripts.
+> **Doc sync note (2026-03-04):** Updated with Direct Messaging UI and Chat Enhancement features.
 
 The React-based frontend application for TestTrack Pro test management platform.
 

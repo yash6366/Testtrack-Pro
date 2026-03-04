@@ -1,6 +1,6 @@
 # TestTrack Pro - API Server
 
-> **Doc sync note (2026-03-02):** Commands and endpoint notes were reviewed against current Fastify route registration and `apps/api/package.json` scripts.
+> **Doc sync note (2026-03-04):** Updated with Webhooks, Direct Messaging, Bug History APIs and 21 database migrations.
 
 The backend REST API server for TestTrack Pro, built with Fastify, Prisma, and PostgreSQL.
 
@@ -34,17 +34,21 @@ This is a high-performance Node.js backend that handles:
 apps/api/
 ├── src/
 │   ├── server.js              # Main server entry point
-│   ├── routes/                # API route handlers
+│   ├── routes/                # API route handlers (27 modules)
 │   │   ├── auth.js           # Authentication endpoints
 │   │   ├── tests.js          # Test case management
 │   │   ├── executions.js     # Test execution
 │   │   ├── bugs.js           # Bug tracking
 │   │   ├── analytics.js      # Reports & analytics
+│   │   ├── webhooks.js       # Webhook management (NEW)
+│   │   ├── directMessage.js  # Direct messaging (NEW)
 │   │   └── ...              
-│   ├── services/             # Business logic layer
+│   ├── services/             # Business logic layer (37 services)
 │   │   ├── authService.js    # Auth operations
 │   │   ├── testCaseService.js
 │   │   ├── bugService.js
+│   │   ├── webhookService.js      # Webhook handling (NEW)
+│   │   ├── webhookHandlerService.js # Webhook delivery (NEW)
 │   │   └── ...
 │   ├── lib/                  # Utilities & helpers
 │   │   ├── prisma.js         # Prisma client
@@ -63,8 +67,8 @@ apps/api/
 │   │   └── common.js
 │   └── test-utils/           # Testing utilities
 ├── prisma/
-│   ├── schema.prisma         # Database schema
-│   ├── migrations/           # Database migrations
+│   ├── schema.prisma         # Database schema (60+ models)
+│   ├── migrations/           # Database migrations (21 migrations)
 │   └── seed.js              # Seed data script
 ├── coverage/                 # Test coverage reports
 ├── .env                      # Environment variables

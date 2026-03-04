@@ -1,11 +1,11 @@
 # TestTrack Pro - Full-Stack Monorepo
 
-> **Doc sync note (2026-03-02):** This README was reviewed against current root/app package scripts and workspace layout.
+> **Doc sync note (2026-03-04):** Updated with Webhooks, Direct Messaging, Bug History, and Chat Enhancement features.
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-org/testtrack-pro/actions)
 [![Test Coverage](https://img.shields.io/badge/coverage-70%25-brightgreen)](./)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-0.6.2-blue)](./)
+[![Version](https://img.shields.io/badge/version-0.6.3-blue)](./)
 
 TestTrack Pro is a **production-ready**, full-stack software testing management platform that enables QA teams to manage the complete testing lifecycle in one place - from writing test cases to executing them, reporting bugs, tracking fixes, and generating analytics.
 
@@ -35,12 +35,12 @@ Complete documentation available in `/docs`:
 
 | Document | Purpose | Lines |
 |----------|---------|-------|
-| [CODEBASE-OVERVIEW.md](./docs/CODEBASE-OVERVIEW.md) | Complete codebase structure and architecture guide | 900+ |
+| [CODEBASE-OVERVIEW.md](./docs/CODEBASE-OVERVIEW.md) | Complete codebase structure and architecture guide | 950+ |
 | [GETTING-STARTED.md](./docs/GETTING-STARTED.md) | User quick-start guide for testers | 200+ |
 | [DEVELOPMENT.md](./docs/DEVELOPMENT.md) | Complete dev setup and workflow guide | 1000+ |
-| [FEATURES.md](./docs/FEATURES.md) | Detailed feature documentation | 876 |
-| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | System design, tech stack, data model, real-time features | 500+ |
-| [API-REFERENCE.md](./docs/API-REFERENCE.md) | REST API documentation with examples | 2226 |
+| [FEATURES.md](./docs/FEATURES.md) | Detailed feature documentation | 1050+ |
+| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | System design, tech stack, data model, real-time features | 600+ |
+| [API-REFERENCE.md](./docs/API-REFERENCE.md) | REST API documentation with examples | 2600+ |
 | [ERROR-CODES.md](./docs/ERROR-CODES.md) | Error code reference with solutions | 800+ |
 | [FAQ.md](./docs/FAQ.md) | Troubleshooting and common questions | 600+ |
 | [CONTRIBUTING.md](./docs/CONTRIBUTING.md) | Contribution guidelines | 300+ |
@@ -72,6 +72,33 @@ TestTrack Pro V1 introduces major enhancements for developer productivity and de
 - **Fix Verification Workflow**: Separation of duties - developers fix, testers verify
 - **Performance Insights**: See your fix metrics and improvement areas
 - **API Improvements**: New endpoints for all analytics features
+
+### Recent Additions (March 2026)
+
+#### Webhooks System
+- **External Integrations**: Configure webhooks to trigger external systems on events
+- **11 Event Types**: TEST_*, BUG_*, EXECUTION_*, SUITE_* events supported
+- **Reliable Delivery**: Automatic retries with exponential backoff (1min, 5min, 15min)
+- **Security**: HMAC signature verification for all payloads
+- **Monitoring**: Full delivery logs and status tracking per webhook
+
+#### Direct Messaging
+- **Private Conversations**: User-to-user private messaging
+- **Rich Features**: Emoji reactions, threaded replies, read receipts
+- **Real-time**: Instant delivery via WebSocket connections
+- **Conversation Management**: Unread counts, conversation list, contact search
+
+#### Bug History Tracking
+- **Complete Audit Trail**: Every bug change is logged with full details
+- **Field-level Tracking**: Status, severity, priority, assignee changes tracked
+- **Change Attribution**: Who changed what and when
+- **Compliance Ready**: Supports audit and regulatory requirements
+
+#### Enhanced Chat
+- **@Mentions**: Tag users in channel messages with notifications
+- **Emoji Reactions**: React to messages in channels
+- **Threaded Replies**: Reply to specific messages
+- **Pinned Messages**: Pin important messages in channels
 
 ---
 
@@ -136,7 +163,7 @@ testtrack-pro/
 - **Fastify** (high-performance web framework)
 - **Node.js 20+** runtime
 - **PostgreSQL 15+** database
-- **Prisma** ORM with 13 migrations
+- **Prisma** ORM with 21 migrations
 - **Redis/Upstash** for caching and Socket.IO pub-sub
 - **Socket.IO** for real-time communication
 - **JWT + bcrypt** for authentication

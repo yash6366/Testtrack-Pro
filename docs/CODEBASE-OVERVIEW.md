@@ -1,12 +1,12 @@
 # TestTrack Pro - Codebase Overview
 
-> **Doc sync note (2026-03-02):** Reviewed against current monorepo structure (`apps/*`, `packages/*`) and active test/documentation layout.
+> **Doc sync note (2026-03-04):** Updated with Bug History, Webhooks, Direct Messaging, and Chat Enhancement features.
 
 Comprehensive analysis and structure guide for developers working on TestTrack Pro.
 
-**Document Version**: 1.0  
-**Last Updated**: February 24, 2026  
-**Codebase Version**: 0.6.2 (Production-Ready)
+**Document Version**: 1.1  
+**Last Updated**: March 4, 2026  
+**Codebase Version**: 0.6.3 (Production-Ready)
 
 ## Quick Navigation
 
@@ -25,15 +25,15 @@ Comprehensive analysis and structure guide for developers working on TestTrack P
 
 | Metric | Value |
 |--------|-------|
-| **Total Files** | 250+ |
+| **Total Files** | 260+ |
 | **Routes** | 27 route modules |
-| **Services** | 35 service files |
+| **Services** | 37 service files |
 | **Frontend Pages** | 41+ page components |
 | **Frontend Components** | 75+ reusable components |
-| **Database Models** | 55+ Prisma models (User, Project, TestCase, Execution, Bug, Channel, etc.) |
-| **Database Migrations** | 16+ completed migrations |
+| **Database Models** | 60+ Prisma models (User, Project, TestCase, Execution, Bug, Channel, Webhook, DirectMessage, etc.) |
+| **Database Migrations** | 21 completed migrations |
 | **Test Coverage** | 70%+ |
-| **Lines of Documentation** | 6000+ |
+| **Lines of Documentation** | 6500+ |
 
 ---
 

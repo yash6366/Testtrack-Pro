@@ -1,6 +1,6 @@
 # OAuth Integration Guide
 
-> **Doc sync note (2026-03-02):** OAuth endpoint details reviewed against `apps/api/src/routes/auth.js` (Google/GitHub callback routes are GET handlers).
+> **Doc sync note (2026-03-04):** OAuth configuration verified. Works with new Webhooks, Direct Messaging, and Bug History features.
 
 This guide covers setting up OAuth 2.0 authentication with Google and GitHub providers in TestTrack Pro V1+.
 

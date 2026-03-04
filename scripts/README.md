@@ -1,6 +1,6 @@
 # Scripts Directory
 
-> **Doc sync note (2026-03-02):** Script inventory reviewed against current files in `scripts/` and `scripts/dev/`.
+> **Doc sync note (2026-03-04):** Scripts directory reviewed. Works with latest DB migrations (21 total).
 
 Utility scripts for development, maintenance, and deployment.
 

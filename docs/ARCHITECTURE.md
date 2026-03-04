@@ -1,6 +1,6 @@
 # TestTrack Pro - System Architecture
 
-> **Doc sync note (2026-03-02):** Reviewed against current workspace packages, runtime scripts, and route/plugin registration in `apps/api/src/server.js`.
+> **Doc sync note (2026-03-04):** Updated with Webhooks, Direct Messaging, Bug History, and Chat Enhancement models.
 
 ## Overview
 
@@ -154,6 +154,26 @@ TestTrack Pro is a comprehensive software testing management platform built with
   - `codeReviewUrl`: Link to PR for fix
   - `targetFixVersion`, `fixedInVersion`: Version tracking
   - `actualFixHours`: Time spent on fix
+- **New**: Full history tracking via BugHistory model
+
+**BugHistory (NEW)**
+- Field-level audit trail for all bug changes
+- Tracks: bugId, changedBy, fieldName, oldValue, newValue, changeNote
+- Automatic logging on status, severity, priority, assignee changes
+- Indexed by bugId, changedBy, and createdAt for efficient queries
+
+**Webhook (NEW)**
+- Project-level webhook registration for external integrations
+- Configurable events: TEST_*, BUG_*, EXECUTION_*, SUITE_*
+- HMAC signature verification with configurable secrets
+- Auto-disable after consecutive failures (configurable threshold)
+- Related models: WebhookDelivery, WebhookLog
+
+**DirectMessage (NEW)**
+- User-to-user private messaging system
+- Read receipts and unread counts
+- Support for reactions and threaded replies
+- Related models: DirectMessageReaction, DirectMessageReply
 
 **TestSuite**
 - Logical grouping of test cases

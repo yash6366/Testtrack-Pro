@@ -1,6 +1,6 @@
 # TestTrack Pro - API Reference
 
-> **Doc sync note (2026-03-02):** Reviewed against current API route modules and Fastify runtime configuration. Swagger UI at `/docs` is the authoritative interactive reference.
+> **Doc sync note (2026-03-04):** Updated with Webhooks and Direct Messaging API endpoints. Swagger UI at `/docs` is the authoritative interactive reference.
 
 Complete REST API documentation. For interactive API exploration, visit `/docs` after starting the server.
 
@@ -2226,3 +2226,352 @@ Handles events:
 - `ping`: Webhook test
 
 Response: `200 OK`
+
+## Webhooks (NEW)
+
+### Create Webhook
+
+**POST** `/api/projects/:projectId/webhooks`
+
+Request:
+```json
+{
+  "name": "CI/CD Pipeline",
+  "url": "https://ci.example.com/webhook",
+  "events": ["BUG_CREATED", "BUG_STATUS_CHANGED", "EXECUTION_COMPLETED"],
+  "secret": "optional-custom-secret",
+  "description": "Triggers CI pipeline on test events",
+  "isActive": true
+}
+```
+
+Response: `201 Created`
+```json
+{
+  "id": 1,
+  "projectId": 5,
+  "name": "CI/CD Pipeline",
+  "url": "https://ci.example.com/webhook",
+  "events": ["BUG_CREATED", "BUG_STATUS_CHANGED", "EXECUTION_COMPLETED"],
+  "secret": "generated-secret-if-not-provided",
+  "description": "Triggers CI pipeline on test events",
+  "isActive": true,
+  "createdAt": "2026-03-04T10:00:00Z"
+}
+```
+
+### List Webhooks
+
+**GET** `/api/projects/:projectId/webhooks`
+
+Response:
+```json
+{
+  "webhooks": [
+    {
+      "id": 1,
+      "name": "CI/CD Pipeline",
+      "url": "https://ci.example.com/webhook",
+      "events": ["BUG_CREATED", "BUG_STATUS_CHANGED"],
+      "isActive": true,
+      "failureCount": 0,
+      "lastSuccessAt": "2026-03-04T09:30:00Z",
+      "lastTriggeredAt": "2026-03-04T09:30:00Z"
+    }
+  ]
+}
+```
+
+### Get Webhook
+
+**GET** `/api/projects/:projectId/webhooks/:webhookId`
+
+Response:
+```json
+{
+  "id": 1,
+  "name": "CI/CD Pipeline",
+  "url": "https://ci.example.com/webhook",
+  "events": ["BUG_CREATED", "BUG_STATUS_CHANGED"],
+  "isActive": true,
+  "failureCount": 0,
+  "lastSuccessAt": "2026-03-04T09:30:00Z",
+  "deliveries": [
+    {
+      "id": 101,
+      "event": "BUG_CREATED",
+      "status": "DELIVERED",
+      "responseCode": 200,
+      "durationMs": 150,
+      "deliveredAt": "2026-03-04T09:30:00Z"
+    }
+  ]
+}
+```
+
+### Update Webhook
+
+**PATCH** `/api/projects/:projectId/webhooks/:webhookId`
+
+Request:
+```json
+{
+  "name": "Updated Name",
+  "events": ["BUG_CREATED", "BUG_UPDATED"],
+  "isActive": false
+}
+```
+
+Response: `200 OK`
+
+### Delete Webhook
+
+**DELETE** `/api/projects/:projectId/webhooks/:webhookId`
+
+Response: `204 No Content`
+
+### Get Webhook Deliveries
+
+**GET** `/api/projects/:projectId/webhooks/:webhookId/deliveries`
+
+Query Parameters:
+- `limit` (number): Max deliveries to return (default: 50)
+- `status` (string): Filter by status (PENDING, DELIVERED, FAILED)
+
+Response:
+```json
+{
+  "deliveries": [
+    {
+      "id": 101,
+      "event": "BUG_STATUS_CHANGED",
+      "status": "DELIVERED",
+      "attemptCount": 1,
+      "responseCode": 200,
+      "durationMs": 150,
+      "deliveredAt": "2026-03-04T09:30:00Z"
+    }
+  ]
+}
+```
+
+### Test Webhook
+
+**POST** `/api/projects/:projectId/webhooks/:webhookId/test`
+
+Sends a test payload to verify the webhook endpoint.
+
+Response:
+```json
+{
+  "success": true,
+  "responseCode": 200,
+  "durationMs": 245
+}
+```
+
+### Retry Webhook Delivery
+
+**POST** `/api/projects/:projectId/webhooks/:webhookId/deliveries/:deliveryId/retry`
+
+Retry a failed webhook delivery.
+
+Response: `200 OK`
+
+### Webhook Events Reference
+
+| Event | When Triggered | Payload Contains |
+|-------|---------------|------------------|
+| `TEST_CREATED` | Test case created | testCase object |
+| `TEST_UPDATED` | Test case modified | testCase, changes |
+| `TEST_DELETED` | Test case deleted | testCaseId, deletedBy |
+| `BUG_CREATED` | Bug reported | bug object |
+| `BUG_UPDATED` | Bug modified | bug, changes |
+| `BUG_STATUS_CHANGED` | Bug status changed | bug, oldStatus, newStatus |
+| `BUG_ASSIGNED` | Bug assigned | bug, assignee |
+| `EXECUTION_COMPLETED` | Test passed | execution object |
+| `EXECUTION_FAILED` | Test failed | execution, failures |
+| `SUITE_COMPLETED` | Suite run passed | suiteRun, stats |
+| `SUITE_FAILED` | Suite run failed | suiteRun, failures |
+
+## Direct Messaging (NEW)
+
+### Get Contacts
+
+**GET** `/api/dm/contacts`
+
+Returns all active users available for direct messaging.
+
+Response:
+```json
+{
+  "contacts": [
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "role": "DEVELOPER",
+      "picture": "https://..."
+    }
+  ]
+}
+```
+
+### Get Conversations
+
+**GET** `/api/dm/conversations`
+
+Returns list of all DM conversations for current user.
+
+Response:
+```json
+{
+  "conversations": [
+    {
+      "otherUserId": 2,
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "picture": "https://...",
+      "role": "DEVELOPER",
+      "lastMessageAt": "2026-03-04T10:15:00Z",
+      "lastMessage": "Thanks for the update!",
+      "unreadCount": 2
+    }
+  ]
+}
+```
+
+### Get Messages with User
+
+**GET** `/api/dm/:userId/messages`
+
+Query Parameters:
+- `limit` (number): Max messages (default: 50, max: 100)
+
+Response:
+```json
+{
+  "messages": [
+    {
+      "id": 1,
+      "senderId": 1,
+      "recipientId": 2,
+      "message": "Hey, can you check bug #42?",
+      "isRead": true,
+      "createdAt": "2026-03-04T10:00:00Z",
+      "sender": {
+        "id": 1,
+        "name": "John Doe",
+        "picture": "https://..."
+      },
+      "reactions": [
+        {
+          "emoji": "👍",
+          "user": { "id": 2, "name": "Jane Smith" }
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Send Direct Message
+
+**POST** `/api/dm/send`
+
+Request:
+```json
+{
+  "recipientId": 2,
+  "message": "Hey, can you check bug #42?",
+  "replyToId": null
+}
+```
+
+Response: `201 Created`
+```json
+{
+  "id": 123,
+  "senderId": 1,
+  "recipientId": 2,
+  "message": "Hey, can you check bug #42?",
+  "isRead": false,
+  "createdAt": "2026-03-04T10:30:00Z"
+}
+```
+
+### Add Reaction to DM
+
+**POST** `/api/dm/:messageId/reaction`
+
+Request:
+```json
+{
+  "emoji": "👍"
+}
+```
+
+Response: `201 Created`
+
+### Remove Reaction from DM
+
+**DELETE** `/api/dm/:messageId/reaction/:emoji`
+
+Response: `204 No Content`
+
+### Mark Messages as Read
+
+Messages are automatically marked as read when retrieved via `GET /api/dm/:userId/messages`.
+
+## Bug History (NEW)
+
+### Get Bug History
+
+**GET** `/api/bugs/:bugId/history`
+
+Returns the complete change history for a bug.
+
+Response:
+```json
+{
+  "history": [
+    {
+      "id": 456,
+      "field": "status",
+      "oldValue": "IN_PROGRESS",
+      "newValue": "FIXED",
+      "changedBy": {
+        "id": 5,
+        "name": "John Developer",
+        "email": "john@example.com"
+      },
+      "changedAt": "2026-03-04T14:22:00Z",
+      "changeNote": "Fixed in commit abc123"
+    },
+    {
+      "id": 455,
+      "field": "assigneeId",
+      "oldValue": null,
+      "newValue": "5",
+      "changedBy": {
+        "id": 1,
+        "name": "Admin User",
+        "email": "admin@example.com"
+      },
+      "changedAt": "2026-03-04T10:00:00Z",
+      "changeNote": null
+    }
+  ]
+}
+```
+
+### Tracked Fields
+
+The following fields are automatically tracked in bug history:
+- `status` - Bug lifecycle status
+- `severity` - Bug severity level
+- `priority` - Bug priority level
+- `assigneeId` - Bug assignment changes
+- `fixStrategy` - Fix documentation
+- `rootCauseCategory` - Root cause classification
+- `fixedInCommitHash` - Git commit reference

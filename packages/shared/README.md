@@ -1,6 +1,6 @@
 # @shared/types
 
-> **Doc sync note (2026-03-02):** Package name and usage guidance are aligned with `packages/shared/package.json`.
+> **Doc sync note (2026-03-04):** Package aligned with latest codebase. Supports new Webhook, DirectMessage, and BugHistory types.
 
 Shared TypeScript types, utilities, and constants used across TestTrack Pro monorepo.
 

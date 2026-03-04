@@ -1,6 +1,6 @@
 # TestTrack Pro - Test Suite
 
-> **Doc sync note (2026-03-02):** Test command references reviewed against current Vitest scripts in `apps/api/package.json`.
+> **Doc sync note (2026-03-04):** Test suite updated. Include tests for webhookService and direct messaging.
 
 This directory contains tests for the TestTrack Pro API.
 

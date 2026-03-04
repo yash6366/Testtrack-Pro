@@ -1,6 +1,6 @@
 # Development Guide
 
-> **Doc sync note (2026-03-02):** Local workflow commands are aligned to currently available `pnpm` scripts for root, `api`, and `web` packages.
+> **Doc sync note (2026-03-04):** Updated with new webhook and direct messaging development workflows.
 
 This guide covers setting up your local development environment and common development workflows.
 

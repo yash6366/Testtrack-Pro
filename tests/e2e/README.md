@@ -1,6 +1,6 @@
 # End-to-End Testing Framework
 
-> **Doc sync note (2026-03-02):** Test inventory and command examples reviewed against current Playwright specs in `tests/e2e`.
+> **Doc sync note (2026-03-04):** E2E tests updated. Consider adding Webhook and Direct Messaging test specs.
 
 ## Overview
 

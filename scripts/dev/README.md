@@ -1,6 +1,6 @@
 # Development Utility Scripts
 
-> **Doc sync note (2026-03-02):** Usage examples reviewed against script locations and API workspace expectations.
+> **Doc sync note (2026-03-04):** Scripts verified with latest codebase and 21 database migrations.
 
 This directory contains utility scripts for development and database management.
 

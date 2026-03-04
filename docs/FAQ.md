@@ -1,6 +1,6 @@
 # TestTrack Pro - Frequently Asked Questions (FAQ)
 
-> **Doc sync note (2026-03-02):** Answers have been reviewed for alignment with the currently implemented API and workspace scripts.
+> **Doc sync note (2026-03-04):** Updated with Webhooks, Direct Messaging, and Bug History FAQs.
 
 Common questions and answers about TestTrack Pro.
 
@@ -570,6 +570,134 @@ Yes! Full REST API:
 2. Toggle email notifications
 3. Choose events to notify
 4. Save
+
+---
+
+## Webhooks — NEW
+
+### What are webhooks?
+
+Webhooks allow TestTrack Pro to send real-time notifications to external systems when events occur. This enables integration with CI/CD pipelines, Slack, custom dashboards, and more.
+
+### How do I create a webhook?
+
+1. Go to **Project Settings** → **Webhooks**
+2. Click **+ Add Webhook**
+3. Enter webhook URL (must be HTTPS)
+4. Select events to subscribe to
+5. Optionally customize the secret
+6. Click **Create**
+
+### What events can trigger webhooks?
+
+| Event | Description |
+|-------|-------------|
+| `TEST_CREATED` | New test case created |
+| `TEST_UPDATED` | Test case modified |
+| `TEST_DELETED` | Test case deleted |
+| `BUG_CREATED` | New bug reported |
+| `BUG_UPDATED` | Bug details modified |
+| `BUG_STATUS_CHANGED` | Bug status changed |
+| `BUG_ASSIGNED` | Bug assigned to developer |
+| `EXECUTION_COMPLETED` | Test execution passed |
+| `EXECUTION_FAILED` | Test execution failed |
+| `SUITE_COMPLETED` | Test suite run passed |
+| `SUITE_FAILED` | Test suite run failed |
+
+### How does webhook security work?
+
+- All webhooks use HMAC-SHA256 signatures
+- Each payload includes a `X-TestTrack-Signature` header
+- Your endpoint should verify the signature using your secret
+- Only HTTPS endpoints are allowed
+
+### What happens if my endpoint is down?
+
+TestTrack Pro automatically retries failed deliveries:
+1. First retry: 1 minute after failure
+2. Second retry: 5 minutes after failure
+3. Third retry: 15 minutes after failure
+4. After 10 consecutive failures, webhook is auto-disabled
+
+### Can I test my webhook?
+
+Yes:
+1. Go to your webhook details
+2. Click **Send Test**
+3. A test payload is sent to your endpoint
+4. Check the response and status
+
+---
+
+## Direct Messaging — NEW
+
+### What is direct messaging?
+
+Direct messaging (DM) allows private, one-on-one communication between team members outside of project channels. Perfect for quick questions, sensitive discussions, or personal conversations.
+
+### How do I send a direct message?
+
+1. Click **Messages** in the sidebar
+2. Click **New Conversation** or select an existing contact
+3. Type your message and press Enter
+4. Message appears instantly via WebSocket
+
+### Can I add reactions to messages?
+
+Yes! Click the emoji icon on any message to add a reaction. Available reactions include 👍 ❤️ 😄 😮 😢 😡
+
+### Can I reply to specific messages?
+
+Yes! Click the reply icon on any message to start a threaded conversation. Replies are grouped under the original message.
+
+### How do I know when I have unread messages?
+
+- The **Messages** icon shows a badge with unread count
+- Conversations with unread messages are highlighted
+- Toast notifications appear for new messages
+
+### Are direct messages private?
+
+Yes. DMs are only visible to the sender and recipient. Admins cannot view DM content.
+
+---
+
+## Bug History — NEW
+
+### What is bug history?
+
+Bug history provides a complete audit trail of all changes made to a bug throughout its lifecycle. Every modification is logged with who made the change, what changed, and when.
+
+### What changes are tracked?
+
+- **Status changes**: NEW → IN_PROGRESS → FIXED → VERIFIED → CLOSED
+- **Severity changes**: CRITICAL, MAJOR, MINOR, TRIVIAL
+- **Priority changes**: P0 through P4
+- **Assignee changes**: Bug assignments and reassignments
+- **Fix documentation**: All fix-related field updates
+
+### How do I view bug history?
+
+1. Open any bug detail page
+2. Click the **History** tab
+3. View chronological list of all changes
+4. Each entry shows: field changed, old value, new value, who changed it, when
+
+### Can I export bug history?
+
+Yes, the history is accessible via API:
+```
+GET /api/bugs/:bugId/history
+```
+
+See [API-REFERENCE.md](./API-REFERENCE.md#bug-history-new) for details.
+
+### Why is bug history useful?
+
+- **Audit compliance**: Track who changed what and when
+- **Dispute resolution**: Verify historical bug state
+- **Process improvement**: Analyze bug lifecycle patterns
+- **Root cause analysis**: Understand how issues evolved
 
 ---
 
