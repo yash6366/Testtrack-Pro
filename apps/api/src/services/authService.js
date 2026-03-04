@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { getPrismaClient } from '../lib/prisma.js';
 import { logError } from '../lib/logger.js';
 import { SignupSchema, LoginSchema } from '../schemas/auth.js';
+import { isCommonPassword, checkPasswordUserInfo } from '../lib/commonPasswords.js';
 import { 
   sendVerificationEmail, 
   generateVerificationToken, 
@@ -547,8 +548,8 @@ export async function resetPassword(token, newPassword) {
     throw new Error('Invalid or expired reset token');
   }
 
-  // Validate password strength
-  validatePasswordStrength(newPassword);
+  // Validate password strength (with user info check)
+  validatePasswordStrength(newPassword, user.email, user.name);
 
   // Check password history
   await validatePasswordHistory(user, newPassword);
@@ -584,9 +585,12 @@ export async function resetPassword(token, newPassword) {
 }
 
 // Password Validation Functions
-function validatePasswordStrength(password) {
+function validatePasswordStrength(password, email = '', name = '') {
   if (password.length < 8) {
     throw new Error('Password must be at least 8 characters long');
+  }
+  if (password.length > 128) {
+    throw new Error('Password must be at most 128 characters long');
   }
   if (!/[a-z]/.test(password)) {
     throw new Error('Password must contain at least one lowercase letter');
@@ -597,8 +601,19 @@ function validatePasswordStrength(password) {
   if (!/[0-9]/.test(password)) {
     throw new Error('Password must contain at least one number');
   }
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+  if (!/[!@#$%^&*(),.?":{}|<>\-_=+\[\]\\;'`~]/.test(password)) {
     throw new Error('Password must contain at least one special character');
+  }
+  
+  // Check for common passwords
+  if (isCommonPassword(password)) {
+    throw new Error('This password is too common. Please choose a stronger password.');
+  }
+  
+  // Check if password contains user info
+  const userInfoCheck = checkPasswordUserInfo(password, email, name);
+  if (!userInfoCheck.isValid) {
+    throw new Error(userInfoCheck.reason);
   }
 }
 
@@ -635,8 +650,8 @@ export async function changePassword(userId, currentPassword, newPassword) {
     throw new Error('Current password is incorrect');
   }
 
-  // Validate new password strength
-  validatePasswordStrength(newPassword);
+  // Validate new password strength (with user info check)
+  validatePasswordStrength(newPassword, user.email, user.name);
 
   // Check password history
   await validatePasswordHistory(user, newPassword);

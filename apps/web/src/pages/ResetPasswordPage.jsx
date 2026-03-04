@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import BackButton from '@/components/ui/BackButton';
 import { API_BASE_URL } from '@/lib/runtimeConfig';
+import PasswordStrengthIndicator, { usePasswordStrength } from '@/components/PasswordStrengthIndicator';
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -14,13 +15,9 @@ const ResetPasswordPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState({
-    hasLength: false,
-    hasLower: false,
-    hasUpper: false,
-    hasNumber: false,
-    hasSpecial: false,
-  });
+
+  // Use the password strength hook
+  const passwordStrength = usePasswordStrength(formData.newPassword);
 
   const token = searchParams.get('token');
 
@@ -29,18 +26,6 @@ const ResetPasswordPage = () => {
       navigate('/login');
     }
   }, [token, navigate]);
-
-  useEffect(() => {
-    // Check password strength
-    const password = formData.newPassword;
-    setPasswordStrength({
-      hasLength: password.length >= 8,
-      hasLower: /[a-z]/.test(password),
-      hasUpper: /[A-Z]/.test(password),
-      hasNumber: /[0-9]/.test(password),
-      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-    });
-  }, [formData.newPassword]);
 
   const handleChange = (e) => {
     setFormData({
@@ -58,8 +43,7 @@ const ResetPasswordPage = () => {
       return;
     }
 
-    const allRequirementsMet = Object.values(passwordStrength).every(v => v);
-    if (!allRequirementsMet) {
+    if (!passwordStrength.isValid) {
       setError('Please meet all password requirements');
       return;
     }
@@ -139,6 +123,10 @@ const ResetPasswordPage = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter new password"
             />
+            <PasswordStrengthIndicator 
+              password={formData.newPassword}
+              showRequirements={true}
+            />
           </div>
 
           <div>
@@ -155,43 +143,6 @@ const ResetPasswordPage = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Confirm new password"
             />
-          </div>
-
-          {/* Password Requirements */}
-          <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-3">Password Requirements:</p>
-            <div className="space-y-2">
-              <div className={`flex items-center text-sm ${passwordStrength.hasLength ? 'text-green-600' : 'text-gray-500'}`}>
-                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                At least 8 characters
-              </div>
-              <div className={`flex items-center text-sm ${passwordStrength.hasLower ? 'text-green-600' : 'text-gray-500'}`}>
-                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                One lowercase letter
-              </div>
-              <div className={`flex items-center text-sm ${passwordStrength.hasUpper ? 'text-green-600' : 'text-gray-500'}`}>
-                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                One uppercase letter
-              </div>
-              <div className={`flex items-center text-sm ${passwordStrength.hasNumber ? 'text-green-600' : 'text-gray-500'}`}>
-                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                One number
-              </div>
-              <div className={`flex items-center text-sm ${passwordStrength.hasSpecial ? 'text-green-600' : 'text-gray-500'}`}>
-                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                One special character (!@#$%^&*...)
-              </div>
-            </div>
           </div>
 
           <button

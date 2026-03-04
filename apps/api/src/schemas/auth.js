@@ -1,4 +1,5 @@
 import z from 'zod';
+import { isCommonPassword } from '../lib/commonPasswords.js';
 
 const SignupRoleSchema = z.preprocess(
   (value) => (typeof value === 'string' ? value.trim().toUpperCase() : value),
@@ -7,6 +8,7 @@ const SignupRoleSchema = z.preprocess(
 
 const StrongPasswordSchema = z.string()
   .min(8, 'Password must be at least 8 characters long')
+  .max(128, 'Password must be at most 128 characters long')
   .refine((password) => /[a-z]/.test(password), {
     message: 'Password must contain at least one lowercase letter',
   })
@@ -16,8 +18,11 @@ const StrongPasswordSchema = z.string()
   .refine((password) => /[0-9]/.test(password), {
     message: 'Password must contain at least one number',
   })
-  .refine((password) => /[!@#$%^&*(),.?":{}|<>]/.test(password), {
+  .refine((password) => /[!@#$%^&*(),.?":{}|<>\-_=+\[\]\\;'`~]/.test(password), {
     message: 'Password must contain at least one special character',
+  })
+  .refine((password) => !isCommonPassword(password), {
+    message: 'This password is too common. Please choose a stronger password.',
   });
 
 export const SignupSchema = z.object({

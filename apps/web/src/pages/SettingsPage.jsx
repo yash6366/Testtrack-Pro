@@ -6,6 +6,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { apiClient } from '@/lib/apiClient';
 import { Settings, Bell, Lock, Palette, Globe, Trash2, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import BackButton from '@/components/ui/BackButton';
+import PasswordStrengthIndicator, { usePasswordStrength } from '@/components/PasswordStrengthIndicator';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -435,7 +436,12 @@ export default function SettingsPage() {
                             {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </button>
                         </div>
-                        <p className="text-xs text-[var(--muted)] mt-1">{t('settings.passwordMinLength')}</p>
+                        <PasswordStrengthIndicator 
+                          password={passwordData.newPassword}
+                          email={user?.email}
+                          username={user?.name}
+                          showRequirements={true}
+                        />
                       </div>
 
                       <div>

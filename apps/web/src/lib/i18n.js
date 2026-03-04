@@ -72,6 +72,25 @@ const resources = {
         invalidCredentials: 'Invalid email or password',
       },
 
+      // Password Strength
+      password: {
+        veryWeak: 'Very Weak',
+        weak: 'Weak',
+        fair: 'Fair',
+        strong: 'Strong',
+        veryStrong: 'Very Strong',
+        crackTime: 'Time to crack',
+        minLength: 'At least 8 characters',
+        hasUpper: 'Uppercase letter',
+        hasLower: 'Lowercase letter',
+        hasNumber: 'Number',
+        hasSpecial: 'Special character',
+        notCommon: 'Not a common password',
+        notContainsEmail: 'Does not contain email',
+        notContainsUsername: 'Does not contain name',
+        requirements: 'Password Requirements',
+      },
+
       // Dashboard
       dashboard: {
         welcomeBack: 'Welcome back',
@@ -294,6 +313,25 @@ const resources = {
         loginSuccess: 'Inicio de sesión exitoso',
         logoutSuccess: 'Sesión cerrada correctamente',
         invalidCredentials: 'Correo electrónico o contraseña inválidos',
+      },
+
+      // Password Strength
+      password: {
+        veryWeak: 'Muy Débil',
+        weak: 'Débil',
+        fair: 'Regular',
+        strong: 'Fuerte',
+        veryStrong: 'Muy Fuerte',
+        crackTime: 'Tiempo para descifrar',
+        minLength: 'Al menos 8 caracteres',
+        hasUpper: 'Letra mayúscula',
+        hasLower: 'Letra minúscula',
+        hasNumber: 'Número',
+        hasSpecial: 'Carácter especial',
+        notCommon: 'No es una contraseña común',
+        notContainsEmail: 'No contiene email',
+        notContainsUsername: 'No contiene nombre',
+        requirements: 'Requisitos de Contraseña',
       },
 
       // Dashboard
@@ -520,6 +558,25 @@ const resources = {
         invalidCredentials: 'Email ou mot de passe invalide',
       },
 
+      // Password Strength
+      password: {
+        veryWeak: 'Très Faible',
+        weak: 'Faible',
+        fair: 'Moyen',
+        strong: 'Fort',
+        veryStrong: 'Très Fort',
+        crackTime: 'Temps de craquage',
+        minLength: 'Au moins 8 caractères',
+        hasUpper: 'Lettre majuscule',
+        hasLower: 'Lettre minuscule',
+        hasNumber: 'Chiffre',
+        hasSpecial: 'Caractère spécial',
+        notCommon: 'Pas un mot de passe commun',
+        notContainsEmail: 'Ne contient pas l\'email',
+        notContainsUsername: 'Ne contient pas le nom',
+        requirements: 'Exigences du Mot de Passe',
+      },
+
       // Dashboard
       dashboard: {
         welcomeBack: 'Bienvenue',
@@ -744,6 +801,25 @@ const resources = {
         invalidCredentials: 'Ungültige E-Mail oder Passwort',
       },
 
+      // Password Strength
+      password: {
+        veryWeak: 'Sehr Schwach',
+        weak: 'Schwach',
+        fair: 'Mittel',
+        strong: 'Stark',
+        veryStrong: 'Sehr Stark',
+        crackTime: 'Zeit zum Knacken',
+        minLength: 'Mindestens 8 Zeichen',
+        hasUpper: 'Großbuchstabe',
+        hasLower: 'Kleinbuchstabe',
+        hasNumber: 'Zahl',
+        hasSpecial: 'Sonderzeichen',
+        notCommon: 'Kein häufiges Passwort',
+        notContainsEmail: 'Enthält keine E-Mail',
+        notContainsUsername: 'Enthält keinen Namen',
+        requirements: 'Passwortanforderungen',
+      },
+
       // Dashboard
       dashboard: {
         welcomeBack: 'Willkommen zurück',
@@ -966,6 +1042,25 @@ const resources = {
         loginSuccess: 'Inloggning lyckades',
         logoutSuccess: 'Utloggning lyckades',
         invalidCredentials: 'Ogiltig e-post eller lösenord',
+      },
+
+      // Password Strength
+      password: {
+        veryWeak: 'Mycket Svagt',
+        weak: 'Svagt',
+        fair: 'Medel',
+        strong: 'Starkt',
+        veryStrong: 'Mycket Starkt',
+        crackTime: 'Tid att knäcka',
+        minLength: 'Minst 8 tecken',
+        hasUpper: 'Stor bokstav',
+        hasLower: 'Liten bokstav',
+        hasNumber: 'Siffra',
+        hasSpecial: 'Specialtecken',
+        notCommon: 'Inte ett vanligt lösenord',
+        notContainsEmail: 'Innehåller inte e-post',
+        notContainsUsername: 'Innehåller inte namn',
+        requirements: 'Lösenordskrav',
       },
 
       // Dashboard

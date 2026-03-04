@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks';
 import ThemeToggle from '@/components/ThemeToggle';
+import PasswordStrengthIndicator, { usePasswordStrength } from '@/components/PasswordStrengthIndicator';
 
 export default function SignupForm({ onSuccess }) {
   const navigate = useNavigate();
@@ -16,6 +17,9 @@ export default function SignupForm({ onSuccess }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
+
+  // Password strength validation
+  const passwordStrength = usePasswordStrength(password, email, name);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,8 +39,8 @@ export default function SignupForm({ onSuccess }) {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
+    if (!passwordStrength.isValid) {
+      setError('Please meet all password requirements');
       setLoading(false);
       return;
     }
@@ -172,7 +176,7 @@ export default function SignupForm({ onSuccess }) {
                 />
               </div>
 
-              <div>
+                <div>
                 <label htmlFor="signup-password" className="block text-sm font-semibold mb-2">
                   Password
                 </label>
@@ -184,7 +188,7 @@ export default function SignupForm({ onSuccess }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="tt-input pr-10"
-                    placeholder="At least 6 characters"
+                    placeholder="Strong password required"
                     required
                   />
                   <button
@@ -206,6 +210,12 @@ export default function SignupForm({ onSuccess }) {
                     )}
                   </button>
                 </div>
+                <PasswordStrengthIndicator 
+                  password={password} 
+                  email={email} 
+                  username={name}
+                  showRequirements={true}
+                />
               </div>
 
               <div>
