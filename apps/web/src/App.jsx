@@ -47,6 +47,7 @@ const WebhooksPage = lazy(() => import('@/pages/WebhooksPage'));
 const TestPlanDetailPage = lazy(() => import('@/pages/TestPlanDetailPage'));
 const EvidenceGalleryPage = lazy(() => import('@/pages/EvidenceGalleryPage'));
 const AuditLogsPage = lazy(() => import('@/pages/AuditLogsPage'));
+const ProjectsAssignedPage = lazy(() => import('@/pages/ProjectsAssignedPage'));
 import NotificationToast from '@/components/NotificationToast';
 import DashboardLayout from '@/components/DashboardLayout';
 
@@ -583,6 +584,18 @@ function AppRoutes() {
             <RoleRoute allowedRoles={['ADMIN', 'DEVELOPER', 'TESTER']}>
               <Suspense fallback={<PageLoader />}>
                 <ProjectsListPage />
+              </Suspense>
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/projects-assigned"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRoles={['DEVELOPER', 'TESTER']}>
+              <Suspense fallback={<PageLoader />}>
+                <ProjectsAssignedPage />
               </Suspense>
             </RoleRoute>
           </ProtectedRoute>

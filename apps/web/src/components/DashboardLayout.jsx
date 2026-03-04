@@ -45,8 +45,9 @@ export default function DashboardLayout({
   if (isAdmin) {
     navLinks.splice(0, navLinks.length);
   } else {
-    navLinks.splice(1, 0, { to: '/test-suites', label: 'Test Suites' });
-    navLinks.splice(2, 0, { to: '/bugs', label: 'Bugs' });
+    navLinks.unshift({ to: '/projects-assigned', label: 'My Projects' });
+    navLinks.splice(2, 0, { to: '/test-suites', label: 'Test Suites' });
+    navLinks.splice(3, 0, { to: '/bugs', label: 'Bugs' });
   }
 
   if (isDeveloper) {
@@ -71,6 +72,12 @@ export default function DashboardLayout({
           <div className="flex items-center gap-4">
             {isTester ? (
               <>
+                <Link
+                  to="/projects-assigned"
+                  className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  My Projects
+                </Link>
                 <button
                   onClick={handleExecuteNewTest}
                   className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
