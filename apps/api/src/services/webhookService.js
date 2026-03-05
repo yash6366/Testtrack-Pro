@@ -152,7 +152,8 @@ async function queueWebhookDelivery(webhookId, event, payload) {
 
     // Attempt immediate delivery (don't await - fire and forget)
     deliverWebhook(delivery.id).catch((err) => {
-      logError('Failed to deliver webhook', { error: err, deliveryId: delivery.id, webhookId });
+      // Only log safe error details, avoid leaking sensitive info
+      logError('Failed to deliver webhook', err, { deliveryId: delivery.id, webhookId });
     });
 
     return delivery;
@@ -177,7 +178,8 @@ export async function deliverWebhook(deliveryId) {
     });
 
     if (!delivery || !delivery.webhook) {
-      throw new Error('Delivery or webhook not found');
+      // Only throw a generic error, avoid leaking details
+      throw new Error('Webhook delivery not found');
     }
 
     const { webhook } = delivery;
@@ -249,7 +251,8 @@ export async function deliverWebhook(deliveryId) {
       });
     } else {
       // HTTP error
-      throw new Error(`HTTP ${response.status}: ${responseBody.substring(0, 200)}`);
+      // Only include status code, not response body, to avoid leaking info
+      throw new Error(`HTTP ${response.status}`);
     }
   } catch (error) {
     const duration = Date.now() - startTime;
@@ -267,7 +270,8 @@ export async function deliverWebhook(deliveryId) {
       where: { id: deliveryId },
       data: {
         status: shouldRetry ? 'PENDING' : 'FAILED',
-        errorMessage: error.message.substring(0, 500),
+        // Only store safe error message
+        errorMessage: error && error.message ? error.message.substring(0, 200) : 'Unknown error',
         durationMs: duration,
         nextRetryAt: shouldRetry ? new Date(Date.now() + RETRY_DELAYS[attemptCount]) : null,
       },

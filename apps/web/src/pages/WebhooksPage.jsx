@@ -59,7 +59,8 @@ export default function WebhooksPage() {
       const response = await apiClient.get(`/api/projects/${projectId}/webhooks`);
       setWebhooks(response.webhooks || response || []);
     } catch (err) {
-      setError(err.message || 'Failed to load webhooks');
+      // Only show safe error message to user
+      setError('Failed to load webhooks. Please try again later.');
       logError(err, 'WebhooksPage.loadWebhooks');
     } finally {
       setLoading(false);
@@ -75,7 +76,7 @@ export default function WebhooksPage() {
       setDeliveries(response.deliveries || response.data || []);
       setShowDeliveriesModal(true);
     } catch (err) {
-      setError(err.message || 'Failed to load webhook deliveries');
+      setError('Failed to load webhook deliveries. Please try again later.');
       logError(err, 'WebhooksPage.loadDeliveries');
     } finally {
       setActionLoading(false);
@@ -123,7 +124,7 @@ export default function WebhooksPage() {
       await loadWebhooks();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError(err.message || 'Failed to create webhook');
+      setError('Failed to create webhook. Please check your input and try again.');
       logError(err, 'WebhooksPage.createWebhook');
     } finally {
       setActionLoading(false);
@@ -150,7 +151,7 @@ export default function WebhooksPage() {
       await loadWebhooks();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError(err.message || 'Failed to update webhook');
+      setError('Failed to update webhook. Please check your input and try again.');
       logError(err, 'WebhooksPage.updateWebhook');
     } finally {
       setActionLoading(false);
@@ -181,7 +182,7 @@ export default function WebhooksPage() {
       await loadWebhooks();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError(err.message || 'Failed to delete webhook');
+      setError('Failed to delete webhook. Please try again later.');
       logError(err, 'WebhooksPage.deleteWebhook');
     } finally {
       setActionLoading(false);
@@ -196,7 +197,7 @@ export default function WebhooksPage() {
       setSuccessMessage('Test webhook sent successfully');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError(err.message || 'Failed to send test webhook');
+      setError('Failed to send test webhook. Please try again later.');
       logError(err, 'WebhooksPage.testWebhook');
     } finally {
       setActionLoading(false);
