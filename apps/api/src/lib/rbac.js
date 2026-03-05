@@ -24,6 +24,11 @@ export async function verifyTokenAndLoadUser(fastify, token) {
     return null;
   }
 
+  // Enforce token expiration
+  if (!payload?.exp || Date.now() >= payload.exp * 1000) {
+    return null;
+  }
+
   if (!payload?.id || !payload?.role || typeof payload.tokenVersion !== 'number') {
     return null;
   }
@@ -71,6 +76,11 @@ export function createAuthGuards(fastify) {
       payload = await request.jwtVerify();
     } catch (error) {
       return reply.code(401).send({ error: 'Unauthorized' });
+    }
+
+    // Enforce token expiration
+    if (!payload?.exp || Date.now() >= payload.exp * 1000) {
+      return reply.code(401).send({ error: 'Token expired' });
     }
 
     if (!payload?.id || !payload?.role || typeof payload.tokenVersion !== 'number') {

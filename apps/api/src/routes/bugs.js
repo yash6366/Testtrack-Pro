@@ -878,7 +878,10 @@ export async function bugRoutes(fastify) {
    */
   fastify.patch(
     '/api/bugs/:bugId/status',
-    { preHandler: [requirePermission('bug:status:change')] },
+    {
+      schema: changeBugStatusSchema,
+      preHandler: [requirePermission('bug:status:change')]
+    },
     async (request, reply) => {
       try {
         const { bugId } = request.params;
@@ -931,7 +934,10 @@ export async function bugRoutes(fastify) {
    */
   fastify.post(
     '/api/bugs/:bugId/comments',
-    { preHandler: [requirePermission('bug:comment')] },
+    {
+      schema: addBugCommentSchema,
+      preHandler: [requirePermission('bug:comment')]
+    },
     async (request, reply) => {
       try {
         const { bugId } = request.params;
@@ -966,7 +972,10 @@ export async function bugRoutes(fastify) {
    */
   fastify.patch(
     '/api/bugs/:bugId/comments/:commentId',
-    { preHandler: [requirePermission('bug:comment')] },
+    {
+      schema: updateBugCommentSchema,
+      preHandler: [requirePermission('bug:comment')]
+    },
     async (request, reply) => {
       try {
         const { bugId, commentId } = request.params;
@@ -1000,7 +1009,10 @@ export async function bugRoutes(fastify) {
    */
   fastify.post(
     '/api/bugs/:bugId/retest-request',
-    { preHandler: [requirePermission('bug:verify')] },
+    {
+      schema: verifyBugFixSchema,
+      preHandler: [requirePermission('bug:verify')]
+    },
     async (request, reply) => {
       try {
         const { bugId } = request.params;
@@ -1047,7 +1059,43 @@ export async function bugRoutes(fastify) {
    */
   fastify.patch(
     '/api/bugs/:bugId/link-commit',
-    { preHandler: [requirePermission('bug:edit')] },
+    {
+      schema: {
+        tags: ['bugs'],
+        summary: 'Link commit to bug',
+        description: 'Link a commit hash, branch, and code review URL to a bug',
+        params: {
+          type: 'object',
+          properties: {
+            bugId: { type: 'string', description: 'Bug ID' },
+          },
+        },
+        querystring: {
+          type: 'object',
+          properties: {
+            projectId: { type: 'string', description: 'Project ID' },
+          },
+        },
+        body: {
+          type: 'object',
+          required: ['commitHash'],
+          properties: {
+            commitHash: { type: 'string', description: 'Commit hash' },
+            branchName: { type: 'string', description: 'Branch name' },
+            codeReviewUrl: { type: 'string', description: 'Code review URL' },
+          },
+        },
+        response: {
+          200: {
+            description: 'Bug updated with commit info',
+            type: 'object',
+          },
+          ...errorResponse,
+        },
+        security: bearerAuth,
+      },
+      preHandler: [requirePermission('bug:edit')]
+    },
     async (request, reply) => {
       try {
         const { bugId } = request.params;
@@ -1122,7 +1170,10 @@ export async function bugRoutes(fastify) {
    */
   fastify.patch(
     '/api/bugs/:bugId/assign',
-    { preHandler: [requirePermission('bug:assign')] },
+    {
+      schema: assignBugSchema,
+      preHandler: [requirePermission('bug:assign')]
+    },
     async (request, reply) => {
       try {
         const { bugId } = request.params;
