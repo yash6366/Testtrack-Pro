@@ -80,16 +80,18 @@ export async function createTestSuite(data, userId) {
   });
 
   // Log audit
-  await logAuditAction({
-    action: 'TESTSUITE_CREATED',
-    performedBy: userId,
-    resourceType: 'TESTSUITE',
-    resourceId: suite.id,
-    resourceName: suite.name,
-    projectId: suite.projectId,
-    description: `Created test suite "${suite.name}"`,
-    newValues: JSON.stringify(suite),
-  });
+  await logAuditAction(
+    userId,
+    'TESTSUITE_CREATED',
+    {
+      resourceType: 'TESTSUITE',
+      resourceId: suite.id,
+      resourceName: suite.name,
+      projectId: suite.projectId,
+      description: `Created test suite "${suite.name}"`,
+      newValues: suite,
+    }
+  );
 
   return suite;
 }

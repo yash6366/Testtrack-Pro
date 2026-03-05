@@ -78,6 +78,8 @@ model User {
   sessions                 UserSession[]
   webhooksCreated          Webhook[]               @relation("WebhooksCreated")
 
+  projectActivities ProjectActivity[]
+
   @@index([email])
   @@index([role])
   @@index([createdAt])
@@ -93,7 +95,8 @@ model ProjectUserAllocation {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, userId])
   @@index([projectId])
@@ -200,6 +203,10 @@ model Project {
   testSuites        TestSuite[]
   webhooks          Webhook[]
 
+  attachments       Attachment[]
+  projectActivities ProjectActivity[]
+  gitIntegrations   GitIntegration[]
+
   @@index([ownerId])
   @@index([status])
 }
@@ -209,6 +216,7 @@ model ProjectEnvironment {
   projectId   Int
   name        String
   description String?
+  url         String?
   isActive    Boolean  @default(true)
   order       Int      @default(0)
   createdAt   DateTime @default(now())
@@ -263,11 +271,104 @@ model TestCase {
   executions               TestExecution[]     @relation("TestCaseToExecution")
   suites                   TestSuiteTestCase[]
 
+  testRunTestCases TestRunTestCase[]
+  testCaseTags     TestCaseTag[]
+
   @@index([projectId])
   @@index([status])
   @@index([priority])
   @@index([isDeleted])
   @@index([createdAt])
+}
+
+model TestRunTestCase {
+  id         Int      @id @default(autoincrement())
+  testRunId  Int
+  testCaseId Int
+  order      Int      @default(0)
+  status     String   @default("PENDING")
+  assignedTo Int?
+  createdAt  DateTime @default(now())
+
+  testRun  TestRun  @relation(fields: [testRunId], references: [id], onDelete: Cascade)
+  testCase TestCase @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+
+  @@unique([testRunId, testCaseId])
+  @@index([testRunId])
+  @@index([testCaseId])
+}
+
+model TestRunEnvironment {
+  id          Int      @id @default(autoincrement())
+  testRunId   Int
+  environment String
+  createdAt   DateTime @default(now())
+
+  testRun TestRun @relation(fields: [testRunId], references: [id], onDelete: Cascade)
+
+  @@index([testRunId])
+}
+
+model Attachment {
+  id          Int      @id @default(autoincrement())
+  projectId   Int
+  fileName    String
+  fileUrl     String
+  fileSize    Int?
+  mimeType    String?
+  uploadedBy  Int
+  bugId       Int?
+  testCaseId  Int?
+  executionId Int?
+  createdAt   DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ProjectActivity {
+  id          Int      @id @default(autoincrement())
+  projectId   Int
+  userId      Int
+  action      String
+  resource    String
+  resourceId  Int?
+  description String?
+  createdAt   DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([createdAt])
+}
+
+model Tag {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  createdAt   DateTime      @default(now())
+  TestCaseTag TestCaseTag[]
+}
+
+model TestCaseTag {
+  id         Int @id @default(autoincrement())
+  testCaseId Int
+  tagId      Int
+
+  testCase TestCase @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+  tag      Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([testCaseId, tagId])
+}
+
+model GitIntegration {
+  id         Int      @id @default(autoincrement())
+  projectId  Int
+  provider   String
+  repository String
+  branch     String?
+  createdAt  DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model TestCaseStep {
@@ -418,6 +519,9 @@ model TestRun {
   executor       User            @relation("ExecutedBy", fields: [executedBy], references: [id])
   project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   suiteRuns      TestSuiteRun[]
+
+  testRunTestCases    TestRunTestCase[]
+  testRunEnvironments TestRunEnvironment[]
 
   @@index([projectId])
   @@index([status])

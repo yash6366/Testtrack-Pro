@@ -353,7 +353,6 @@ export async function addProjectEnvironment(projectId, data, userId) {
     data: {
       projectId,
       name: name.trim(),
-      url: url?.trim() || null,
       description: description?.trim() || null,
     },
   });
