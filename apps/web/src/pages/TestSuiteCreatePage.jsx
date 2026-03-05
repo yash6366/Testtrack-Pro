@@ -1,3 +1,9 @@
+  // Role-based access
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = String(user?.role || '').toUpperCase();
+  const isAdmin = role === 'ADMIN';
+  const isTester = role === 'TESTER';
+  const isDeveloper = role === 'DEVELOPER';
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiClient } from '../lib/apiClient';
@@ -66,11 +72,11 @@ export default function TestSuiteCreatePage() {
     }
   };
 
-  if (!projectId) {
+  if (!projectId || isDeveloper) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 dark:bg-red-900 border border-red-200 text-red-800 dark:text-red-200 px-4 py-3 rounded">
-          ProjectId is missing. Please select a project from the dashboard.
+        <div className="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 text-yellow-800 dark:text-yellow-200 px-4 py-3 rounded">
+          You do not have permission to create test suites. Only TESTER or ADMIN roles can perform this action.
         </div>
         <div className="mt-4">
           <BackButton label="Back to Test Suites" fallback="/test-suites" />

@@ -12,6 +12,10 @@ export default function TestCaseDetailPage() {
   const { testCaseId } = useParams();
   const navigate = useNavigate();
   const { user, projectId: contextProjectId } = useAuth();
+  const role = String(user?.role || '').toUpperCase();
+  const isAdmin = role === 'ADMIN';
+  const isTester = role === 'TESTER';
+  const isDeveloper = role === 'DEVELOPER';
   const { selectedProjectId } = useProject();
 
   const [testCase, setTestCase] = useState(null);
@@ -186,7 +190,7 @@ export default function TestCaseDetailPage() {
         <div className="tt-card">
           <div className="px-6 py-4 border-b border-[var(--border)] flex justify-between items-center">
             <h2 className="text-xl font-bold">Test Case Information</h2>
-            {!isEditing && (
+            {!isEditing && (isAdmin || isTester) && (
               <button
                 onClick={() => setIsEditing(true)}
                 className="tt-btn tt-btn-primary px-4 py-2 text-sm"
@@ -376,7 +380,7 @@ export default function TestCaseDetailPage() {
         </div>
 
         {/* Actions Card */}
-        {!isEditing && (
+        {!isEditing && (isAdmin || isTester) && (
           <div className="tt-card">
             <div className="px-6 py-4 border-b border-[var(--border)]">
               <h3 className="text-lg font-bold">Actions</h3>
