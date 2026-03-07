@@ -25,6 +25,6 @@
   },
   "packageManager": "pnpm@8.15.4",
   "dependencies": {
-    "prisma": "^5.22.0"
+    "prisma": "^7.4.2"
   }
 }
