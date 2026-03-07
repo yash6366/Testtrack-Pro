@@ -1,5 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
 import Fastify from 'fastify';
 import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
