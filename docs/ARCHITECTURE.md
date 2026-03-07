@@ -150,8 +150,8 @@ TestTrack Pro is a comprehensive software testing management platform built with
   - `fixStrategy`: How the bug was fixed
   - `rootCauseAnalysis`: Analysis of root cause
   - `rootCauseCategory`: DESIGN_DEFECT, IMPLEMENTATION_ERROR, etc.
-  - `fixedInCommitHash`, `fixBranchName`: Git traceability
-  - `codeReviewUrl`: Link to PR for fix
+  - `fixNotes`: Developer-provided fix notes
+  - `fixDocumentation`: How the bug was fixed (no commit linking)
   - `targetFixVersion`, `fixedInVersion`: Version tracking
   - `actualFixHours`: Time spent on fix
 - **New**: Full history tracking via BugHistory model
@@ -162,12 +162,7 @@ TestTrack Pro is a comprehensive software testing management platform built with
 - Automatic logging on status, severity, priority, assignee changes
 - Indexed by bugId, changedBy, and createdAt for efficient queries
 
-**Webhook (NEW)**
-- Project-level webhook registration for external integrations
-- Configurable events: TEST_*, BUG_*, EXECUTION_*, SUITE_*
-- HMAC signature verification with configurable secrets
-- Auto-disable after consecutive failures (configurable threshold)
-- Related models: WebhookDelivery, WebhookLog
+
 
 **DirectMessage (NEW)**
 - User-to-user private messaging system
@@ -250,12 +245,9 @@ The backend exposes REST APIs organized by functional domains:
 | `admin.js` | `/api/admin` | Admin operations | User management, project admin, role assignment |
 | `analytics.js` | `/api/analytics` | Analytics & reporting | Trends, metrics, flaky tests, developer analytics |
 | `projects.js` | `/api/projects` | Project management | Create, list, manage members, allocations |
-| `webhooks.js` | `/api/webhooks` | Webhook management | Create, test, retrieve deliveries, retry failed |
-| `github.js` | `/api/github` | GitHub integration | OAuth callback, commit data, PR info, sync data |
 | `notification.js` | `/api/notifications` | Notification management | Get notifications, preferences, mark read, delete |
 | `search.js` | `/api/search` | Global search | Search all resources, suggestions, recent searches |
 | `evidence.js` | `/api/evidence` | File evidence management | Upload, list, retrieve, associate with execution |
-| `apiKeys.js` | `/api/api-keys` | API key management | Generate, validate, revoke, scope management |
 | `health.js` | `/api/health` | Health check | System status, database health, cache health |
 | `backup.js` | `/api/backup` | Backup operations | Create backup, restore, list backups |
 | `userProfile.js` | `/api/user-profile` | User profile management | Get profile, update, statistics, settings |
@@ -290,9 +282,8 @@ The backend exposes REST APIs organized by functional domains:
 - `scheduledReportService.js`: Automated report generation via node-cron
 - `searchIndexService.js`: Full-text search index maintenance and optimization
 
-**Developer Features** (2 services)
+**Developer Features** (1 service)
 - `developerService.js`: Developer analytics, fix documentation, bug assignment tracking
-- `commitParserService.js`: Auto-linking commits to bugs via regex patterns
 
 **Communication** (5 services)
 - `notificationService.js`: Creation, delivery, preferences, digest scheduling
@@ -301,13 +292,8 @@ The backend exposes REST APIs organized by functional domains:
 - `chatAdminService.js`: Chat moderation, message deletion, user mutes
 - `digestService.js`: Scheduled digest email generation and distribution
 
-**Infrastructure Services** (10 services)
+**Infrastructure Services**
 - `emailService.js`: Email templates, verification, password reset, notification dispatch
-- `webhookService.js`: Webhook creation, event management, retry policies, delivery tracking
-- `webhookHandlerService.js`: Webhook payload processing and event routing
-- `githubService.js`: GitHub OAuth, commit linking, PR integration
-- `oauthService.js`: OAuth provider integration (Google, GitHub)
-- `apiKeyService.js`: API key generation, validation, scope management
 - `evidenceService.js`: File upload/storage via Cloudinary, optimization
 - `auditService.js`: Comprehensive audit logging for compliance
 - `cronService.js`: Job scheduling for background tasks
@@ -350,20 +336,6 @@ The backend exposes REST APIs organized by functional domains:
 - `developerService.js`: Developer analytics, fix documentation, bug assignment tracking
 
 **Infrastructure Services**
-- `emailService.js`: Email templates, verification, password reset
-- `channelService.js`: Chat channels, universal channel management, role-based auto-join
-- `githubService.js`: GitHub OAuth, commit linking, PR integration
-- `commitParserService.js`: Auto-linking commits to bugs via regex patterns
-- `auditService.js`: Comprehensive audit logging for compliance
-- `webhookService.js` & `webhookHandlerService.js`: Webhook creation and trigger handling
-- `apiKeyService.js`: API key generation, validation, and scope management
-- `evidenceService.js`: File upload/storage via Cloudinary, size optimization
-- `digestService.js`: Scheduled digest email generation
-- `scheduledReportService.js`: Automated report generation via node-cron
-- `chatAdminService.js`: Chat moderation, message deletion, user mutes
-- `testCaseTemplateService.js`: Template management and reusability
-- `bulkTestCaseService.js`: Bulk import/export operations
-- `oauthService.js`: OAuth provider integration (Google, GitHub)
 - `cronService.js`: Job scheduling for background tasks
 
 ## Database Schema (V1)
@@ -374,7 +346,6 @@ The backend exposes REST APIs organized by functional domains:
 - Authentication credentials (email, password hash)
 - Profile (name, avatar, timezone)
 - Roles (ADMIN, DEVELOPER, TESTER)
-- OAuth integrations (Google, GitHub)
 - Preferences (notifications, theme)
 
 **Project**

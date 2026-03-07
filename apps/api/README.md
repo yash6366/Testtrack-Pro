@@ -115,10 +115,6 @@ FRONTEND_URL="http://localhost:5173"
 # Sentry (Error Monitoring)
 SENTRY_DSN=""
 
-# GitHub Integration (Optional)
-GITHUB_CLIENT_ID=""
-GITHUB_CLIENT_SECRET=""
-GITHUB_CALLBACK_URL="http://localhost:3001/api/github/callback"
 
 # Swagger Documentation
 ENABLE_SWAGGER="true"

@@ -9,7 +9,7 @@ import { API_BASE_URL } from '@/lib/runtimeConfig';
  */
 export default function DirectMessagesPanel({ onSelectConversation }) {
   const { user, token } = useAuth();
-  const { sendDirectMessage, onUserPresence } = useSocket(user?.id, user?.role, localStorage.getItem('token'));
+  const { sendDirectMessage, onUserPresence } = useSocket(user?.id, user?.role, localStorage.getItem('auth_token'));
   const { conversations, loadConversations } = useChat();
 
   const [onlineUsers, setOnlineUsers] = useState(new Set());

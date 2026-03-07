@@ -75,7 +75,9 @@ export function createAuthGuards(fastify) {
     try {
       payload = await request.jwtVerify();
     } catch (error) {
-      return reply.code(401).send({ error: 'Unauthorized' });
+      // Debug log for JWT verification errors
+      request.log.error({ err: error, headers: request.headers }, 'JWT verification failed');
+      return reply.code(401).send({ error: 'Unauthorized', details: error.message });
     }
 
     // Enforce token expiration
