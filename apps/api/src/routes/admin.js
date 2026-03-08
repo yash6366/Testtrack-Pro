@@ -31,13 +31,24 @@ export async function adminRoutes(fastify) {
   // ADMIN OVERVIEW
   // ==========================================
   fastify.get('/api/admin/overview', { preHandler: [requireAuth, adminOnly] }, async (request) => {
-    const [totalUsers, activeUsers, adminCount, developerCount, testerCount] = await Promise.all([
-      prisma.user.count(),
-      prisma.user.count({ where: { isActive: true } }),
-      prisma.user.count({ where: { role: ROLES.ADMIN } }),
-      prisma.user.count({ where: { role: ROLES.DEVELOPER } }),
-      prisma.user.count({ where: { role: ROLES.TESTER } }),
-    ]);
+    const aggregate = await prisma.user.groupBy({
+      by: ['role', 'isActive'],
+      _count: { id: true },
+    });
+
+    let totalUsers = 0;
+    let activeUsers = 0;
+    let adminCount = 0;
+    let developerCount = 0;
+    let testerCount = 0;
+
+    aggregate.forEach(row => {
+      totalUsers += row._count.id;
+      if (row.isActive) activeUsers += row._count.id;
+      if (row.role === ROLES.ADMIN) adminCount += row._count.id;
+      if (row.role === ROLES.DEVELOPER) developerCount += row._count.id;
+      if (row.role === ROLES.TESTER) testerCount += row._count.id;
+    });
 
     return {
       stats: {
@@ -158,34 +169,37 @@ export async function adminRoutes(fastify) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user (auto-verified for admin-created users)
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: normalizedRole,
-        isVerified: true, // Admin-created users are auto-verified
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-      },
+    // Transaction: create user and log audit
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          name,
+          email,
+          password: hashedPassword,
+          role: normalizedRole,
+          isVerified: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      });
+
+      await logAuditAction(request.user.id, 'USER_CREATED', {
+        resourceType: 'USER',
+        resourceId: user.id,
+        resourceName: user.name,
+        description: `Created new ${normalizedRole} user: ${user.email}`,
+        newValues: { name, email, role: normalizedRole },
+        ...getClientContext(request),
+      }, tx);
+
+      return { user };
     });
 
-    // Log audit
-    await logAuditAction(request.user.id, 'USER_CREATED', {
-      resourceType: 'USER',
-      resourceId: user.id,
-      resourceName: user.name,
-      description: `Created new ${normalizedRole} user: ${user.email}`,
-      newValues: { name, email, role: normalizedRole },
-      ...getClientContext(request),
-    });
-
-    return { user };
+    return result;
   });
 
   // ==========================================

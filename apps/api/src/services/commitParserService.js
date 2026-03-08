@@ -150,32 +150,6 @@ export function extractPullRequestNumbers(message) {
  */
 export function parseCommitMessage(message) {
   if (!message || typeof message !== 'string') {
-    return {
-      bugIds: [],
-      testIds: [],
-      prNumbers: [],
-      mainMessage: '',
-    };
-  }
-
-  return {
-    bugIds: extractBugIds(message),
-    testIds: extractTestIds(message),
-    prNumbers: extractPullRequestNumbers(message),
-    mainMessage: message.trim(),
-  };
-}
-
-/**
- * Validate and filter bug IDs (check if they actually exist)
- * @param {Array<number>} bugIds - Array of bug IDs
- * @param {number} projectId - Project ID
- * @returns {Promise<Array<Object>>} Valid bugs with details
- */
-export async function validateBugIds(bugIds, projectId) {
-  if (!bugIds || bugIds.length === 0) return [];
-
-  const bugs = await prisma.bug.findMany({
     where: {
       id: { in: bugIds },
       projectId: Number(projectId),
