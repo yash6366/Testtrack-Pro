@@ -31,7 +31,7 @@ class ApiClient {
       }
     }
     
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
 
     const headers = {
       ...fetchOptions.headers,
@@ -72,8 +72,13 @@ class ApiClient {
       error.body = errorBody;
 
       if (response.status === 401) {
-        localStorage.removeItem('token');
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
+        // Redirect to login if not already there
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
         window.dispatchEvent(new Event('auth:unauthorized'));
       }
 
@@ -151,7 +156,7 @@ class ApiClient {
 
   async upload(endpoint, formData, options = {}) {
     const url = `${this.baseURL}${normalizeEndpoint(endpoint)}`;
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
 
     const headers = {
       ...options.headers,

@@ -32,7 +32,6 @@ model User {
   mutedUntil               DateTime?
   muteReason               String?
   mutedBy                  Int?
-  apiKeys                  ApiKey[]
   auditLogs                AuditLog[]
   assignedBugs             Bug[]                   @relation("AssignedTo")
   reportedBugs             Bug[]                   @relation("ReportedBy")
@@ -56,7 +55,6 @@ model User {
   createdMilestones        Milestone[]             @relation("CreatedBy")
   notifications            Notification[]
   notificationPreferences  NotificationPreference?
-  oauthIntegrations        OAuthIntegration[]
   pinnedMessages           PinnedMessage[]         @relation("PinnedMessages")
   projects                 Project[]
   projectAllocations       ProjectUserAllocation[]
@@ -76,7 +74,6 @@ model User {
   executedSuiteRuns        TestSuiteRun[]          @relation("TestSuiteRunExecutor")
   activityLogs             UserActivityLog[]
   sessions                 UserSession[]
-  webhooksCreated          Webhook[]               @relation("WebhooksCreated")
 
   projectActivities ProjectActivity[]
 
@@ -161,22 +158,6 @@ model AuditLog {
   @@index([timestamp])
 }
 
-model OAuthIntegration {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  provider   String
-  providerId String
-  email      String?
-  metadata   Json?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerId])
-  @@index([userId])
-  @@index([provider])
-  @@index([createdAt])
-}
 
 model Project {
   id                Int                     @id @default(autoincrement())
@@ -189,8 +170,6 @@ model Project {
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
   deletedAt         DateTime?
-  apiKeys           ApiKey[]
-  bugs              Bug[]
   customFields      CustomField[]
   milestones        Milestone[]
   owner             User                    @relation(fields: [ownerId], references: [id])
@@ -201,11 +180,11 @@ model Project {
   testPlans         TestPlan[]
   testRuns          TestRun[]
   testSuites        TestSuite[]
-  webhooks          Webhook[]
+
+  bugs              Bug[]                   @relation("ProjectToBug")
 
   attachments       Attachment[]
   projectActivities ProjectActivity[]
-  gitIntegrations   GitIntegration[]
 
   @@index([ownerId])
   @@index([status])
@@ -360,16 +339,6 @@ model TestCaseTag {
   @@unique([testCaseId, tagId])
 }
 
-model GitIntegration {
-  id         Int      @id @default(autoincrement())
-  projectId  Int
-  provider   String
-  repository String
-  branch     String?
-  createdAt  DateTime @default(now())
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-}
 
 model TestCaseStep {
   id             Int      @id @default(autoincrement())
@@ -541,7 +510,7 @@ model TestExecution {
   updatedAt             DateTime                @updatedAt
   suiteRunId            Int?
   bugs                  Bug[]                   @relation("ExecutionToBug")
-  suiteRun              TestSuiteRun?           @relation(fields: [suiteRunId], references: [id])
+  suiteRun              TestSuiteRun?           @relation("SuiteRunToExecution", fields: [suiteRunId], references: [id])
   testCase              TestCase                @relation("TestCaseToExecution", fields: [testCaseId], references: [id], onDelete: Cascade)
   testRun               TestRun                 @relation(fields: [testRunId], references: [id], onDelete: Cascade)
   executor              User                    @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -616,7 +585,6 @@ model TestSuiteRun {
   totalTestCases     Int             @default(0)
   passedCount        Int             @default(0)
   failedCount        Int             @default(0)
-  createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
   testRunId          Int?
   description        String?
@@ -628,10 +596,10 @@ model TestSuiteRun {
   executedBy         Int
   actualStartDate    DateTime?
   actualEndDate      DateTime?
-  executions         TestExecution[]
-  executor           User            @relation("TestSuiteRunExecutor", fields: [executedBy], references: [id])
   suite              TestSuite       @relation(fields: [suiteId], references: [id], onDelete: Cascade)
   testRun            TestRun?        @relation(fields: [testRunId], references: [id])
+  executor           User            @relation("TestSuiteRunExecutor", fields: [executedBy], references: [id])
+  executions         TestExecution[] @relation("SuiteRunToExecution")
 
   @@index([suiteId])
   @@index([projectId])
@@ -668,10 +636,7 @@ model Bug {
   closedAt          DateTime?
   milestoneId       Int?
   actualFixHours    Float?
-  codeReviewUrl     String?
-  fixBranchName     String?
   fixStrategy       String?
-  fixedInCommitHash String?
   fixedInVersion    String?
   rootCauseAnalysis String?
   rootCauseCategory String?
@@ -679,7 +644,7 @@ model Bug {
   assignee          User?              @relation("AssignedTo", fields: [assigneeId], references: [id])
   execution         TestExecution?     @relation("ExecutionToBug", fields: [executionId], references: [id])
   milestone         Milestone?         @relation(fields: [milestoneId], references: [id])
-  project           Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project           Project            @relation("ProjectToBug", fields: [projectId], references: [id], onDelete: Cascade)
   reporter          User               @relation("ReportedBy", fields: [reportedBy], references: [id])
   testCase          TestCase?          @relation("TestCaseToBug", fields: [testCaseId], references: [id])
   verifier          User?              @relation("VerifiedBy", fields: [verifiedBy], references: [id])
@@ -705,7 +670,6 @@ model BugComment {
   id              Int          @id @default(autoincrement())
   bugId           Int
   userId          Int
-  comment         String
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   parentCommentId Int?
@@ -1043,87 +1007,9 @@ model DirectMessageReply {
   @@index([replyToId])
 }
 
-model ApiKey {
-  id         Int       @id @default(autoincrement())
-  name       String
-  isActive   Boolean   @default(true)
-  lastUsedAt DateTime?
-  createdAt  DateTime  @default(now())
-  expiresAt  DateTime?
-  createdBy  Int
-  keyHash    String    @unique
-  projectId  Int
-  rateLimit  Int       @default(1000)
-  updatedAt  DateTime  @updatedAt
-  creator    User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  @@index([projectId])
-  @@index([isActive])
-}
 
-model Webhook {
-  id              Int               @id @default(autoincrement())
-  projectId       Int
-  url             String
-  isActive        Boolean           @default(true)
-  secret          String
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  autoDisabledAt  DateTime?
-  createdById     Int
-  description     String?
-  events          String[]          @default([])
-  failureCount    Int               @default(0)
-  lastFailureAt   DateTime?
-  lastSuccessAt   DateTime?
-  lastTriggeredAt DateTime?
-  name            String
-  creator         User              @relation("WebhooksCreated", fields: [createdById], references: [id], onDelete: Cascade)
-  project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  deliveries      WebhookDelivery[]
 
-  @@index([projectId])
-  @@index([isActive])
-}
-
-model WebhookDelivery {
-  id           Int       @id @default(autoincrement())
-  webhookId    Int
-  event        String
-  payload      String
-  status       String    @default("PENDING")
-  attemptCount Int       @default(0)
-  scheduledAt  DateTime
-  deliveredAt  DateTime?
-  responseCode Int?
-  responseBody String?
-  errorMessage String?
-  durationMs   Int?
-  nextRetryAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  webhook      Webhook   @relation(fields: [webhookId], references: [id], onDelete: Cascade)
-
-  @@index([webhookId])
-  @@index([status])
-  @@index([nextRetryAt])
-  @@index([createdAt])
-}
-
-model WebhookLog {
-  id             Int      @id @default(autoincrement())
-  webhookId      Int
-  event          String
-  payload        String?
-  responseStatus Int?
-  responseBody   String?
-  error          String?
-  createdAt      DateTime @default(now())
-
-  @@index([webhookId])
-  @@index([createdAt])
-}
 
 model SearchIndex {
   id           Int      @id @default(autoincrement())

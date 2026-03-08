@@ -4,8 +4,8 @@ export default function FixDocumentationView({ bug }) {
   const hasFixDocumentation =
     bug.fixStrategy ||
     bug.rootCauseAnalysis ||
-    bug.fixedInCommitHash ||
-    bug.fixBranchName;
+    bug.fixNotes ||
+    bug.fixDocumentation;
 
   if (!hasFixDocumentation) {
     return (
@@ -53,42 +53,14 @@ export default function FixDocumentationView({ bug }) {
         </div>
       )}
 
-      {/* Git Traceability */}
-      {(bug.fixedInCommitHash || bug.fixBranchName || bug.codeReviewUrl) && (
+      {/* Fix Notes / Documentation */}
+      {(bug.fixNotes || bug.fixDocumentation) && (
         <div>
           <h4 className="text-sm font-semibold text-[var(--muted)] block mb-2">
-            Git Commit & Branch Information
+            Fix Notes
           </h4>
-          <div className="bg-[var(--bg-elevated)] p-3 rounded space-y-2">
-            {bug.fixBranchName && (
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-[var(--muted)] w-20">Branch:</span>
-                <code className="text-sm bg-[var(--bg)] px-2 py-1 rounded font-mono text-indigo-600 dark:text-indigo-400">
-                  {bug.fixBranchName}
-                </code>
-              </div>
-            )}
-            {bug.fixedInCommitHash && (
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-[var(--muted)] w-20">Commit:</span>
-                <code className="text-sm bg-[var(--bg)] px-2 py-1 rounded font-mono text-emerald-600 dark:text-emerald-400">
-                  {bug.fixedInCommitHash}
-                </code>
-              </div>
-            )}
-            {bug.codeReviewUrl && (
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-[var(--muted)] w-20">Review:</span>
-                <a
-                  href={bug.codeReviewUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline break-all"
-                >
-                  {bug.codeReviewUrl}
-                </a>
-              </div>
-            )}
+          <div className="bg-[var(--bg-elevated)] p-3 rounded text-sm whitespace-pre-wrap">
+            {bug.fixNotes || bug.fixDocumentation}
           </div>
         </div>
       )}

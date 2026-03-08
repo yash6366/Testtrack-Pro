@@ -18,7 +18,7 @@ const ExecutionTrendChart = ({ testCaseId }) => {
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       const response = await axios.get(
         `${API_BASE_URL}/api/test-cases/${testCaseId}/execution-trend?limit=${limit}`,
         {

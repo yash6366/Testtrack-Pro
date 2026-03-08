@@ -57,7 +57,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       await axios.post(
         `${API_BASE_URL}/api/auth/change-password`,
         {

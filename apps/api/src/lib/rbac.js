@@ -24,6 +24,11 @@ export async function verifyTokenAndLoadUser(fastify, token) {
     return null;
   }
 
+  // Enforce token expiration
+  if (!payload?.exp || Date.now() >= payload.exp * 1000) {
+    return null;
+  }
+
   if (!payload?.id || !payload?.role || typeof payload.tokenVersion !== 'number') {
     return null;
   }
@@ -70,7 +75,14 @@ export function createAuthGuards(fastify) {
     try {
       payload = await request.jwtVerify();
     } catch (error) {
-      return reply.code(401).send({ error: 'Unauthorized' });
+      // Debug log for JWT verification errors
+      request.log.error({ err: error, headers: request.headers }, 'JWT verification failed');
+      return reply.code(401).send({ error: 'Unauthorized', details: error.message });
+    }
+
+    // Enforce token expiration
+    if (!payload?.exp || Date.now() >= payload.exp * 1000) {
+      return reply.code(401).send({ error: 'Token expired' });
     }
 
     if (!payload?.id || !payload?.role || typeof payload.tokenVersion !== 'number') {
