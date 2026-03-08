@@ -21,7 +21,7 @@ export default function CommentThread({ bugId, comments = [], currentUserId, onC
       const response = await fetch(`/api/developer/bugs/${bugId}/comments/${commentId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -44,7 +44,7 @@ export default function CommentThread({ bugId, comments = [], currentUserId, onC
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify({ body: editBody }),
       });

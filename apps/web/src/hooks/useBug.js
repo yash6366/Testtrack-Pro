@@ -71,27 +71,6 @@ export function useBug(bugId) {
     [bugId],
   );
 
-  const linkCommit = useCallback(
-    async (commitHash, branchName = '', codeReviewUrl = '') => {
-      try {
-        setSaving(true);
-        setError('');
-        const response = await apiClient.patch(`/api/bugs/${bugId}/link-commit`, {
-          commitHash,
-          branchName,
-          codeReviewUrl,
-        });
-        return response;
-      } catch (err) {
-        const message = err.message || 'Failed to link commit';
-        setError(message);
-        throw err;
-      } finally {
-        setSaving(false);
-      }
-    },
-    [bugId],
-  );
 
   const requestRetest = useCallback(
     async (notes = '', assignToTesterId = null) => {
@@ -146,7 +125,6 @@ export function useBug(bugId) {
     changeBugStatus,
     assignBug,
     addComment,
-    linkCommit,
     requestRetest,
     completeRetest,
   };

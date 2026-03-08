@@ -700,9 +700,7 @@ Request:
   "fixStrategy": "Refactored login validation logic to handle special characters properly. Updated regex pattern to be more permissive.",
   "rootCauseAnalysis": "The password validation regex was too restrictive and incorrectly rejected valid special characters supported by backend.",
   "rootCauseCategory": "IMPLEMENTATION_ERROR",
-  "fixedInCommitHash": "a3f7c89d4e2b1f6a9c8e3d2f1a0b9c8d7e6f5a4",
-  "fixBranchName": "fix/login-validation-chars",
-  "codeReviewUrl": "https://github.com/org/repo/pull/1234",
+  "fixNotes": "Refactored login validation logic to handle special characters properly. Updated regex pattern to be more permissive.",
   "targetFixVersion": "0.6.3",
   "fixedInVersion": "0.6.3",
   "actualFixHours": 4.5
@@ -720,9 +718,7 @@ Response: `200 OK`
   "fixStrategy": "Refactored login validation logic...",
   "rootCauseAnalysis": "The password validation regex...",
   "rootCauseCategory": "IMPLEMENTATION_ERROR",
-  "fixedInCommitHash": "a3f7c89d4e2b1f6a9c8e3d2f1a0b9c8d7e6f5a4",
-  "fixBranchName": "fix/login-validation-chars",
-  "codeReviewUrl": "https://github.com/org/repo/pull/1234",
+  "fixNotes": "Refactored login validation logic...",
   "targetFixVersion": "0.6.3",
   "fixedInVersion": "0.6.3",
   "actualFixHours": 4.5,
@@ -950,53 +946,6 @@ Query Parameters:
 
 Response: File download
 
-## Webhooks
-
-### Create Webhook
-
-**POST** `/api/projects/:projectId/webhooks`
-
-Request:
-```json
-{
-  "url": "https://your-domain.com/webhooks/testtrack",
-  "events": ["test.completed", "bug.created", "execution.finished"],
-  "active": true
-}
-```
-
-Response: `201 Created`
-
-### List Webhooks
-
-**GET** `/api/projects/:projectId/webhooks`
-
-### Delete Webhook
-
-**DELETE** `/api/projects/:projectId/webhooks/:webhookId`
-
-Response: `204 No Content`
-
-### Webhook Events
-
-Webhook payload structure:
-
-```json
-{
-  "id": "webhook-event-123",
-  "event": "test.completed",
-  "timestamp": "2024-02-12T10:30:00Z",
-  "project": {
-    "id": 1,
-    "name": "Web App v2.0"
-  },
-  "data": {
-    "testId": 5,
-    "status": "PASS",
-    "timeSpent": 120
-  }
-}
-```
 
 ## Health Checks
 
@@ -2136,96 +2085,6 @@ Response:
 }
 ```
 
-### Get GitHub Integration
-
-**GET** `/api/projects/:projectId/github/integration`
-
-Response:
-```json
-{
-  "id": 1,
-  "projectId": 1,
-  "repositoryUrl": "https://github.com/org/repo",
-  "owner": "org",
-  "repo": "repo",
-  "isActive": true,
-  "webhookId": "12345",
-  "lastSyncAt": "2024-02-12T15:00:00Z"
-}
-```
-
-### Update GitHub Integration
-
-**PATCH** `/api/projects/:projectId/github/integration`
-
-Request:
-```json
-{
-  "repositoryUrl": "https://github.com/org/new-repo",
-  "isActive": true
-}
-```
-
-Response: `200 OK`
-
-### Delete GitHub Integration
-
-**DELETE** `/api/projects/:projectId/github/integration`
-
-Response: `204 No Content`
-
-### Get Recent Commits
-
-**GET** `/api/projects/:projectId/github/commits`
-
-Query Parameters:
-- `limit` (number): Number of commits (default: 20)
-- `branch` (string): Branch name (default: main)
-
-Response:
-```json
-{
-  "commits": [
-    {
-      "sha": "a3f7c89d4e2b1f6a9c8e3d2f1a0b9c8d7e6f5a4",
-      "message": "Fix login validation issue",
-      "author": "John Doe",
-      "authorEmail": "john@example.com",
-      "timestamp": "2024-02-12T14:30:00Z",
-      "url": "https://github.com/org/repo/commit/a3f7c89"
-    }
-  ]
-}
-```
-
-### Sync GitHub Data
-
-**POST** `/api/projects/:projectId/github/sync`
-
-Response:
-```json
-{
-  "success": true,
-  "synced": {
-    "commits": 50,
-    "branches": 3,
-    "pullRequests": 5
-  }
-}
-```
-
-### GitHub Webhook Handler
-
-**POST** `/api/github/webhook/:projectId`
-
-*Automatically called by GitHub. Requires webhook secret verification.*
-
-Handles events:
-- `push`: New commits
-- `pull_request`: PR opened/closed/merged
-- `ping`: Webhook test
-
-Response: `200 OK`
 
 ## Webhooks (NEW)
 

@@ -27,7 +27,7 @@ export default function BugDetailsModal({ bugId, onClose, onStatusUpdate, onRequ
       setLoading(true);
       const response = await fetch(`/api/developer/bugs/${bugId}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
 
@@ -46,7 +46,7 @@ export default function BugDetailsModal({ bugId, onClose, onStatusUpdate, onRequ
     try {
       const response = await fetch('/api/users?role=DEVELOPER,TESTER', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
       if (response.ok) {
@@ -62,7 +62,7 @@ export default function BugDetailsModal({ bugId, onClose, onStatusUpdate, onRequ
     try {
       const response = await fetch('/api/auth/me', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
       if (response.ok) {
@@ -80,7 +80,7 @@ export default function BugDetailsModal({ bugId, onClose, onStatusUpdate, onRequ
     try {
       setIsUpdatingStatus(true);
       let endpoint = '';
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
 
       if (newStatus === 'IN_PROGRESS') {
         endpoint = `/api/developer/bugs/${bugId}/start-work`;

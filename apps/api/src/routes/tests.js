@@ -51,7 +51,7 @@ const createTestCaseSchema = {
       preconditions: { type: 'string', description: 'Setup needed before execution' },
       postconditions: { type: 'string', description: 'Cleanup or state after execution' },
       testData: { type: 'string', description: 'Input or data set required' },
-      type: { type: 'string', enum: ['FUNCTIONAL', 'REGRESSION', 'SMOKE', 'SANITY', 'INTEGRATION', 'PERFORMANCE', 'SECURITY', 'USABILITY', 'DATA'] },
+      type: { type: 'string', enum: ['FUNCTIONAL', 'REGRESSION', 'SMOKE', 'SANITY', 'PERFORMANCE', 'SECURITY', 'USABILITY', 'DATA'] },
       priority: { type: 'string', enum: ['P0', 'P1', 'P2', 'P3'] },
       status: { type: 'string', enum: ['DRAFT', 'ACTIVE', 'DEPRECATED', 'ARCHIVED'] },
       steps: {
@@ -161,7 +161,7 @@ const updateTestCaseSchema = {
       preconditions: { type: 'string' },
       postconditions: { type: 'string' },
       testData: { type: 'string' },
-      type: { type: 'string', enum: ['FUNCTIONAL', 'REGRESSION', 'SMOKE', 'SANITY', 'INTEGRATION', 'PERFORMANCE', 'SECURITY', 'USABILITY', 'DATA'] },
+      type: { type: 'string', enum: ['FUNCTIONAL', 'REGRESSION', 'SMOKE', 'SANITY', 'PERFORMANCE', 'SECURITY', 'USABILITY', 'DATA'] },
       priority: { type: 'string', enum: ['P0', 'P1', 'P2', 'P3'] },
       status: { type: 'string', enum: ['DRAFT', 'ACTIVE', 'DEPRECATED', 'ARCHIVED'] },
       steps: {

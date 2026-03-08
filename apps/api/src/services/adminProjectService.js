@@ -58,7 +58,7 @@ export async function createProject(data, userId) {
   }
 
   // Validate modules
-  const validModules = ['UI', 'BACKEND', 'API', 'DATABASE', 'MOBILE', 'INTEGRATION', 'AUTOMATION', 'SECURITY', 'PERFORMANCE', 'OTHER'];
+  const validModules = ['UI', 'BACKEND', 'API', 'DATABASE', 'MOBILE', 'AUTOMATION', 'SECURITY', 'PERFORMANCE', 'OTHER'];
   const filteredModules = modules
     .filter(m => typeof m === 'string')
     .map(m => m.toUpperCase())
@@ -264,7 +264,7 @@ export async function updateProject(projectId, data, userId) {
 
   // Update modules if provided
   if (modules !== undefined && Array.isArray(modules)) {
-    const validModules = ['UI', 'BACKEND', 'API', 'DATABASE', 'MOBILE', 'INTEGRATION', 'AUTOMATION', 'SECURITY', 'PERFORMANCE', 'OTHER'];
+    const validModules = ['UI', 'BACKEND', 'API', 'DATABASE', 'MOBILE', 'AUTOMATION', 'SECURITY', 'PERFORMANCE', 'OTHER'];
     normalizedModules = modules
       .filter(m => typeof m === 'string')
       .map(m => m.toUpperCase())
