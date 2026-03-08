@@ -23,7 +23,7 @@ export default function BugsList({
   
   // Fetch bugs on mount and when filters change
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token');
     if (token) {
       fetchBugs();
     } else {

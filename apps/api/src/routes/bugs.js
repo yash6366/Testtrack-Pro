@@ -878,7 +878,10 @@ export async function bugRoutes(fastify) {
    */
   fastify.patch(
     '/api/bugs/:bugId/status',
-    { preHandler: [requirePermission('bug:status:change')] },
+    {
+      schema: changeBugStatusSchema,
+      preHandler: [requirePermission('bug:status:change')]
+    },
     async (request, reply) => {
       try {
         const { bugId } = request.params;
@@ -931,7 +934,10 @@ export async function bugRoutes(fastify) {
    */
   fastify.post(
     '/api/bugs/:bugId/comments',
-    { preHandler: [requirePermission('bug:comment')] },
+    {
+      schema: addBugCommentSchema,
+      preHandler: [requirePermission('bug:comment')]
+    },
     async (request, reply) => {
       try {
         const { bugId } = request.params;
@@ -966,7 +972,10 @@ export async function bugRoutes(fastify) {
    */
   fastify.patch(
     '/api/bugs/:bugId/comments/:commentId',
-    { preHandler: [requirePermission('bug:comment')] },
+    {
+      schema: updateBugCommentSchema,
+      preHandler: [requirePermission('bug:comment')]
+    },
     async (request, reply) => {
       try {
         const { bugId, commentId } = request.params;
@@ -1000,7 +1009,10 @@ export async function bugRoutes(fastify) {
    */
   fastify.post(
     '/api/bugs/:bugId/retest-request',
-    { preHandler: [requirePermission('bug:verify')] },
+    {
+      schema: verifyBugFixSchema,
+      preHandler: [requirePermission('bug:verify')]
+    },
     async (request, reply) => {
       try {
         const { bugId } = request.params;
@@ -1042,87 +1054,16 @@ export async function bugRoutes(fastify) {
     },
   );
 
-  /**
-   * Link commit to bug
-   */
-  fastify.patch(
-    '/api/bugs/:bugId/link-commit',
-    { preHandler: [requirePermission('bug:edit')] },
-    async (request, reply) => {
-      try {
-        const { bugId } = request.params;
-        const { projectId } = request.query;
-        const { commitHash, branchName, codeReviewUrl } = request.body;
-        const userId = request.user.id;
-
-        if (!projectId) {
-          return reply.code(400).send({ error: 'projectId query parameter is required' });
-        }
-
-        if (!commitHash) {
-          return reply.code(400).send({ error: 'commitHash is required' });
-        }
-
-        // Get bug to verify it exists and belongs to project, then update it
-        const bug = await prisma.bug.findFirst({
-          where: { id: Number(bugId), projectId: Number(projectId) },
-        });
-
-        if (!bug) {
-          return reply.code(404).send({ error: 'Bug not found' });
-        }
-
-        const updated = await prisma.bug.update({
-          where: { id: Number(bugId) },
-          data: {
-            fixedInCommitHash: commitHash,
-            fixBranchName: branchName || null,
-            codeReviewUrl: codeReviewUrl || null,
-          },
-          include: {
-            reporter: { select: { id: true, name: true, email: true } },
-            assignee: { select: { id: true, name: true, email: true } },
-          },
-        });
-
-        // Create history entries if they're needed
-        if (prisma.bugHistory) {
-          await Promise.all([
-            prisma.bugHistory.create({
-              data: {
-                bugId: Number(bugId),
-                fieldName: 'fixedInCommitHash',
-                oldValue: '',
-                newValue: commitHash,
-                changedBy: userId,
-              },
-            }),
-            branchName && prisma.bugHistory.create({
-              data: {
-                bugId: Number(bugId),
-                fieldName: 'fixBranchName',
-                oldValue: '',
-                newValue: branchName,
-                changedBy: userId,
-              },
-            }),
-          ]);
-        }
-
-        reply.send(updated);
-      } catch (error) {
-        logError('Error linking commit:', error);
-        reply.code(500).send({ error: error.message });
-      }
-    },
-  );
 
   /**
    * Assign bug to developer (convenience route)
    */
   fastify.patch(
     '/api/bugs/:bugId/assign',
-    { preHandler: [requirePermission('bug:assign')] },
+    {
+      schema: assignBugSchema,
+      preHandler: [requirePermission('bug:assign')]
+    },
     async (request, reply) => {
       try {
         const { bugId } = request.params;

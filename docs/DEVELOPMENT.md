@@ -134,15 +134,6 @@ SENTRY_DSN="https://your-sentry-dsn"
 # Optional: Get from https://sentry.io
 # Remove to disable error tracking
 
-# ===== OAUTH PROVIDERS (Optional) =====
-# Google OAuth
-GOOGLE_OAUTH_CLIENT_ID="your-google-client-id"
-GOOGLE_OAUTH_CLIENT_SECRET="your-google-secret"
-
-# GitHub OAuth
-GITHUB_OAUTH_CLIENT_ID="your-github-client-id"
-GITHUB_OAUTH_CLIENT_SECRET="your-github-secret"
-GITHUB_WEBHOOK_SECRET="your-webhook-secret"
 
 # ===== V1 FEATURES =====
 # Bug Fix Documentation: Enabled by default
