@@ -75,7 +75,7 @@ export async function updateFixDocumentation(bugId, fixData, userId) {
     fixStrategy,
     rootCauseAnalysis,
     rootCauseCategory,
-    fixedInCommitHash,
+    // fixedInCommitHash, // removed field
     fixBranchName,
     codeReviewUrl,
     actualFixHours,
@@ -106,9 +106,9 @@ export async function updateFixDocumentation(bugId, fixData, userId) {
   if (rootCauseCategory && rootCauseCategory !== bug.rootCauseCategory) {
     changes.rootCauseCategory = rootCauseCategory;
   }
-  if (fixedInCommitHash && fixedInCommitHash !== bug.fixedInCommitHash) {
-    changes.fixedInCommitHash = fixedInCommitHash;
-  }
+  // if (fixedInCommitHash && fixedInCommitHash !== bug.fixedInCommitHash) {
+  //   changes.fixedInCommitHash = fixedInCommitHash;
+  // }
   if (fixBranchName && fixBranchName !== bug.fixBranchName) {
     changes.fixBranchName = fixBranchName;
   }
@@ -131,7 +131,7 @@ export async function updateFixDocumentation(bugId, fixData, userId) {
       ...(fixStrategy && { fixStrategy }),
       ...(rootCauseAnalysis && { rootCauseAnalysis }),
       ...(rootCauseCategory && { rootCauseCategory }),
-      ...(fixedInCommitHash && { fixedInCommitHash }),
+      // ...(fixedInCommitHash && { fixedInCommitHash }),
       ...(fixBranchName && { fixBranchName }),
       ...(codeReviewUrl && { codeReviewUrl }),
       ...(actualFixHours !== undefined && { actualFixHours }),
@@ -241,18 +241,7 @@ export async function getDeveloperMetrics(userId, options = {}) {
       },
     }),
 
-    // Get info about bugs with fix documentation
-    prisma.bug.findMany({
-      where: {
-        ...where,
-        fixedInCommitHash: { not: null },
-      },
-      select: {
-        id: true,
-        status: true,
-        actualFixHours: true,
-      },
-    }),
+    // Removed: Get info about bugs with fix documentation (fixedInCommitHash)
   ]);
 
   // Calculate resolution time statistics
@@ -302,7 +291,7 @@ export async function getDeveloperMetrics(userId, options = {}) {
       avgResolutionTimeHours: Number(avgResolutionTime),
       reopenRate: Number(reopenRate),
       resolutionRate: Number(resolutionRate),
-      bugsWithFixDocumentation: fixQuality.length,
+      // bugsWithFixDocumentation removed
     },
     breakdown: {
       byStatus: statusMap,
@@ -509,19 +498,7 @@ export async function getDeveloperOverview(userId) {
       where: { ...where, status: 'VERIFIED' },
     }),
 
-    prisma.bug.findMany({
-      where,
-      select: {
-        id: true,
-        bugNumber: true,
-        title: true,
-        status: true,
-        priority: true,
-        severity: true,
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    }),
+    // Removed query for bugs with fix documentation (fixedInCommitHash)
   ]);
 
   return {
@@ -640,7 +617,7 @@ export async function generateDeveloperReport(userId, options = {}) {
       fixStrategy: true,
       rootCauseAnalysis: true,
       rootCauseCategory: true,
-      fixedInCommitHash: true,
+      // fixedInCommitHash: true, // removed field
       actualFixHours: true,
     },
   });

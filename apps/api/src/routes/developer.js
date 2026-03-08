@@ -122,7 +122,10 @@ export async function developerRoutes(fastify) {
         const { bugId } = request.params;
         const bug = await getBugWithTestDetails(Number(bugId));
 
-        reply.send(bug);
+        reply.send({
+          ...bug,
+          // fixedInCommitHash: bug?.fixedInCommitHash, // removed field
+        });
       } catch (error) {
         logError('Error fetching bug:', error);
         reply.code(404).send({ error: error.message });
@@ -130,32 +133,6 @@ export async function developerRoutes(fastify) {
     },
   );
 
-  /**
-   * Update fix documentation (commit, branch, fix notes, etc.)
-   */
-  fastify.patch(
-    '/api/developer/bugs/:bugId/fix-documentation',
-    { preHandler: [requireAuth, requireRoles(['DEVELOPER'])] },
-    async (request, reply) => {
-      try {
-        const { bugId } = request.params;
-        const { projectId } = request.query;
-        const userId = request.user.id;
-
-        if (!projectId) {
-          return reply.code(400).send({ error: 'projectId query parameter is required' });
-        }
-
-        const bug = await updateFixDocumentation(Number(bugId), request.body, userId);
-
-        reply.send(bug);
-      } catch (error) {
-        logError('Error updating fix documentation:', error);
-        const statusCode = error.message.includes('not found') ? 404 : 400;
-        reply.code(statusCode).send({ error: error.message });
-      }
-    },
-  );
 
   /**
    * Mark bug as FIXED (only DEVELOPER can do this)

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Fastify from 'fastify';
 import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
@@ -33,12 +34,12 @@ import { testSuiteRoutes } from './routes/testSuites.js';
 import analyticsRoutes from './routes/analytics.js';
 import { notificationRoutes } from './routes/notification.js';
 import { searchRoutes } from './routes/search.js';
-import webhookRoutes from './routes/webhooks.js';
+// ...existing code...
 import projectRoutes from './routes/projects.js';
 import milestoneRoutes from './routes/milestones.js';
 import testPlanRoutes from './routes/testPlans.js';
-import apiKeyRoutes from './routes/apiKeys.js';
-import githubRoutes from './routes/github.js';
+// ...existing code...
+// ...existing code...
 import scheduledReportsRoutes from './routes/scheduledReports.js';
 import backupRoutes from './routes/backup.js';
 import healthRoutes, { setServerInitStatus } from './routes/health.js';
@@ -47,11 +48,14 @@ import userSessionRoutes from './routes/userSession.js';
 
 // Validate environment variables before starting server (non-fatal in production)
 if (process.env.NODE_ENV !== 'test') {
+  console.log('Validating environment variables...');
   const isValid = validateEnvironment(false); // Don't throw, just warn
   if (!isValid && process.env.NODE_ENV !== 'production') {
     // Only exit in dev if validation fails
     console.error('Environment validation failed in development mode. Exiting.');
     process.exit(1);
+  } else {
+    console.log('Environment validation passed.');
   }
 }
 
@@ -59,9 +63,11 @@ const fastify = Fastify({ logger: true });
 
 // Initialize structured logging
 initializeLogger(fastify.log);
+console.log('Structured logger initialized.');
 
 // Log server startup
 logInfo('Starting TestTrack Pro API server');
+console.log('Starting TestTrack Pro API server...');
 
 // Register error handler EARLY (before other plugins/routes)
 await fastify.register(errorHandlerPlugin);
@@ -120,12 +126,12 @@ fastify.register(testSuiteRoutes);
 fastify.register(analyticsRoutes);
 fastify.register(notificationRoutes);
 fastify.register(searchRoutes);
-fastify.register(webhookRoutes);
+// ...existing code...
 fastify.register(projectRoutes);
 fastify.register(milestoneRoutes);
 fastify.register(testPlanRoutes);
-fastify.register(apiKeyRoutes);
-fastify.register(githubRoutes);
+// ...existing code...
+// ...existing code...
 fastify.register(scheduledReportsRoutes);
 fastify.register(backupRoutes, { prefix: '/api/admin/backup' });
 
@@ -134,60 +140,78 @@ let initializationComplete = false;
 let initializationError = null;
 
 // Start server
+
 const start = async () => {
   try {
     const port = process.env.PORT || 3001;
-    
+    console.log('Attempting to start Fastify server on port', port);
     // START LISTENING IMMEDIATELY - Critical for health checks
     await fastify.listen({ port, host: '0.0.0.0' });
     fastify.log.info(`Server listening on port ${port} - health checks available`);
-    
+    console.log(`Server is now listening on port ${port} - health checks available`);
+
     // Background initialization - happens AFTER server is listening
     // This prevents Railway health check timeouts
     setImmediate(async () => {
       try {
         fastify.log.info('Starting background initialization...');
-        
+        console.log('Starting background initialization...');
+
         // Ensure Prisma is connected
+        console.log('Connecting to database...');
         await ensurePrismaConnected();
         fastify.log.info('✓ Database connection established');
-        
+        console.log('✓ Database connection established');
+
         // Initialize role-based channels
+        console.log('Initializing role-based channels...');
         await initializeRoleChannels();
         fastify.log.info('✓ Role-based channels initialized');
-        
+        console.log('✓ Role-based channels initialized');
+
         // Ensure all users in universal channel
+        console.log('Ensuring all users are in universal channel...');
         await ensureAllUsersInUniversalChannel();
         fastify.log.info('✓ Universal channel synchronized');
-        
+        console.log('✓ Universal channel synchronized');
+
         // Setup Socket.IO
+        console.log('Setting up Socket.IO...');
         const io = setupSocket(fastify);
         fastify.log.info('✓ Socket.IO initialized');
-        
+        console.log('✓ Socket.IO initialized');
+
         // Initialize notification emitter
+        console.log('Initializing notification emitter...');
         initializeNotificationEmitter(io);
         fastify.log.info('✓ Notification emitter initialized');
-        
+        console.log('✓ Notification emitter initialized');
+
         // Initialize cron jobs for background processing
+        console.log('Initializing cron jobs...');
         initializeCronJobs();
         fastify.log.info('✓ Cron jobs initialized');
-        
+        console.log('✓ Cron jobs initialized');
+
         // Store io on fastify for access in routes
         fastify.io = io;
-        
+
         initializationComplete = true;
         setServerInitStatus(true); // Update health check status
         fastify.log.info('🚀 Full initialization complete - all systems operational');
+        console.log('🚀 Full initialization complete - all systems operational');
       } catch (err) {
         initializationError = err;
         setServerInitStatus(false, err); // Update health check with error
         fastify.log.error({ err }, '❌ Background initialization failed - server running in degraded mode');
+        console.error('❌ Background initialization failed - server running in degraded mode', err);
         // Don't exit - server can still serve health checks and some endpoints
       }
     });
-    
+
   } catch (err) {
     fastify.log.error(err);
+    console.error('Error starting server:', err);
     process.exit(1);
   }
 };

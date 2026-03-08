@@ -20,7 +20,7 @@ const VersionHistoryModal = ({ isOpen, onClose, testCaseId, project }) => {
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       const response = await axios.get(
         `${API_BASE_URL}/api/projects/${project.id}/test-cases/${testCaseId}/versions`,
         {
@@ -52,7 +52,7 @@ const VersionHistoryModal = ({ isOpen, onClose, testCaseId, project }) => {
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       const response = await axios.get(
         `${API_BASE_URL}/api/projects/${project.id}/test-cases/${testCaseId}/versions/compare?v1=${selectedVersions[0]}&v2=${selectedVersions[1]}`,
         {

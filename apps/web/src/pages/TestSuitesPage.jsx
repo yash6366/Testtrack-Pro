@@ -13,7 +13,10 @@ export default function TestSuitesPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const isAdmin = String(user?.role || '').toUpperCase() === 'ADMIN';
+  const role = String(user?.role || '').toUpperCase();
+  const isAdmin = role === 'ADMIN';
+  const isTester = role === 'TESTER';
+  const isDeveloper = role === 'DEVELOPER';
 
   const [suites, setSuites] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -169,23 +172,15 @@ export default function TestSuitesPage() {
               </div>
             </div>
             <div className="flex gap-2">
-              {!isAdmin && (
-                <button
-                  onClick={() => handleExecuteSuite(suite.id, suite.name)}
-                  className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                  disabled={suite.status === 'ARCHIVED'}
-                >
-                  Execute
-                </button>
-              )}
-              <button
-                onClick={() => handleViewSuite(suite.id)}
-                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                View
-              </button>
-              {!isAdmin && (
+              {(isAdmin || isTester) && (
                 <>
+                  <button
+                    onClick={() => handleExecuteSuite(suite.id, suite.name)}
+                    className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                    disabled={suite.status === 'ARCHIVED'}
+                  >
+                    Execute
+                  </button>
                   <button
                     onClick={() => handleCloneSuite(suite.id, suite.name)}
                     className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
@@ -202,6 +197,12 @@ export default function TestSuitesPage() {
                   )}
                 </>
               )}
+              <button
+                onClick={() => handleViewSuite(suite.id)}
+                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                View
+              </button>
             </div>
           </div>
         </div>
@@ -250,7 +251,7 @@ export default function TestSuitesPage() {
               Manage and execute test suite collections
             </p>
           </div>
-          {!isAdmin && (
+          {(isAdmin || isTester) && (
             <button
               onClick={handleCreateSuite}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"

@@ -52,8 +52,7 @@ export default function DashboardLayout({
 
   if (isDeveloper) {
     navLinks.push({ to: '/analytics', label: 'Analytics' });
-    navLinks.push({ to: '/api-keys', label: 'API Keys' });
-    navLinks.push({ to: '/integrations', label: 'Integrations' });
+    // ...existing code...
   }
 
   return (
