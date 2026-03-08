@@ -48,7 +48,7 @@ export async function testSuiteRoutes(fastify) {
   // Create test suite
   fastify.post(
     '/api/projects/:projectId/test-suites',
-    { preHandler: [requireAuth, requireRoles(['TESTER', 'DEVELOPER', 'ADMIN'])] },
+    { preHandler: [requireAuth, requireRoles(['TESTER', 'ADMIN'])] },
     async (request, reply) => {
       try {
         const { projectId } = request.params;
@@ -130,7 +130,7 @@ export async function testSuiteRoutes(fastify) {
   // Update test suite
   fastify.patch(
     '/api/test-suites/:suiteId',
-    { preHandler: [requireAuth, requireRoles(['TESTER', 'DEVELOPER', 'ADMIN'])] },
+    { preHandler: [requireAuth, requireRoles(['TESTER', 'ADMIN'])] },
     async (request, reply) => {
       try {
         const { suiteId } = request.params;
@@ -170,7 +170,7 @@ export async function testSuiteRoutes(fastify) {
   // Clone test suite
   fastify.post(
     '/api/test-suites/:suiteId/clone',
-    { preHandler: [requireAuth, requireRoles(['TESTER', 'DEVELOPER', 'ADMIN'])] },
+    { preHandler: [requireAuth, requireRoles(['TESTER', 'ADMIN'])] },
     async (request, reply) => {
       try {
         const { suiteId } = request.params;
@@ -242,7 +242,7 @@ export async function testSuiteRoutes(fastify) {
   // Move suite to different parent
   fastify.patch(
     '/api/test-suites/:suiteId/move',
-    { preHandler: [requireAuth, requireRoles(['TESTER', 'DEVELOPER', 'ADMIN'])] },
+    { preHandler: [requireAuth, requireRoles(['TESTER', 'ADMIN'])] },
     async (request, reply) => {
       try {
         const { suiteId } = request.params;
@@ -311,7 +311,7 @@ export async function testSuiteRoutes(fastify) {
   // Add test cases to suite
   fastify.post(
     '/api/test-suites/:suiteId/test-cases',
-    { preHandler: [requireAuth, requireRoles(['TESTER', 'DEVELOPER', 'ADMIN'])] },
+    { preHandler: [requireAuth, requireRoles(['TESTER', 'ADMIN'])] },
     async (request, reply) => {
       try {
         const { suiteId } = request.params;
@@ -334,7 +334,7 @@ export async function testSuiteRoutes(fastify) {
   // Remove test case from suite
   fastify.delete(
     '/api/test-suites/:suiteId/test-cases/:testCaseId',
-    { preHandler: [requireAuth, requireRoles(['TESTER', 'DEVELOPER', 'ADMIN'])] },
+    { preHandler: [requireAuth, requireRoles(['TESTER', 'ADMIN'])] },
     async (request, reply) => {
       try {
         const { suiteId, testCaseId } = request.params;
@@ -351,7 +351,7 @@ export async function testSuiteRoutes(fastify) {
   // Bulk remove test cases from suite
   fastify.post(
     '/api/test-suites/:suiteId/test-cases/bulk-remove',
-    { preHandler: [requireAuth, requireRoles(['TESTER', 'DEVELOPER', 'ADMIN'])] },
+    { preHandler: [requireAuth, requireRoles(['TESTER', 'ADMIN'])] },
     async (request, reply) => {
       try {
         const { suiteId } = request.params;
@@ -373,7 +373,7 @@ export async function testSuiteRoutes(fastify) {
   // Reorder test cases in suite
   fastify.patch(
     '/api/test-suites/:suiteId/test-cases/reorder',
-    { preHandler: [requireAuth, requireRoles(['TESTER', 'DEVELOPER', 'ADMIN'])] },
+    { preHandler: [requireAuth, requireRoles(['TESTER', 'ADMIN'])] },
     async (request, reply) => {
       try {
         const { suiteId } = request.params;

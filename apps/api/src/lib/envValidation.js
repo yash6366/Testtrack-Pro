@@ -22,11 +22,7 @@ const recommendedEnvVars = {
   PORT: 'Server port (default: 3001)',
   NODE_ENV: 'Environment (development/production/test)',
   
-  // OAuth providers  
-  GOOGLE_OAUTH_CLIENT_ID: 'Google OAuth client ID',
-  GOOGLE_OAUTH_CLIENT_SECRET: 'Google OAuth client secret',
-  GITHUB_OAUTH_CLIENT_ID: 'GitHub OAuth client ID',
-  GITHUB_OAUTH_CLIENT_SECRET: 'GitHub OAuth client secret',
+  // ...existing code...
   
   // Email service
   RESEND_API_KEY: 'Resend email API key',

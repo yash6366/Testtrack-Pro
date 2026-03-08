@@ -7,10 +7,10 @@
 import cron from 'node-cron';
 import { sendPendingDigests } from './digestService.js';
 import { retryFailedDeliveries, cleanupOldDeliveries } from './notificationEmitter.js';
-import { retryFailedDeliveries as retryFailedWebhooks } from './webhookService.js';
 import { generateAndSendScheduledReports } from './scheduledReportService.js';
 import { autoUnmuteExpiredMutes } from './chatAdminService.js';
 import { logInfo, logError, logWarn } from '../lib/logger.js';
+// Removed import of webhookService.js as it has been deleted
 
 let scheduledJobs = [];
 
@@ -18,7 +18,6 @@ let scheduledJobs = [];
 const jobFailureTracker = {
   digest: { consecutiveFailures: 0, lastFailure: null, lastSuccess: null },
   retry: { consecutiveFailures: 0, lastFailure: null, lastSuccess: null },
-  webhookRetry: { consecutiveFailures: 0, lastFailure: null, lastSuccess: null },
   cleanup: { consecutiveFailures: 0, lastFailure: null, lastSuccess: null },
   scheduledReports: { consecutiveFailures: 0, lastFailure: null, lastSuccess: null },
   autoUnmute: { consecutiveFailures: 0, lastFailure: null, lastSuccess: null },
@@ -139,21 +138,6 @@ export function initializeCronJobs() {
   });
   scheduledJobs.push(retryJob);
 
-  // Retry failed webhook deliveries every 5 minutes
-  const webhookRetryJob = cron.schedule('*/5 * * * *', async () => {
-    logInfo('Running failed webhook deliveries retry job');
-    try {
-      const result = await retryFailedWebhooks();
-      if (result.processed > 0) {
-        logInfo('Webhook retry job completed', { processed: result.processed });
-      }
-      trackJobExecution('webhookRetry', true);
-    } catch (error) {
-      logError('Error in webhook retry job', { error });
-      trackJobExecution('webhookRetry', false, error);
-    }
-  });
-  scheduledJobs.push(webhookRetryJob);
 
   // Clean up old delivery records every day at 2 AM
   const cleanupJob = cron.schedule('0 2 * * *', async () => {
