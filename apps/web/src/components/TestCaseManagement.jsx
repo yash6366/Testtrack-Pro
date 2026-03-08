@@ -13,6 +13,10 @@ export default function TestCaseManagement() {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const role = String(user?.role || '').toUpperCase();
+  const isAdmin = role === 'ADMIN';
+  const isTester = role === 'TESTER';
+  const isDeveloper = role === 'DEVELOPER';
   
   const [testCases, setTestCases] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -84,12 +88,11 @@ export default function TestCaseManagement() {
   };
 
   const handleCreateTestCase = async (e) => {
+    if (!(isAdmin || isTester)) return;
     e.preventDefault();
     if (submitting) return; // Prevent double submission
-    
     setError('');
     setSubmitting(true);
-    
     try {
       const testCaseData = {
         ...formData,
@@ -99,12 +102,10 @@ export default function TestCaseManagement() {
           ? Number(formData.estimatedDurationMinutes) 
           : null,
       };
-
       const response = await apiClient.post(
         `/api/projects/${projectId}/test-cases`,
         testCaseData,
       );
-
       setSuccess('Test case created successfully');
       setShowCreateModal(false);
       resetForm();
@@ -117,12 +118,11 @@ export default function TestCaseManagement() {
   };
 
   const handleUpdateTestCase = async (e) => {
+    if (!(isAdmin || isTester)) return;
     e.preventDefault();
     if (submitting) return; // Prevent double submission
-    
     setError('');
     setSubmitting(true);
-
     try {
       const testCaseData = {
         ...formData,
@@ -132,12 +132,10 @@ export default function TestCaseManagement() {
           ? Number(formData.estimatedDurationMinutes) 
           : null,
       };
-
       await apiClient.patch(
         `/api/projects/${projectId}/test-cases/${editingTestCase.id}`,
         testCaseData,
       );
-
       setSuccess('Test case updated successfully');
       setShowCreateModal(false);
       setEditingTestCase(null);
@@ -151,10 +149,10 @@ export default function TestCaseManagement() {
   };
 
   const handleDeleteTestCase = async (id) => {
+    if (!(isAdmin || isTester)) return;
     if (!confirm('Are you sure you want to delete this test case? (It can be restored)')) {
       return;
     }
-
     try {
       await apiClient.delete(
         `/api/projects/${projectId}/test-cases/${id}`,

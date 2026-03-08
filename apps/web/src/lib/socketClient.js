@@ -561,7 +561,7 @@ export async function sendReaction(messageId, emoji, action = 'add') {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
       },
       body: JSON.stringify({ emoji, action }),
     });
@@ -589,7 +589,7 @@ export async function sendReply(messageId, channelId, body) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
       },
       body: JSON.stringify({ channelId, body }),
     });
@@ -613,7 +613,7 @@ export async function getReactions(messageId) {
   try {
     const response = await fetch(`${API_BASE_URL}/api/chat/messages/${messageId}/reactions`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
       },
     });
     
@@ -636,7 +636,7 @@ export async function getPinnedMessages(channelId) {
   try {
     const response = await fetch(`${API_BASE_URL}/api/chat/channels/${channelId}/pinned`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
       },
     });
     
@@ -660,7 +660,7 @@ export async function pinMessage(messageId) {
     const response = await fetch(`${API_BASE_URL}/api/chat/messages/${messageId}/pin`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
       },
     });
     
@@ -684,7 +684,7 @@ export async function unpinMessage(messageId) {
     const response = await fetch(`${API_BASE_URL}/api/chat/messages/${messageId}/pin`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
       },
     });
     
@@ -707,7 +707,7 @@ export async function getChannelMembers(channelId) {
   try {
     const response = await fetch(`${API_BASE_URL}/api/chat/channels/${channelId}/members`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
       },
     });
     

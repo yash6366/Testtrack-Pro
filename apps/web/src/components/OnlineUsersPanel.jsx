@@ -9,7 +9,7 @@ import { logError } from '@/lib/errorLogger';
  */
 export default function OnlineUsersPanel({ roomId, roomPrefix }) {
   const { user } = useAuth();
-  const { onUserPresence, getChannelMembers } = useSocket(user?.id, user?.role, localStorage.getItem('token'));
+  const { onUserPresence, getChannelMembers } = useSocket(user?.id, user?.role, localStorage.getItem('auth_token'));
 
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const [allMembers, setAllMembers] = useState([]);

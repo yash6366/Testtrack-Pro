@@ -30,6 +30,10 @@ export default function TestSuiteDetailPage() {
     loadExecutionHistory();
   }, [suiteId]);
 
+  const role = String(user?.role || '').toUpperCase();
+  const isAdmin = role === 'ADMIN';
+  const isTester = role === 'TESTER';
+  const isDeveloper = role === 'DEVELOPER';
   const suiteType = suite?.type || 'STATIC';
   const loadSuiteDetails = async () => {
     try {
@@ -149,19 +153,23 @@ export default function TestSuiteDetailPage() {
             </span>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={handleExecuteSuite}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-              disabled={suite.isDeleted || suite.status === 'ARCHIVED'}
-            >
-              ▶ Execute Suite
-            </button>
-            <button
-              onClick={handleEditSuite}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Edit
-            </button>
+            {(isAdmin || isTester) && (
+              <>
+                <button
+                  onClick={handleExecuteSuite}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  disabled={suite.isDeleted || suite.status === 'ARCHIVED'}
+                >
+                  ▶ Execute Suite
+                </button>
+                <button
+                  onClick={handleEditSuite}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Edit
+                </button>
+              </>
+            )}
           </div>
         </div>
         
@@ -220,12 +228,14 @@ export default function TestSuiteDetailPage() {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Test Cases</h2>
-            <button
-              onClick={handleAddTestCases}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              + Add Test Cases
-            </button>
+            {(isAdmin || isTester) && (
+              <button
+                onClick={handleAddTestCases}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                + Add Test Cases
+              </button>
+            )}
           </div>
 
           {testCases.length === 0 ? (
@@ -278,12 +288,14 @@ export default function TestSuiteDetailPage() {
                         </span>
                       </td>
                       <td className="px-4 py-2">
-                        <button
-                          onClick={() => handleRemoveTestCase(tc.testCaseId)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Remove
-                        </button>
+                        {(isAdmin || isTester) && (
+                          <button
+                            onClick={() => handleRemoveTestCase(tc.testCaseId)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            Remove
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

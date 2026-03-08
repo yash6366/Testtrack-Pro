@@ -83,7 +83,6 @@ This guide provides step-by-step instructions for deploying TestTrack Pro to pro
 - [ ] Configure Resend API key with verified sender domain
 - [ ] Set FORCE_HTTPS=true
 - [ ] Disable Swagger in production (ENABLE_SWAGGER=false)
-- [ ] Configure OAuth credentials (Google, GitHub)
 
 ### Database
 - [ ] Create production database

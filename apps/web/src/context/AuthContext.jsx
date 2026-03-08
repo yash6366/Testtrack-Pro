@@ -18,13 +18,13 @@ export function AuthProvider({ children }) {
   const clearAuth = useCallback(() => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('token');
+    localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
   }, []);
 
   // Initialize auth state from localStorage
   useEffect(() => {
-    const savedToken = localStorage.getItem('token');
+    const savedToken = localStorage.getItem('auth_token');
     const savedUser = localStorage.getItem('user');
 
     if (savedToken && savedUser) {
@@ -45,8 +45,8 @@ export function AuthProvider({ children }) {
     };
 
     const handleStorage = (event) => {
-      if (event.key === 'token' || event.key === 'user') {
-        const nextToken = localStorage.getItem('token');
+      if (event.key === 'auth_token' || event.key === 'user') {
+        const nextToken = localStorage.getItem('auth_token');
         const nextUser = localStorage.getItem('user');
         if (!nextToken || !nextUser) {
           clearAuth();
@@ -117,16 +117,17 @@ export function AuthProvider({ children }) {
       });
 
       const data = await response.json();
+      console.log('[LOGIN API RESPONSE]', data); // Debug log
 
       if (!response.ok) {
         throw new Error(data.error || data.message || 'Login failed');
       }
 
       const { token: newToken, user: newUser } = data;
+
       setToken(newToken);
       setUser(newUser);
-
-      localStorage.setItem('token', newToken);
+      localStorage.setItem('auth_token', newToken);
       localStorage.setItem('user', JSON.stringify(newUser));
 
       return { success: true, user: newUser };
@@ -229,6 +230,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const isAuthenticated = !!token && !!user;
+
+  console.log('Auth state', { token, user, isAuthenticated }); // Debug log
 
   const value = {
     user,
